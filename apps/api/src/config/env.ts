@@ -17,13 +17,50 @@ const BaseSchema = z.object({
   LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent']).default('info'),
 });
 
+/** Comma-separated web origins allowed by CORS (NFR-SECURITY-027), e.g. `https://app.example.com`. */
+const originList = z
+  .string()
+  .transform((s) =>
+    s
+      .split(',')
+      .map((o) => o.trim())
+      .filter(Boolean),
+  )
+  .pipe(z.array(z.url()).min(1));
+
 /** API (HTTP) process. */
 const ApiSchema = BaseSchema.extend({
   PORT: z.coerce.number().int().min(1).max(65535).default(4000),
+  /** Allowed web origins. Required in production; development defaults to DEV_WEB_ORIGINS. */
+  WEB_ORIGINS: originList.optional(),
+  /**
+   * Reverse-proxy hops in front of the API, so rate limiting sees real client IPs. Required in
+   * production (0 only if the API is exposed directly): a wrong value puts every client behind
+   * the proxy into one rate-limit bucket.
+   */
+  TRUST_PROXY: z.coerce.number().int().min(0).max(5).optional(),
   /** Pooled connection (Neon pooler) used by the running app. */
   DATABASE_URL: postgresUrl,
   /** Connections per process; Neon pooler fronts these (DL-026). */
   DB_POOL_MAX: z.coerce.number().int().min(1).max(50).default(5),
+});
+
+/** Local web dev servers: Next's default port, and 3210 used where 3000 is taken (README). */
+export const DEV_WEB_ORIGINS = ['http://localhost:3000', 'http://localhost:3210'];
+
+const ApiConfigSchema = ApiSchema.transform((env, ctx) => {
+  if (env.NODE_ENV === 'production') {
+    for (const key of ['WEB_ORIGINS', 'TRUST_PROXY'] as const) {
+      if (env[key] === undefined) {
+        ctx.addIssue({ code: 'custom', path: [key], message: 'required in production' });
+      }
+    }
+  }
+  return {
+    ...env,
+    WEB_ORIGINS: env.WEB_ORIGINS ?? DEV_WEB_ORIGINS,
+    TRUST_PROXY: env.TRUST_PROXY ?? 0,
+  };
 });
 
 /** Worker process: pg-boss needs a direct (unpooled) connection (DL-026). */
@@ -34,7 +71,7 @@ const WorkerSchema = BaseSchema.extend({
 });
 
 export type BaseConfig = z.infer<typeof BaseSchema>;
-export type AppConfig = z.infer<typeof ApiSchema>;
+export type AppConfig = z.infer<typeof ApiConfigSchema>;
 export type WorkerConfig = z.infer<typeof WorkerSchema>;
 
 export class InvalidConfigError extends Error {
@@ -52,7 +89,7 @@ function parse<S extends z.ZodType>(schema: S, env: NodeJS.ProcessEnv): z.infer<
 }
 
 /** Parses process env into typed config. Throws (aborting boot) on any invalid value. */
-export const loadConfig = (env: NodeJS.ProcessEnv): AppConfig => parse(ApiSchema, env);
+export const loadConfig = (env: NodeJS.ProcessEnv): AppConfig => parse(ApiConfigSchema, env);
 export const loadWorkerConfig = (env: NodeJS.ProcessEnv): WorkerConfig => parse(WorkerSchema, env);
 
 /** DI token for the process config (AppConfig in the API, WorkerConfig in the worker). */

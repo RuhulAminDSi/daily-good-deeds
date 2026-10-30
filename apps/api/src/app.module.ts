@@ -4,10 +4,12 @@ import {
   Module,
   type NestModule,
 } from '@nestjs/common';
-import { APP_FILTER } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD } from '@nestjs/core';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { LoggerModule } from 'nestjs-pino';
 import { ProblemDetailsFilter } from './common/errors/problem-details.filter.js';
 import { jsonBody } from './common/http/json-body.middleware.js';
+import { RateLimitGuard, THROTTLE_OPTIONS } from './common/http/rate-limit.js';
 import { loggerOptions } from './common/logging/logger.options.js';
 import { ConfigModule } from './config/config.module.js';
 import type { AppConfig } from './config/env.js';
@@ -22,10 +24,14 @@ export class AppModule implements NestModule {
       imports: [
         LoggerModule.forRoot(loggerOptions(config)),
         ConfigModule.forRoot(config),
+        ThrottlerModule.forRoot(THROTTLE_OPTIONS),
         HealthModule,
         DatabaseModule,
       ],
-      providers: [{ provide: APP_FILTER, useClass: ProblemDetailsFilter }],
+      providers: [
+        { provide: APP_FILTER, useClass: ProblemDetailsFilter },
+        { provide: APP_GUARD, useClass: RateLimitGuard },
+      ],
     };
   }
 

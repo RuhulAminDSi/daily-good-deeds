@@ -1,10 +1,13 @@
 import type { Metadata } from 'next';
 import { BoundaryMessagesProvider } from '@/i18n/boundary-messages';
-import { LOCALES } from '@/i18n/locales';
 import { routeMessages } from '@/i18n/route-locale';
 import '../globals.css';
 
-export const generateStaticParams = () => LOCALES.map((locale) => ({ locale }));
+/**
+ * Rendered per request: the CSP nonce (src/proxy.ts) is new for every response, and static HTML
+ * cannot carry it. Expensive data is cached at the fetch level instead.
+ */
+export const dynamic = 'force-dynamic';
 
 export async function generateMetadata({ params }: LayoutProps<'/[locale]'>): Promise<Metadata> {
   const { m } = await routeMessages(params);

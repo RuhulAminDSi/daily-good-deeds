@@ -1,5 +1,6 @@
 import { Controller, Get } from '@nestjs/common';
 import { ApiServiceUnavailableResponse, ApiTags } from '@nestjs/swagger';
+import { SkipThrottle } from '@nestjs/throttler';
 import type { HealthLive, HealthReady } from '@dgd/contracts';
 import { DomainError } from '../common/errors/domain-error.js';
 import { schemaRef, ZodOk } from '../common/openapi/openapi.js';
@@ -10,6 +11,7 @@ import { ReadinessService } from './readiness.service.js';
  * `ready` for deploy gating: `ready` touches the database, which keeps Neon's compute awake.
  */
 @ApiTags('health')
+@SkipThrottle() // probes run every few seconds from the host
 @Controller('health')
 export class HealthController {
   constructor(private readonly readiness: ReadinessService) {}

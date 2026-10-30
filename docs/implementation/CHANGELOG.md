@@ -268,3 +268,42 @@ All notable changes to this project are recorded here. Format: [Keep a Changelog
   - `e2e` took 1 min 6 s.
   - `security` took 14 s.
   - This also closes T-P2-PLAT-006: CI now fails on OpenAPI contract drift.
+
+### Added (2026-10-31), Phase 2: T-P2-PLAT-008 security baseline
+- **API headers (Helmet, NFR-SECURITY-014/015):**
+  - CSP `default-src 'none'; frame-ancestors 'none'`, which suits a JSON API.
+  - `nosniff` and `strict-origin-when-cross-origin`.
+  - HSTS with preload in production only.
+  - The Swagger UI (non-production only) gets its own relaxed policy.
+- **CORS (NFR-SECURITY-027):** credentialed, limited to `WEB_ORIGINS`.
+  - `WEB_ORIGINS` is required and validated in production; development defaults to `localhost:3000` and `3210`.
+  - Unknown origins get no CORS headers, preflights included.
+- **Rate limiting (`@nestjs/throttler`, tiers per API_CONVENTIONS §10):**
+  - `default` allows 300/min and `write` allows 120/min for mutations.
+  - 429 responses carry a standard `Retry-After` header and a `RATE_LIMITED` problem with `retryAfterSec`.
+  - Health probes are exempt.
+  - `TRUST_PROXY` makes the per-IP limits see real client IPs.
+  - `auth-strict` and the Postgres-backed login/reset counters arrive with the auth endpoints, which already plan them.
+- **Request limits:** a JSON depth limit of 32 is checked in one byte pass before parsing, on top of the 256 KB body limit. Brackets inside strings don't count.
+- **Web (NFR-SECURITY-015):**
+  - A strict CSP with a fresh nonce per request (`proxy.ts`): no `unsafe-inline` scripts, `strict-dynamic`, and `frame-ancestors 'none'`. Development adds only `unsafe-eval` and `ws:`.
+  - Static headers: `nosniff`, a referrer policy, `X-Frame-Options`, a `Permissions-Policy` (geolocation same-origin for prayer times, camera and microphone off), and HSTS in production.
+  - Pages now render per request, because a nonce can't be baked into static HTML. The landing page's API status stays fetch-cached for 60 s, so this adds no API or database load.
+- **Dev fix:** on Windows, `pnpm dev` crashed on the first file change: Nest's watcher couldn't kill the app process when launched through `--exec`. `.env` is now loaded into the Nest CLI process, and restarts were verified after two file changes.
+- **Tests:**
+  - API: 41 passing, including new tests for headers, CORS (allowed, unknown, preflight), the depth limit (including brackets inside strings), health probes never being throttled, and the write tier returning 429 with `Retry-After`.
+  - Web E2E: 12 passing, including the nonce on every script with no CSP violations while the page still hydrates, and the static headers.
+  - Dev mode was checked in a real browser.
+- **Pre-push review of T-P2-PLAT-008:**
+  - **Rate limiting behind a proxy (the main fix):** `TRUST_PROXY` is now required in production, alongside `WEB_ORIGINS`; an explicit `0` is allowed. With the default of 0, every client behind the host's proxy would have shared one rate-limit bucket.
+  - **Rendering trade-off:** the nonce CSP's per-request rendering is recorded as DL-038, and the architecture rendering table is updated. A hash-based CSP spike for public pages is planned in T-P10-QA-003.
+  - **Headers:**
+    - The API now sends `X-Frame-Options: DENY`, consistent with the web app.
+    - In production `/docs` also gets the strict headers.
+    - One shared `DOCS_PATH` constant.
+    - Per-tier `X-RateLimit-*` and `Retry-After-write` headers are gone; only the standard `Retry-After` is sent on 429.
+  - **Dev script:** `pnpm dev` now uses the Nest CLI's built-in `--env-file`, again verified to restart cleanly on file changes on Windows.
+  - **Planned CSP follow-ups:** a violation-report endpoint (T-P2-PLAT-009), the R2 origin in `img-src` (T-P3-DEED-012), the API origin in `connect-src` (T-P9-PWA-001), and a `TRUST_PROXY`/`WEB_ORIGINS` deploy checklist item (T-P2-PLAT-010).
+  - **Accepted, not changed:**
+    - The throttle guard runs after body parsing, which costs at most a bounded 256 KB read and scan per throttled request.
+    - Unknown routes aren't throttled; edge/WAF limits come with the deployment.

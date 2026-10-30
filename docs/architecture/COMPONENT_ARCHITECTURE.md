@@ -153,7 +153,7 @@ app/
 
 | Route type | Rendering | Data fetching | Cache |
 |---|---|---|---|
-| (public) marketing | SSG + ISR (1 h) | build-time / ISR | CDN |
+| (public) marketing | SSR per request (nonce CSP, DL-038) | fetch-cached server calls (e.g. API status, 60 s) | no HTML CDN cache; static assets on CDN |
 | (public) auth pages | SSR (no cache) | none | no-store |
 | (app) pages | RSC shell + client islands | TanStack Query against the API (client). Only the first-paint query is prefetched in RSC, with forwarded cookies: `GET /today` for the Today page (DL-025). Functions are pinned to `sin1` (DL-026). | SW: see PWA doc |
 | admin | Client-rendered within an RSC layout | TanStack Query | no SW cache (network-only) |

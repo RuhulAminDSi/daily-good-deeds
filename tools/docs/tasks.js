@@ -170,7 +170,11 @@ t(
   [],
   'S',
   'Errors from web & api appear in Sentry with release + request id; PII redaction unit-tested.',
-  ['Sentry web/api', 'Structured log field conventions'],
+  [
+    'Sentry web/api',
+    'Structured log field conventions',
+    'CSP violation reports: report-to endpoint for the web CSP (proxy.ts)',
+  ],
 );
 t(
   'T-P2-PLAT-010',
@@ -182,6 +186,7 @@ t(
     'Vercel (web) project',
     'Render/Fly (api, worker)',
     'Secrets management per env',
+    'API env per host: WEB_ORIGINS and TRUST_PROXY (proxy hop count; wrong value = one shared rate-limit bucket)',
     'Post-deploy smoke job',
     'Probes: liveness → /health/live (frequent); /health/ready only for deploy gating, so Neon compute can autosuspend',
   ],
@@ -717,6 +722,7 @@ t(
   'Signed upload (≤5 MB, jpeg/png/webp, magic-byte check), EXIF stripped by re-encode job, private signed GET; deleted with completion/account (tests).',
   [
     'Storage adapter (R2) + unconfigured mode',
+    'Add the R2 public origin to the web CSP img-src',
     'Upload/confirm endpoints',
     'Re-encode job',
     'Attachment UI',
@@ -1255,6 +1261,7 @@ t('T-P8-JRNL-001', 'AI journal summaries (opt-in)', ['F-JRNL-010'], 'S', null, [
 
 // ---------------- P9 Offline + Widget ----------------
 t('T-P9-PWA-001', 'IndexedDB read cache', ['F-PWA-004'], 'M', null, [
+  'Browser→API calls: add the API origin to the web CSP connect-src',
   'idb schema',
   'Cache today/checklist/recent',
   'Logout clears data',
@@ -1403,6 +1410,7 @@ t('T-P10-QA-002', 'Security verification', [], 'L', 'No open High/Critical findi
   'Manual OWASP checklist',
 ]);
 t('T-P10-QA-003', 'Performance verification', [], 'M', 'k6 & Lighthouse budgets met.', [
+  'Spike: hash-based CSP (experimental.sri) to make public pages static/CDN-cacheable again (DL-038)',
   'k6 load',
   'Lighthouse CI budgets',
 ]);

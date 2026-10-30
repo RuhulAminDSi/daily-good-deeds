@@ -105,7 +105,7 @@ Endpoint-specific **business quotas** (not throttles) are enforced by their modu
 | Public API clients (P10) | Per client, configured | FR-INTG-005-01 |
 
 ## 11. Request and response format
-- `Content-Type: application/json; charset=utf-8`. The body limit is 256 KB, except for uploads, which go directly to object storage with presigned URLs.
+- `Content-Type: application/json; charset=utf-8`. The body limit is 256 KB (SRS NFR-SECURITY-019), except for uploads, which go directly to object storage with presigned URLs. JSON nesting deeper than 32 levels is rejected with `VALIDATION_FAILED` (`errors[].code: max_depth`) before parsing.
 - Single resource: the object is returned bare (no envelope). Lists use the envelope from §4.
 - Errors: `application/problem+json` (RFC 9457). See [ERROR_HANDLING.md](ERROR_HANDLING.md).
 - Unknown JSON fields in requests are rejected with `400 VALIDATION_FAILED` (Zod `.strict()`). This prevents mass assignment.

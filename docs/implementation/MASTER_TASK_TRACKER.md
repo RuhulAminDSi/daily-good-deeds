@@ -4,7 +4,7 @@
 >
 > Test case IDs here are **placeholders**, allocated in sequence per feature. [qa/TEST_PLAN.md](../qa/TEST_PLAN.md) defines their steps. Update **Status** as work moves (Not started → In progress → In review → Done → Verified). A task is marked Done only when its Definition of Done in the master plan is met, including tests. A UI that exists without its backend and tests does **not** count as Done.
 
-**Totals:** 200 tasks · 535 subtasks · 196 in-scope features (P2–P10) covered · 2 Won't-Have features deliberately unmapped (F-INTG-004, F-ADMIN-017).
+**Totals:** 200 tasks · 540 subtasks · 196 in-scope features (P2–P10) covered · 2 Won't-Have features deliberately unmapped (F-INTG-004, F-ADMIN-017).
 
 ## Phase 0
 
@@ -34,9 +34,9 @@
 | EP-PLAT | — | T-P2-PLAT-005 | apps/web Next.js skeleton | T-P2-PLAT-005.1, T-P2-PLAT-005.2, T-P2-PLAT-005.3, T-P2-PLAT-005.4 | TC-PLAT-005-01 | Done | P2 |
 | EP-PLAT | — | T-P2-PLAT-006 | packages/contracts (Zod + generated OpenAPI types) | T-P2-PLAT-006.1, T-P2-PLAT-006.2, T-P2-PLAT-006.3 | TC-PLAT-006-01 | Done | P2 |
 | EP-PLAT | — | T-P2-PLAT-007 | CI pipeline (GitHub Actions) | T-P2-PLAT-007.1, T-P2-PLAT-007.2, T-P2-PLAT-007.3, T-P2-PLAT-007.4, T-P2-PLAT-007.5, T-P2-PLAT-007.6 | TC-PLAT-007-01 | Done | P2 |
-| EP-PLAT | — | T-P2-PLAT-008 | Security baseline middleware | T-P2-PLAT-008.1, T-P2-PLAT-008.2, T-P2-PLAT-008.3, T-P2-PLAT-008.4 | TC-PLAT-008-01 | Not started | P2 |
-| EP-PLAT | — | T-P2-PLAT-009 | Observability | T-P2-PLAT-009.1, T-P2-PLAT-009.2 | TC-PLAT-009-01 | Not started | P2 |
-| EP-PLAT | — | T-P2-PLAT-010 | Staging deployment | T-P2-PLAT-010.1, T-P2-PLAT-010.2, T-P2-PLAT-010.3, T-P2-PLAT-010.4, T-P2-PLAT-010.5 | TC-PLAT-010-01 | Not started | P2 |
+| EP-PLAT | — | T-P2-PLAT-008 | Security baseline middleware | T-P2-PLAT-008.1, T-P2-PLAT-008.2, T-P2-PLAT-008.3, T-P2-PLAT-008.4 | TC-PLAT-008-01 | Done | P2 |
+| EP-PLAT | — | T-P2-PLAT-009 | Observability | T-P2-PLAT-009.1, T-P2-PLAT-009.2, T-P2-PLAT-009.3 | TC-PLAT-009-01 | Not started | P2 |
+| EP-PLAT | — | T-P2-PLAT-010 | Staging deployment | T-P2-PLAT-010.1, T-P2-PLAT-010.2, T-P2-PLAT-010.3, T-P2-PLAT-010.4, T-P2-PLAT-010.5, T-P2-PLAT-010.6 | TC-PLAT-010-01 | Not started | P2 |
 | EP-UI | — | T-P2-UI-001 | packages/tokens | T-P2-UI-001.1, T-P2-UI-001.2, T-P2-UI-001.3, T-P2-UI-001.4 | TC-UI-001-01 | Not started | P2 |
 | EP-UI | — | T-P2-UI-002 | packages/ui core components | T-P2-UI-002.1, T-P2-UI-002.2, T-P2-UI-002.3, T-P2-UI-002.4 | TC-UI-002-01 | Not started | P2 |
 | EP-UI | F-PWA-002 | T-P2-UI-003 | App shell & responsive navigation | T-P2-UI-003.1, T-P2-UI-003.2, T-P2-UI-003.3 | TC-PWA-002-01 | Not started | P2 |
@@ -98,7 +98,7 @@
 | EP-DEED | F-DEED-009, F-DEED-008 | T-P3-DEED-009 | Completions (status & notes) | T-P3-DEED-009.1, T-P3-DEED-009.2, T-P3-DEED-009.3 | TC-DEED-009-01, TC-DEED-008-01 | Not started | P3 |
 | EP-DEED | F-DEED-006 | T-P3-DEED-010 | Favorites | T-P3-DEED-010.1, T-P3-DEED-010.2 | TC-DEED-006-01 | Not started | P3 |
 | EP-DEED | F-DEED-007 | T-P3-DEED-011 | Activity history | T-P3-DEED-011.1, T-P3-DEED-011.2 | TC-DEED-007-01 | Not started | P3 |
-| EP-DEED | F-DEED-010 | T-P3-DEED-012 | Evidence attachments | T-P3-DEED-012.1, T-P3-DEED-012.2, T-P3-DEED-012.3, T-P3-DEED-012.4 | TC-DEED-010-01 | Not started | P3 |
+| EP-DEED | F-DEED-010 | T-P3-DEED-012 | Evidence attachments | T-P3-DEED-012.1, T-P3-DEED-012.2, T-P3-DEED-012.3, T-P3-DEED-012.4, T-P3-DEED-012.5 | TC-DEED-010-01 | Not started | P3 |
 | EP-DEED | F-DEED-012 | T-P3-DEED-013 | Random good deed generator | T-P3-DEED-013.1, T-P3-DEED-013.2 | TC-DEED-012-01 | Not started | P3 |
 | EP-DEED | F-DEED-013 | T-P3-DEED-014 | Five-minute deeds collection | T-P3-DEED-014.1, T-P3-DEED-014.2 | TC-DEED-013-02 | Not started | P3 |
 | EP-DEED | F-DEED-014 | T-P3-DEED-015 | Rule-based recommendations | T-P3-DEED-015.1, T-P3-DEED-015.2, T-P3-DEED-015.3 | TC-DEED-014-01 | Not started | P3 |
@@ -220,7 +220,7 @@
 
 | Epic | Feature(s) | Task | Title | Subtasks | Test cases | Status | Phase |
 |---|---|---|---|---|---|---|---|
-| EP-PWA | F-PWA-004 | T-P9-PWA-001 | IndexedDB read cache | T-P9-PWA-001.1, T-P9-PWA-001.2, T-P9-PWA-001.3 | TC-PWA-004-01 | Not started | P9 |
+| EP-PWA | F-PWA-004 | T-P9-PWA-001 | IndexedDB read cache | T-P9-PWA-001.1, T-P9-PWA-001.2, T-P9-PWA-001.3, T-P9-PWA-001.4 | TC-PWA-004-01 | Not started | P9 |
 | EP-PWA | F-PWA-005 | T-P9-PWA-002 | Outbox queue & optimistic UI | T-P9-PWA-002.1, T-P9-PWA-002.2 | TC-PWA-005-01 | Not started | P9 |
 | EP-PWA | F-PWA-006 | T-P9-PWA-003 | /sync endpoint & conflict handling | T-P9-PWA-003.1, T-P9-PWA-003.2, T-P9-PWA-003.3, T-P9-PWA-003.4, T-P9-PWA-003.5 | TC-PWA-006-01 | Not started | P9 |
 | EP-PWA | F-PWA-005 | T-P9-PWA-004 | Flush triggers | T-P9-PWA-004.1, T-P9-PWA-004.2 | TC-PWA-005-02 | Not started | P9 |
@@ -255,7 +255,7 @@
 | EP-PLAT | — | T-P10-PLAT-003 | OpenTelemetry tracing | T-P10-PLAT-003.1, T-P10-PLAT-003.2 | TC-PLAT-003-02 | Not started | P10 |
 | EP-QA | — | T-P10-QA-001 | Full regression | T-P10-QA-001.1, T-P10-QA-001.2 | TC-QA-001-02 | Not started | P10 |
 | EP-QA | — | T-P10-QA-002 | Security verification | T-P10-QA-002.1, T-P10-QA-002.2, T-P10-QA-002.3, T-P10-QA-002.4 | TC-QA-002-01 | Not started | P10 |
-| EP-QA | — | T-P10-QA-003 | Performance verification | T-P10-QA-003.1, T-P10-QA-003.2 | TC-QA-003-01 | Not started | P10 |
+| EP-QA | — | T-P10-QA-003 | Performance verification | T-P10-QA-003.1, T-P10-QA-003.2, T-P10-QA-003.3 | TC-QA-003-01 | Not started | P10 |
 | EP-QA | — | T-P10-QA-004 | Accessibility audit | T-P10-QA-004.1, T-P10-QA-004.2 | TC-QA-004-01 | Not started | P10 |
 | EP-QA | — | T-P10-QA-005 | Cross-browser, in-app & PWA matrix | T-P10-QA-005.1, T-P10-QA-005.2, T-P10-QA-005.3 | TC-QA-005-01 | Not started | P10 |
 | EP-PLAT | — | T-P10-PLAT-001 | Production environment & operations | T-P10-PLAT-001.1, T-P10-PLAT-001.2, T-P10-PLAT-001.3, T-P10-PLAT-001.4 | TC-PLAT-001-02 | Not started | P10 |

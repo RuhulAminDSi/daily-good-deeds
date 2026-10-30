@@ -2,16 +2,16 @@ import { routeMessages } from '@/i18n/route-locale';
 import { api, unwrap } from '@/lib/api';
 
 /**
- * Static and cached: regenerated at most once a minute. The status probes `/health/live`, which
- * does not touch the database, so public traffic never wakes Neon (ADR-005).
+ * The status probe is cached for a minute (fetch cache) and hits `/health/live`, which does not
+ * touch the database, so public traffic never wakes Neon (ADR-005).
  */
-export const revalidate = 60;
+const STATUS_TTL_SECONDS = 60;
 
 async function apiIsUp(): Promise<boolean> {
   try {
     unwrap(
       await api().GET('/api/v1/health/live', {
-        next: { revalidate },
+        next: { revalidate: STATUS_TTL_SECONDS },
         signal: AbortSignal.timeout(3000),
       }),
     );

@@ -1,4 +1,4 @@
-import { InvalidConfigError, loadConfig } from './env.js';
+import { DEV_WEB_ORIGINS, InvalidConfigError, loadConfig } from './env.js';
 
 const DATABASE_URL = 'postgresql://u:p@localhost:5432/dgd';
 
@@ -10,6 +10,8 @@ describe('loadConfig', () => {
       LOG_LEVEL: 'info',
       DATABASE_URL,
       DB_POOL_MAX: 5,
+      TRUST_PROXY: 0,
+      WEB_ORIGINS: DEV_WEB_ORIGINS,
     });
   });
 
@@ -37,5 +39,22 @@ describe('loadConfig', () => {
     expect(loadConfig({ DATABASE_URL: `${remote}?sslmode=verify-full` }).DATABASE_URL).toContain(
       'verify-full',
     );
+  });
+
+  it('requires WEB_ORIGINS and TRUST_PROXY in production and validates them', () => {
+    const prod = { NODE_ENV: 'production', DATABASE_URL };
+    const run = () => loadConfig(prod);
+    expect(run).toThrow(/WEB_ORIGINS/);
+    expect(run).toThrow(/TRUST_PROXY/);
+    expect(() => loadConfig({ ...prod, TRUST_PROXY: '1', WEB_ORIGINS: 'not a url' })).toThrow(
+      /WEB_ORIGINS/,
+    );
+    const ok = loadConfig({
+      ...prod,
+      TRUST_PROXY: '0',
+      WEB_ORIGINS: 'https://a.example, https://b.example',
+    });
+    expect(ok.WEB_ORIGINS).toEqual(['https://a.example', 'https://b.example']);
+    expect(ok.TRUST_PROXY).toBe(0); // explicit 0 is allowed (API exposed directly)
   });
 });
