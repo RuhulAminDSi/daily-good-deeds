@@ -18,8 +18,8 @@
 flowchart TB
   M["Manual & exploratory<br/>(screen readers, in-app browsers, BN copy review, pentest)"]
   E["E2E — Playwright<br/>~10% · core journeys, PWA, responsive, a11y sweep"]
-  A["API / Integration — Jest + Supertest + Nest testing module<br/>~30% · real Postgres (Neon branch), authz matrix, IDOR, contracts"]
-  U["Unit — Vitest / Jest / JUnit<br/>~60% · packages/domain (recurrence, streaks, local_date, Hijri, zakat), services, components"]
+  A["API / Integration — Vitest + Supertest + Nest testing module<br/>~30% · real Postgres (Neon branch), authz matrix, IDOR, contracts"]
+  U["Unit — Vitest / JUnit<br/>~60% · packages/domain (recurrence, streaks, local_date, Hijri, zakat), services, components"]
   M --> E --> A --> U
 ```
 
@@ -33,9 +33,9 @@ Principles:
 
 | Concern | Tool | Where / when |
 |---|---|---|
-| Unit (TS) | **Vitest** (packages, web), **Jest** (api, Nest default) | Every PR |
+| Unit (TS) | **Vitest** everywhere in TypeScript (packages, web, api — api via unplugin-swc for decorator metadata; DL-035) | Every PR |
 | Property-based | fast-check | `packages/domain`, every PR |
-| API / integration | **Jest + Supertest**, `@nestjs/testing`, Prisma against Neon PR branch | Every PR |
+| API / integration | **Vitest + Supertest**, `@nestjs/testing`, Prisma against Neon PR branch | Every PR |
 | Contract | OpenAPI drift check (generated vs committed); response schema validation in API tests | Every PR |
 | Component | Playwright Component Testing or Storybook test runner, with axe | Every PR (`packages/ui`) |
 | E2E | **Playwright** — Chromium, Firefox, WebKit; mobile emulation (Pixel 7, iPhone 14, Galaxy S9+ 360 px); **in-app-browser UA simulation** (FBAN/FBAV, Messenger, Instagram, Telegram UA strings) to exercise detection & fallback | PR (smoke on Chromium), main (full matrix), nightly |

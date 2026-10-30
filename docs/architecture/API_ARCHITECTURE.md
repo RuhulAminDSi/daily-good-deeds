@@ -14,7 +14,7 @@
 | 1 | `helmet` | Security headers (API returns JSON only; CSP `default-src 'none'`) |
 | 2 | CORS | Allowlist: `https://app.<domain>`, preview origins in non-prod; `credentials: true` |
 | 3 | Request ID + Pino (+ Sentry) | `X-Request-Id` (an incoming value is accepted if it is a UUID, otherwise one is generated). OpenTelemetry tracing arrives in P10 (DL-032) |
-| 4 | Body limits | 100 KB JSON default; 1 MB for `POST /sync`; files never go through the API (signed URLs) |
+| 4 | Body limits | Per SRS NFR-SECURITY-019 (JSON body and `POST /sync` limits); files never go through the API (signed URLs) |
 | 5 | Throttler | See §5 |
 | 6 | `AuthGuard` | Session cookie or bearer device token → SHA-256 → lookup in `user_sessions` / `widget_devices` (≤ 5 s cache) → `req.actor` (`userId`, `permissions`, `sessionId`, `deviceId?`, `stepUpAt`, `locale`). Revoked or expired → 401 (DL-012) |
 | 7 | `OriginGuard` | Cookie-authenticated unsafe methods: `Origin` (or `Sec-Fetch-Site: same-site`) must be in the allowlist. Combined with `SameSite=Lax`, this is the CSRF defence (no token) |

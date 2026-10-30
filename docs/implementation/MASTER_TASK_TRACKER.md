@@ -4,7 +4,7 @@
 >
 > Test case IDs here are **placeholders**, allocated in sequence per feature. [qa/TEST_PLAN.md](../qa/TEST_PLAN.md) defines their steps. Update **Status** as work moves (Not started → In progress → In review → Done → Verified). A task is marked Done only when its Definition of Done in the master plan is met, including tests. A UI that exists without its backend and tests does **not** count as Done.
 
-**Totals:** 200 tasks · 528 subtasks · 196 in-scope features (P2–P10) covered · 2 Won't-Have features deliberately unmapped (F-INTG-004, F-ADMIN-017).
+**Totals:** 200 tasks · 529 subtasks · 196 in-scope features (P2–P10) covered · 2 Won't-Have features deliberately unmapped (F-INTG-004, F-ADMIN-017).
 
 ## Phase 0
 
@@ -28,8 +28,8 @@
 | Epic | Feature(s) | Task | Title | Subtasks | Test cases | Status | Phase |
 |---|---|---|---|---|---|---|---|
 | EP-PLAT | — | T-P2-PLAT-001 | Monorepo scaffold (pnpm via Corepack, Turborepo, packages/config) | T-P2-PLAT-001.1, T-P2-PLAT-001.2, T-P2-PLAT-001.3, T-P2-PLAT-001.4 | TC-PLAT-001-01 | Done | P2 |
-| EP-PLAT | — | T-P2-PLAT-002 | apps/api NestJS skeleton | T-P2-PLAT-002.1, T-P2-PLAT-002.2, T-P2-PLAT-002.3, T-P2-PLAT-002.4, T-P2-PLAT-002.5 | TC-PLAT-002-01 | Not started | P2 |
-| EP-PLAT | — | T-P2-PLAT-003 | Prisma + Neon baseline | T-P2-PLAT-003.1, T-P2-PLAT-003.2, T-P2-PLAT-003.3, T-P2-PLAT-003.4 | TC-PLAT-003-01 | Not started | P2 |
+| EP-PLAT | — | T-P2-PLAT-002 | apps/api NestJS skeleton | T-P2-PLAT-002.1, T-P2-PLAT-002.2, T-P2-PLAT-002.3, T-P2-PLAT-002.4, T-P2-PLAT-002.5 | TC-PLAT-002-01 | Done | P2 |
+| EP-PLAT | — | T-P2-PLAT-003 | Prisma + Neon baseline | T-P2-PLAT-003.1, T-P2-PLAT-003.2, T-P2-PLAT-003.3, T-P2-PLAT-003.4, T-P2-PLAT-003.5 | TC-PLAT-003-01 | Not started | P2 |
 | EP-PLAT | — | T-P2-PLAT-004 | apps/worker with pg-boss | T-P2-PLAT-004.1, T-P2-PLAT-004.2, T-P2-PLAT-004.3, T-P2-PLAT-004.4 | TC-PLAT-004-01 | Not started | P2 |
 | EP-PLAT | — | T-P2-PLAT-005 | apps/web Next.js skeleton | T-P2-PLAT-005.1, T-P2-PLAT-005.2, T-P2-PLAT-005.3, T-P2-PLAT-005.4 | TC-PLAT-005-01 | Not started | P2 |
 | EP-PLAT | — | T-P2-PLAT-006 | packages/contracts (Zod + generated OpenAPI types) | T-P2-PLAT-006.1, T-P2-PLAT-006.2, T-P2-PLAT-006.3 | TC-PLAT-006-01 | Not started | P2 |

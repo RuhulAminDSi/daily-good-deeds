@@ -93,12 +93,13 @@ t(
   'Prisma + Neon baseline',
   [],
   'M',
-  '`prisma migrate deploy` succeeds on Neon dev branch; seed is idempotent (run twice → same row counts, test).',
+  '`prisma migrate deploy` succeeds on Neon dev branch; seed is idempotent (run twice → same row counts, test); /health/ready returns 503 DEPENDENCY_UNAVAILABLE when the DB is unreachable (test).',
   [
     'Neon project with dev/staging/prod branches (user action)',
     'Prisma schema baseline, UUIDv7 default helper',
     'DATABASE_URL (pooled) + DIRECT_URL (migrations)',
     'Seed runner framework',
+    'Readiness check registry (modules register checks; /health/ready aggregates) + DB check',
   ],
 );
 t(
@@ -582,7 +583,7 @@ t(
   'Test infrastructure',
   [],
   'M',
-  'Vitest, Jest+Supertest (Neon test branch), Playwright (mobile + desktop projects, EN/BN), axe helper all runnable via turbo.',
+  'Vitest (unit + API via Supertest, Neon test branch), Playwright (mobile + desktop projects, EN/BN), axe helper all runnable via turbo.',
   ['Vitest config', 'API test DB lifecycle', 'Playwright projects', 'axe helper'],
 );
 t(

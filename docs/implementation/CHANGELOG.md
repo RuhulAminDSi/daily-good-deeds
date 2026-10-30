@@ -65,3 +65,34 @@ All notable changes to this project are recorded here. Format: [Keep a Changelog
   - `.prettierignore` is root-anchored (`/docs/`), so `tools/docs` is formatted again.
   - Node engines are pinned to `^24`.
   - The root README has setup steps.
+
+### Added (2026-10-31), Phase 2: T-P2-PLAT-002 API skeleton (`apps/api`)
+- NestJS 12.3 (ESM, TypeScript 6, built with `tsc`), served under `/api` with URI versioning (`/api/v1/...`).
+- Env config validated with Zod (`loadConfig`). Invalid values abort boot and name every bad key.
+- Pino logging via `nestjs-pino`:
+  - Request IDs: a valid client `X-Request-Id` is reused, otherwise a UUID is generated, and the ID is echoed in the response.
+  - Credentials and personal data (authorization, cookies, passwords, tokens, email) are redacted.
+- Global `ProblemDetailsFilter`:
+  - Renders RFC 9457 problem+json from a typed error catalog.
+  - Maps `DomainError`, `ZodError` (JSON-pointer field errors) and `HttpException`.
+  - 5xx responses stay generic.
+  - Malformed or oversized JSON is mapped at the body parser (`jsonBody`), because Nest otherwise flattens it to a plain 400.
+- `/api/v1/health/live` and `/api/v1/health/ready`. Dependency checks are added by the modules that own them.
+- OpenAPI at `/api/v1/openapi.json`. Swagger UI at `/api/v1/docs` outside production.
+- Tests: 13 passing (Vitest + Supertest, decision DL-035), covering:
+  - config
+  - log redaction
+  - health
+  - OpenAPI
+  - request IDs
+  - 404, DomainError, Zod, malformed JSON and a generic 500
+- Also verified: built and booted in production mode; probed `health/live`, 404 and OpenAPI with curl; checked that the docs UI is hidden in production. `pnpm dev` (Nest watch) works. Turbo build, lint, typecheck, test and check all pass.
+- **Pre-push review of the API skeleton:**
+  - **Fixed: parse errors were untraceable.** JSON parsing ran before request logging, so malformed-JSON responses had no request ID and no log line. JSON parsing is now Nest module middleware that runs after pino-http (test added).
+  - **One log line per failed request.** pino-http's completion line now carries everything. 5xx causes go through `res.err`, 4xx log at info, and health probes are no longer logged.
+  - **Body limit 256 KB** per SRS NFR-SECURITY-019 (test added). API_ARCHITECTURE now links to the SRS instead of restating the limit.
+  - **Error mapping:** the status→code map is derived from the catalog. Zod field errors now carry `i18nKey` and `params`, per ERROR_HANDLING.
+  - **Removed unused code:** the unused `APP_CONFIG` token and `DomainError.status`. Config errors use `z.prettifyError`, and request IDs use `z.uuid()`.
+  - **OpenAPI** is built once at boot. The YAML route is off.
+  - **Build:** the build cleans `dist/` and emits no `.d.ts`. Dev uses the SWC builder (compiles in about 0.3 s).
+  - The readiness check registry is planned into T-P2-PLAT-003.

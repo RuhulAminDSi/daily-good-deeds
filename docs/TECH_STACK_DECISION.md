@@ -38,7 +38,7 @@ The repository is empty, so this stack is proposed from first principles. The us
 | AI | **Anthropic Claude** (current Claude 5 family) behind `AiProvider` | User choice. The abstraction keeps the provider swappable. | OpenAI, Gemini (possible future adapters) |
 | Islamic data | Quran.com API v4 (cached), `adhan` (prayer times), Hijri computed with `Intl` Islamic calendars plus a user offset, and a curated Dua/Hadith seed with references | User choice. Prayer times run offline-capable on the client. | Aladhan API (network dependency) |
 | Android widget | **Kotlin, Jetpack Glance, WorkManager, DataStore, Ktor client, minSdk 26** | Modern widget API with interactive actions (`actionRunCallback`) | RemoteViews XML (more boilerplate); React Native/Capacitor (would turn the product native, which is not allowed) |
-| Testing | Vitest (packages/web), Jest + Supertest (api), Playwright (E2E, PWA, responsive), axe-core, Lighthouse CI, k6, OWASP ZAP baseline, Android instrumented + Glance tests | See [qa/QA_STRATEGY.md](qa/QA_STRATEGY.md) | — |
+| Testing | Vitest everywhere in TS (packages, web, api with Supertest; DL-035), Playwright (E2E, PWA, responsive), axe-core, Lighthouse CI, k6, OWASP ZAP baseline, Android instrumented + Glance tests | See [qa/QA_STRATEGY.md](qa/QA_STRATEGY.md) | — |
 | Observability | Pino structured logs, OpenTelemetry traces, Sentry (web + api + Android) | — | — |
 | CI/CD | GitHub Actions; Vercel (web), Render/Fly.io (api + worker), Neon branches per preview | Proposal; final choice is an open decision | — |
 

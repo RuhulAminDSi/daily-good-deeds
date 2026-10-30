@@ -114,11 +114,11 @@ const levelOf = (t) => {
 };
 const TOOLS = {
   Unit: 'Vitest',
-  API: 'Jest + Supertest',
+  API: 'Vitest + Supertest',
   E2E: 'Playwright',
-  Integration: 'Jest (Nest testing module, Neon branch)',
+  Integration: 'Vitest (Nest testing module, Neon branch)',
   a11y: 'axe-core (Playwright)',
-  Security: 'Jest authz/IDOR suite, OWASP ZAP',
+  Security: 'Vitest authz/IDOR suite, OWASP ZAP',
   Perf: 'k6 + Lighthouse CI',
   Manual: 'Manual checklist',
   Android: 'JUnit + Glance testing + Espresso',

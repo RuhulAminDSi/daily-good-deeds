@@ -10,7 +10,7 @@
 |---|---|
 | Design | Threat model per module (STRIDE) reviewed at each phase start; data-flow diagrams from the architecture docs |
 | Code | CodeQL + Semgrep custom rules on every PR; mandatory review for auth/RBAC/sync/upload/AI code |
-| Automated tests | Authz matrix, IDOR suite, session tests, injection corpora (Jest + Supertest, Playwright) on every PR |
+| Automated tests | Authz matrix, IDOR suite, session tests, injection corpora (Vitest + Supertest, Playwright) on every PR |
 | Dynamic | OWASP ZAP baseline per staging deploy; authenticated active scan before each release |
 | Supply chain | OSV-Scanner / `pnpm audit`, Dependabot, Gradle dependency verification, lockfile review, gitleaks |
 | Manual | OWASP ASVS L2 checklist (V2, V3, V4, V5, V8, V12, V13) per release; **penetration test before public launch** (NFR-SECURITY-026) |
