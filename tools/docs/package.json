@@ -1,0 +1,16 @@
+{
+  "name": "@dgd/docs-tools",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Generators and integrity checks for the planning documents",
+  "type": "module",
+  "scripts": {
+    "gen": "node gen.js",
+    "check": "node gen.js --check",
+    "lint": "eslint ."
+  },
+  "devDependencies": {
+    "@dgd/config": "workspace:*",
+    "eslint": "10.14.0"
+  }
+}

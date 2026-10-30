@@ -1,0 +1,31 @@
+# dependencies
+node_modules/
+.pnpm-store/
+# builds
+.next/
+dist/
+build/
+out/
+.turbo/
+coverage/
+# env & secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.jks
+*.keystore
+local.properties
+# android
+apps/android-widget/.gradle/
+apps/android-widget/**/build/
+apps/android-widget/.idea/
+# os / editor
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+.idea/
+# test artifacts
+playwright-report/
+test-results/

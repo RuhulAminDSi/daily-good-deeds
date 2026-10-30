@@ -1,0 +1,59 @@
+# Decision Log
+
+Chronological record of product and engineering decisions. The architecture-level rationale for each decision is in [../architecture/ARCHITECTURE_DECISIONS.md](../architecture/ARCHITECTURE_DECISIONS.md).
+
+| ID | Date | Decision | Decided by | Rationale / reference |
+|---|---|---|---|---|
+| DL-001 | 2026-10-30 | Repository is greenfield (empty). No existing system to preserve. | Discovery | [PROJECT_DISCOVERY.md](../PROJECT_DISCOVERY.md) |
+| DL-002 | 2026-10-30 | Managed PostgreSQL (Neon recommended, Supabase acceptable) for dev and prod. No local Docker. | User | Docker and psql are not installed. Lowest setup cost. |
+| DL-003 | 2026-10-30 | pnpm + Turborepo monorepo: Next.js web/PWA + NestJS modular-monolith API + Kotlin Glance widget | User | One API for web, widget, and public API. Shared TS packages. |
+| DL-004 | 2026-10-30 | Anthropic Claude is the default AI provider, behind an abstraction. AI is optional. | User | Directive §4.K |
+| DL-005 | 2026-10-30 | Islamic content: external APIs (Quran.com API, cached) + admin-curated, source-referenced seed for Duas and Hadith | User | Reliable sources plus editorial control |
+| DL-006 | 2026-10-30 | Feature IDs are frozen in `product/FEATURE_ID_REGISTRY.md`. Requirement, story, and test IDs derive from them. | Planning | Traceability |
+| DL-007 | 2026-10-30 | Phase order changed from the directive: **Notifications (P6) moves ahead of Community (P7)**, and Community is followed by AI (P8) and then PWA offline + widget (P9). The PWA shell, installability, and in-app-browser fallback are pulled forward into P2. | Planning | Deeds, salah, and journal reminders are core to retention and are needed before community. Installability and the in-app-browser fallback affect every page, so they belong in the foundation. Full offline sync needs stable domain models from P3–P5. |
+| DL-008 | 2026-10-30 | pg-boss (Postgres-backed) for background jobs. Redis is deferred. | Planning | Avoids extra infrastructure ([ADR](../architecture/ARCHITECTURE_DECISIONS.md)) |
+| DL-009 | 2026-10-30 | Entity merges: `good_deeds` + `user_custom_deeds` → `deeds`; `email_verifications` + `password_resets` → `verification_tokens`; `families` + `community_groups` → `groups`; journal-like entities → `journal_entries`; `ai_generated_suggestions` → `ai_insights`; `reports` → `content_reports` | Planning | Fewer near-duplicate tables ([README §6](../README.md)) |
+| DL-010 | 2026-10-30 | UI strings live in git (`packages/i18n`), not in a `translation_entries` table. Admin-managed content is translated through `*_translations` tables. | Planning | Reviewed through PRs, type-safe keys, and missing-key checks in CI |
+| DL-011 | 2026-10-30 | Android widgets need an installable host APK, so a minimal companion app (link device + settings only) is planned. All other functionality stays on the web. | Planning | The Android platform requires a host app for widgets |
+
+## Simplification review (2026-10-30)
+
+A self-review (reuse, simplification, efficiency, altitude) found cross-doc conflicts and over-engineering. The resolutions below are binding.
+
+**Ownership rule.** Each kind of fact has one owning doc. Other docs link to it rather than restating values.
+
+| Fact | Owner |
+|---|---|
+| Numeric parameters | SRS (cite the FR/NFR ID) |
+| Error codes | `api/ERROR_HANDLING.md` |
+| Permissions | `api/API_SPECIFICATION.md` §0 |
+| Rate limits | `api/API_CONVENTIONS.md` |
+| Table inventory, counts and phases | `docs/README.md` §6 |
+| Module ownership of tables | `architecture/COMPONENT_ARCHITECTURE.md` |
+| Settings keys | The *Settings registry* under `system_settings` in `database/DATA_DICTIONARY.md` |
+
+| ID | Decision | Replaces |
+|---|---|---|
+| DL-012 | **Auth uses opaque, DB-backed tokens. No JWTs.**<br>**Web:** a random 256-bit session ID in an `HttpOnly; Secure; SameSite=Lax` cookie (`__Host-dgd_session`). It is stored as a SHA-256 hash in `user_sessions` and looked up on every request, with an in-process cache of ≤ 5 s. User sessions last 30 days at most, with a 7-day idle timeout. Admin sessions last 12 h at most, with a 30 min idle timeout.<br>**Widget:** an opaque bearer **device token**, hashed in `widget_devices`. It expires after 180 days idle.<br>**CSRF:** SameSite=Lax plus a mandatory `Origin`/`Sec-Fetch-Site` check on unsafe methods.<br>**Revocation:** logout, password change, role change and admin action delete or revoke the session rows, so revocation takes effect immediately.<br>**Permissions:** loaded with the session (not embedded in a token) and cached for up to 60 s. | JWT access tokens with rotating refresh, JWKS/kid rotation, `security_version`, reuse detection and grace window, BroadcastChannel single-flight, HMAC double-submit CSRF |
+| DL-013 | Argon2id with **m = 19 MiB, t = 2, p = 1** (OWASP minimum). Login throttling is defined only in SRS FR-AUTH-002-02. | Divergent values in ADR-006 and AUTHENTICATION |
+| DL-014 | **One rate-limit table**, in API_CONVENTIONS, aligned with the SRS FRs (posts 5/day, exports 1 per 24 h). Implemented with `@nestjs/throttler` in memory, using 3 tiers (auth-strict, write, default) and `Retry-After`. Only login and password reset use a Postgres-backed counter. | Two conflicting tables, 10 tiers, a Postgres sliding window |
+| DL-015 | **Sync wire format:** `POST /sync` pushes up to 100 ops and `GET /sync/changes` pulls.<br>**Per-op status:** `applied \| duplicate \| conflict \| rejected`.<br>**Conflicts:** **row-level last-writer-wins on `clientTime`** (SRS FR-PWA-006-13). The losing value is logged in `sync_operations.conflict` and the user sees a toast.<br>**Op-ID dedup:** done in one query.<br>**Pull cursor:** a per-row `change_seq bigint` drawn from one global sequence. The push response returns the latest cursor, and the client pulls only when it is behind. An unchanged cursor returns 304.<br>**Offline window:** no 72 h offline grace. SRS FR-PWA-006-14 governs. | `/sync/push` and `/sync/pull`, per-field LWW, the conflict-review UI, the 200-op limit, `applied_with_conflict`, three different cursor definitions |
+| DL-016 | **Idempotency:** `/sync` uses `sync_operations.op_id`. Other POSTs use `idempotency_keys` with a 24 h TTL. The `Idempotency-Key` header is required **only** on side-effecting POSTs with no natural unique key (exports, invitations, AI requests, broadcasts). Reusing a key with a different body returns `422 IDEMPOTENCY_KEY_REUSED`. | Conflicting TTLs and storage |
+| DL-017 | **Edit window:** the rule is SRS FR-CAL-011-01, the setting key is `completions.edit_window_days`, and the error code is `LOCAL_DATE_OUT_OF_RANGE`. The neutral-day cap (4 per 30) and the partial-completion threshold (≥ 50 %) are **domain constants** in `packages/domain`, not settings. | `backfill_days`, `pastEditWindowDays`, `EDIT_WINDOW_EXCEEDED`, `VALIDATION_LOCAL_DATE_SKEW`, `partial_counts` |
+| DL-018 | **Retention** comes only from SRS NFR-PRIVACY-009 (sync ops 35 d, tombstones 35 d, AI 90 d) and NFR-BACKUP-002 (backups 30 d). DATABASE_DESIGN describes only the purge mechanism. | Variants of 30, 180 and 35 days |
+| DL-019 | **AI quota** is defined by SRS FR-AI-003-01 (30 requests per day, 150 k tokens per month). Model tiers and prices live in env or config. | 40 req and 30 k tokens/day variants |
+| DL-020 | **Widget refresh:** every 30 min plus event triggers. Retry backoff runs from 30 s to 1 h (SRS FR-WIDGET-006).<br>**Snapshot ETag:** derived from (`change_seq`, local date, prayer slot, locale) and checked before building. `generatedAt` is excluded.<br>**Linking:** the web issues a code, stored as `verification_tokens(type=widget_link)`. The QR is an https App Link opened by the system camera, with manual code entry as a fallback. There is no in-app scanner and no poll endpoint. | 15 min refresh, two linking flows, CameraX/ML Kit |
+| DL-021 | **Offline scope** is set by the SRS §18 matrix and NFR-PRIVACY-004: 14 days of personal records, images capped at 100 entries for 30 d, and journals never stored offline. | 60-day, 30-day and 200-entry variants; offline "journal saves" |
+| DL-022 | **Admin step-up window is 10 min** (SRS FR-RBAC-006-01 updated). | 15 min |
+| DL-023 | **New `daily_summaries(user_id, local_date, scheduled, done, partial, skipped)` table.**<br>**Updates:** written in the completion transaction.<br>**Readers:** calendar, heatmap, year view and the overall streak.<br>**Streaks:** `streaks` is updated incrementally for today's and yesterday's completions. Past-day edits, rule changes and sync batches enqueue one debounced `streaks.rebuild:{userId}` job.<br>**Rebuild:** both tables can be rebuilt from completions. | Recurrence evaluated on every read, recompute on every write |
+| DL-024 | `reminders.next_fire_at` with a partial index. It is computed when a reminder is written and again after it fires. One indexed scan per minute covers all reminders, including prayer reminders. Future letters use a pg-boss job with `startAfter`. | Per-timezone tick queries, a separate prayer tick, a 15 min letter poll |
+| DL-025 | `GET /today` returns a composite response with an ETag. It shares its builder with `/widget/snapshot`. | About 6 round trips on the Today page |
+| DL-026 | **Prisma:** uses the Neon pooled URL with `pgbouncer=true&connection_limit=5`.<br>**Migrations and the worker:** use the direct URL with a small pool. pg-boss polls at a longer interval.<br>**Preview branches:** run no worker or cron.<br>**Vercel:** functions are pinned to `sin1`. | Unspecified |
+| DL-027 | `audit_logs` is a plain table with a btree on `occurred_at`. A nightly purge removes rows older than 24 months. Partition only when measurements call for it. | Monthly partitions from day 1 |
+| DL-028 | **One PWA manifest** (`scope: /`, `start_url: /today`). Middleware redirects to the right locale using the locale cookie. Two shortcuts. | Per-locale manifests and scopes |
+| DL-029 | `feature_flags` are **booleans**, with an optional role allowlist. A/B testing lives only in `experiments` (P10). | Variants defined in two places |
+| DL-030 | **Journal encryption:** AES-256-GCM with a single versioned app key (env or KMS). Each row stores `key_version` and `nonce`. Rotation re-encrypts lazily. | Per-user DEK envelope; wrapped DEKs in the same DB add no protection |
+| DL-031 | `*_translations` tables are kept but have no per-translation `status`/`reviewed_by`. `in_review` and `verified_by` exist only on religious content (duas, hadith, dhikr presets). Other content is `draft \| published`. | Review state at two levels |
+| DL-032 | **Phase 2 is trimmed:**<br>- P2 ships the fixed seeded roles with a UI for **assigning** them. The role and permission **editor** moves to P10.<br>- Admins are created by a seed/CLI command. The invite flow moves to P10.<br>- Feature flags are booleans only.<br>- The audit viewer ships without CSV export, which moves to P10.<br>- The email-change flow and XLIFF export move to P4.<br>- OpenTelemetry moves to P10; P2 uses Pino and Sentry.<br>- Account deletion stays in P2. Each later phase extends the purge job to its own tables. | A larger P2 |
+| DL-033 | Pagination cursors are plain opaque base64 with no HMAC, because every query is scoped to the user. | HMAC-signed cursors |
+| DL-034 | `users.security_version` is **dropped** (DL-012 makes it unnecessary). `daily_summaries` is added. | — |

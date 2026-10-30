@@ -1,0 +1,27 @@
+{
+  "name": "daily-good-deeds",
+  "private": true,
+  "description": "Daily Good Deeds — bilingual (EN/BN) personal growth & good deeds platform",
+  "packageManager": "pnpm@10.34.9",
+  "engines": {
+    "node": "^24.0.0"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "e2e": "turbo run e2e",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "docs:gen": "pnpm --filter @dgd/docs-tools gen",
+    "docs:check": "pnpm --filter @dgd/docs-tools check"
+  },
+  "devDependencies": {
+    "@dgd/config": "workspace:*",
+    "prettier": "3.9.10",
+    "turbo": "2.11.10",
+    "typescript": "6.0.3"
+  }
+}

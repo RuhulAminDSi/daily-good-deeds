@@ -1,0 +1,2630 @@
+openapi: 3.1.0
+info:
+  title: Daily Good Deeds API
+  version: 1.0.0-draft
+  summary: REST API for the Daily Good Deeds platform (Phase 2 and Phase 3 scope).
+  description: |
+    Specification-first contract. Status: DRAFT, not implemented.
+    Covers Phase 2 (auth, me, preferences, sessions, admin users/roles/audit, feature flags)
+    and Phase 3 (categories, deeds, favorites, plans, checklist, completions, calendar, heatmap, streaks).
+    Later-phase endpoints are specified in docs/api/API_SPECIFICATION.md and will be added here
+    at the start of their phase. Conventions: docs/api/API_CONVENTIONS.md.
+  license:
+    name: Proprietary
+    identifier: LicenseRef-Proprietary
+servers:
+  - url: https://api.example.com/api/v1
+    description: Production (placeholder domain)
+  - url: http://localhost:4000/api/v1
+    description: Local development
+security:
+  - cookieAuth: []
+  - bearerAuth: []
+tags:
+  - name: auth
+    description: Authentication (F-AUTH, F-RBAC-007)
+  - name: me
+    description: Current user, preferences and sessions
+  - name: admin
+    description: Admin identity, RBAC, audit and feature flags
+  - name: flags
+    description: Client-visible feature flags
+  - name: deeds
+    description: Categories, deeds, favorites (F-DEED)
+  - name: plans
+    description: Scheduled deeds and daily checklist
+  - name: completions
+    description: Completion records
+  - name: calendar
+    description: Calendar, heatmap and streaks (F-CAL)
+  - name: health
+    description: Liveness and readiness
+
+paths:
+  # ---------------------------------------------------------------- AUTH
+  /auth/register:
+    post:
+      tags: [ auth ]
+      operationId: register
+      summary: Register with email and password (F-AUTH-001)
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/AcceptLanguage'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '202':
+          description: Always returned (enumeration-safe). Session cookies are set only for a newly created account.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /auth/login:
+    post:
+      tags: [ auth ]
+      operationId: login
+      summary: Email/password login (F-AUTH-002)
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Logged in. Sets the opaque __Host-dgd_session cookie (HttpOnly; Secure; SameSite=Lax).
+          headers:
+            Set-Cookie:
+              description: Session cookie
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          description: AUTH_INVALID_CREDENTIALS, or MFA_REQUIRED (response includes mfaToken)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /auth/mfa/verify:
+    post:
+      tags: [ auth ]
+      operationId: verifyMfa
+      summary: Complete login with a TOTP or recovery code (F-RBAC-007)
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [ mfaToken, code ]
+              properties:
+                mfaToken:
+                  type: string
+                code:
+                  type: string
+                  pattern: '^([0-9]{6}|[A-Za-z0-9]{10})$'
+      responses:
+        '200':
+          description: Logged in
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /auth/logout:
+    post:
+      tags: [ auth ]
+      operationId: logout
+      summary: Revoke the current session (F-AUTH-006)
+      responses:
+        '204':
+          description: Logged out; cookies cleared
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /auth/logout-all:
+    post:
+      tags: [ auth ]
+      operationId: logoutAll
+      summary: Revoke all sessions (F-AUTH-006, F-AUTH-007)
+      parameters:
+        - name: includeCurrent
+          in: query
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '204':
+          description: Sessions revoked
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /auth/verify-email:
+    post:
+      tags: [ auth ]
+      operationId: verifyEmail
+      summary: Confirm email address with a one-time token (F-AUTH-004)
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRequest'
+      responses:
+        '200':
+          description: Verified
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+  /auth/verify-email/resend:
+    post:
+      tags: [ auth ]
+      operationId: resendVerification
+      summary: Resend verification email (F-AUTH-004)
+      responses:
+        '202':
+          description: Queued (rate limited 1/min, 5/day)
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /auth/password/forgot:
+    post:
+      tags: [ auth ]
+      operationId: forgotPassword
+      summary: Request a password reset email (F-AUTH-005)
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [ email ]
+              properties:
+                email:
+                  $ref: '#/components/schemas/Email'
+      responses:
+        '202':
+          description: Always returned (enumeration-safe)
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /auth/password/reset:
+    post:
+      tags: [ auth ]
+      operationId: resetPassword
+      summary: Set a new password using a reset token; revokes all sessions (F-AUTH-005)
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [ token, newPassword ]
+              properties:
+                token:
+                  type: string
+                  minLength: 20
+                  maxLength: 200
+                newPassword:
+                  $ref: '#/components/schemas/Password'
+      responses:
+        '204':
+          description: Password changed
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /auth/password/change:
+    post:
+      tags: [ auth ]
+      operationId: changePassword
+      summary: Change password while logged in (F-AUTH-008)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [ currentPassword, newPassword ]
+              properties:
+                currentPassword:
+                  type: string
+                  maxLength: 128
+                newPassword:
+                  $ref: '#/components/schemas/Password'
+      responses:
+        '204':
+          description: Changed; other sessions revoked
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /auth/oauth/google/start:
+    get:
+      tags: [ auth ]
+      operationId: googleOAuthStart
+      summary: Begin Google OAuth (Authorization Code + PKCE) (F-AUTH-003)
+      security: []
+      parameters:
+        - name: next
+          in: query
+          description: Same-origin relative path to return to
+          schema:
+            type: string
+            pattern: '^/[^/].*$|^/$'
+      responses:
+        '302':
+          description: Redirect to Google
+        "400":
+          $ref: "#/components/responses/BadRequest"
+  /auth/oauth/google/callback:
+    get:
+      tags: [ auth ]
+      operationId: googleOAuthCallback
+      summary: Google OAuth callback (F-AUTH-003)
+      security: []
+      parameters:
+        - name: code
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: state
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '302':
+          description: Redirect to the web app with session cookies set
+        '400':
+          $ref: '#/components/responses/BadRequest'
+  /auth/step-up:
+    post:
+      tags: [ auth ]
+      operationId: stepUp
+      summary: Re-authenticate for sensitive admin operations (F-RBAC-006)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                password:
+                  type: string
+                  maxLength: 128
+                totpCode:
+                  type: string
+                  pattern: '^[0-9]{6}$'
+      responses:
+        '204':
+          description: Step-up timestamp refreshed (valid 10 minutes)
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /auth/mfa/totp/enroll:
+    post:
+      tags: [ auth ]
+      operationId: enrollTotp
+      summary: Start TOTP enrollment (F-RBAC-007)
+      responses:
+        '200':
+          description: Enrollment secret
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [ otpauthUrl ]
+                properties:
+                  otpauthUrl:
+                    type: string
+                  secretMasked:
+                    type: string
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /auth/mfa/totp/activate:
+    post:
+      tags: [ auth ]
+      operationId: activateTotp
+      summary: Confirm TOTP enrollment; returns recovery codes once (F-RBAC-007)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [ code ]
+              properties:
+                code:
+                  type: string
+                  pattern: '^[0-9]{6}$'
+      responses:
+        '200':
+          description: Activated
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [ recoveryCodes ]
+                properties:
+                  recoveryCodes:
+                    type: array
+                    minItems: 10
+                    maxItems: 10
+                    items:
+                      type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # ---------------------------------------------------------------- ME
+  /me:
+    get:
+      tags: [ me ]
+      operationId: getMe
+      summary: Current user profile (F-AUTH-008)
+      responses:
+        '200':
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    patch:
+      tags: [ me ]
+      operationId: updateMe
+      summary: Update profile (F-AUTH-008)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProfileRequest'
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+  /me/preferences:
+    get:
+      tags: [ me ]
+      operationId: getPreferences
+      summary: User preferences (F-AUTH-010)
+      responses:
+        '200':
+          description: Preferences
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Preferences'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+    put:
+      tags: [ me ]
+      operationId: putPreferences
+      summary: Replace user preferences (F-AUTH-010, F-I18N-003, F-I18N-004, F-CAL-011)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Preferences'
+      responses:
+        '200':
+          description: Saved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Preferences'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+  /me/sessions:
+    get:
+      tags: [ me ]
+      operationId: listSessions
+      summary: List active sessions and widget devices (F-AUTH-007)
+      responses:
+        '200':
+          description: Sessions
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [ data ]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Session'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /me/sessions/{sessionId}:
+    delete:
+      tags: [ me ]
+      operationId: revokeSession
+      summary: Revoke a session or device (F-AUTH-007)
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/Uuid'
+      responses:
+        '204':
+          description: Revoked
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /me/deletion:
+    post:
+      tags: [ me ]
+      operationId: requestAccountDeletion
+      summary: Request account deletion; confirmation email sent (F-AUTH-009)
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                password:
+                  type: string
+                  maxLength: 128
+                totpCode:
+                  type: string
+                  pattern: '^[0-9]{6}$'
+      responses:
+        '202':
+          description: Confirmation email sent
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    delete:
+      tags: [ me ]
+      operationId: cancelAccountDeletion
+      summary: Cancel a pending deletion during the 30-day grace period (F-AUTH-009)
+      responses:
+        '204':
+          description: Cancelled
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /me/deletion/confirm:
+    post:
+      tags: [ me ]
+      operationId: confirmAccountDeletion
+      summary: Confirm deletion via emailed token (F-AUTH-009)
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRequest'
+      responses:
+        '200':
+          description: Scheduled
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [ scheduledFor ]
+                properties:
+                  scheduledFor:
+                    type: string
+                    format: date-time
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  # ---------------------------------------------------------------- FLAGS
+  /feature-flags:
+    get:
+      tags: [ flags ]
+      operationId: getResolvedFlags
+      summary: Feature flags resolved for the caller (F-ADMIN-009)
+      security:
+        - cookieAuth: []
+        - bearerAuth: []
+        - {}
+      responses:
+        '200':
+          description: Map of flag key to boolean
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: boolean
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  # ---------------------------------------------------------------- ADMIN
+  /admin/users:
+    get:
+      tags: [ admin ]
+      operationId: adminListUsers
+      summary: List users (permission users.read) (F-ADMIN-001)
+      x-permissions: [ users.read ]
+      parameters:
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Cursor'
+        - name: q
+          in: query
+          schema:
+            type: string
+            minLength: 2
+            maxLength: 100
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/UserStatus'
+        - name: role
+          in: query
+          schema:
+            $ref: '#/components/schemas/RoleKey'
+        - name: includeTotal
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Users
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [ data, page ]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AdminUserSummary'
+                  page:
+                    $ref: '#/components/schemas/PageInfo'
+                  total:
+                    type: integer
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /admin/users/{userId}:
+    get:
+      tags: [ admin ]
+      operationId: adminGetUser
+      summary: User detail (users.read) (F-ADMIN-001)
+      x-permissions: [ users.read ]
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      responses:
+        '200':
+          description: User detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminUserDetail'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /admin/users/{userId}/suspend:
+    post:
+      tags: [ admin ]
+      operationId: adminSuspendUser
+      summary: Suspend a user (users.manage, step-up) (F-ADMIN-001)
+      x-permissions: [ users.manage ]
+      x-step-up: true
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [ reason ]
+              properties:
+                reason:
+                  type: string
+                  minLength: 3
+                  maxLength: 500
+                until:
+                  type: string
+                  format: date-time
+      responses:
+        '200':
+          description: Suspended
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminUserDetail'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /admin/users/{userId}/unsuspend:
+    post:
+      tags: [ admin ]
+      operationId: adminUnsuspendUser
+      summary: Lift suspension (users.manage) (F-ADMIN-001)
+      x-permissions: [ users.manage ]
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [ reason ]
+              properties:
+                reason:
+                  type: string
+                  maxLength: 500
+      responses:
+        '200':
+          description: Active again
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminUserDetail'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /admin/users/{userId}/roles:
+    put:
+      tags: [ admin ]
+      operationId: adminSetUserRoles
+      summary: Replace a user's roles (roles.manage, step-up) (F-RBAC-003)
+      x-permissions: [ roles.manage ]
+      x-step-up: true
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [ roles ]
+              properties:
+                roles:
+                  type: array
+                  minItems: 1
+                  uniqueItems: true
+                  items:
+                    $ref: '#/components/schemas/RoleKey'
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminUserDetail'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /admin/roles:
+    get:
+      tags: [ admin ]
+      operationId: adminListRoles
+      summary: Roles with permissions (roles.read) (F-RBAC-001)
+      x-permissions: [ roles.read ]
+      responses:
+        '200':
+          description: Roles
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [ data ]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Role'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /admin/permissions:
+    get:
+      tags: [ admin ]
+      operationId: adminListPermissions
+      summary: Permission catalog (roles.read) (F-RBAC-002)
+      x-permissions: [ roles.read ]
+      responses:
+        '200':
+          description: Permissions
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [ data ]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Permission'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /admin/roles/{roleId}/permissions:
+    put:
+      tags: [ admin ]
+      operationId: adminSetRolePermissions
+      summary: Replace a role's permissions (roles.manage, super admin, step-up). Phase P10; in P2 roles and permissions are seeded from code (F-ADMIN-002)
+      x-permissions: [ roles.manage ]
+      x-step-up: true
+      parameters:
+        - name: roleId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/Uuid'
+        - $ref: '#/components/parameters/IfMatchRequired'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [ permissionCodes ]
+              properties:
+                permissionCodes:
+                  type: array
+                  uniqueItems: true
+                  items:
+                    type: string
+                    pattern: '^[a-z_]+(\.[a-z_]+)+$'
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Role'
+        '412':
+          $ref: '#/components/responses/PreconditionFailed'
+  /admin/audit-logs:
+    get:
+      tags: [ admin ]
+      operationId: adminListAuditLogs
+      summary: Audit log (audit.read) (F-RBAC-005, F-ADMIN-016)
+      x-permissions: [ audit.read ]
+      parameters:
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Cursor'
+        - name: actorId
+          in: query
+          schema:
+            $ref: '#/components/schemas/Uuid'
+        - name: action
+          in: query
+          schema:
+            type: string
+            maxLength: 80
+        - name: targetType
+          in: query
+          schema:
+            type: string
+            maxLength: 40
+        - name: targetId
+          in: query
+          schema:
+            type: string
+            maxLength: 64
+        - name: createdFrom
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: createdTo
+          in: query
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: Audit entries
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [ data, page ]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AuditLog'
+                  page:
+                    $ref: '#/components/schemas/PageInfo'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /admin/feature-flags:
+    get:
+      tags: [ admin ]
+      operationId: adminListFlags
+      summary: Feature flags (flags.manage) (F-ADMIN-009)
+      x-permissions: [ flags.manage ]
+      responses:
+        '200':
+          description: Flags
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [ data ]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/FeatureFlag'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /admin/feature-flags/{key}:
+    put:
+      tags: [ admin ]
+      operationId: adminPutFlag
+      summary: Create or update a feature flag (flags.manage; step-up in production) (F-ADMIN-009)
+      x-permissions: [ flags.manage ]
+      parameters:
+        - name: key
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^[a-z0-9_.-]{2,64}$'
+        - $ref: '#/components/parameters/IfMatch'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FeatureFlagInput'
+      responses:
+        '200':
+          description: Saved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeatureFlag'
+        '412':
+          $ref: '#/components/responses/PreconditionFailed'
+
+  # ---------------------------------------------------------------- DEEDS
+  /categories:
+    get:
+      tags: [ deeds ]
+      operationId: listCategories
+      summary: Deed categories, localized (F-DEED-002)
+      parameters:
+        - $ref: '#/components/parameters/AcceptLanguage'
+        - $ref: '#/components/parameters/IfNoneMatch'
+      responses:
+        '200':
+          description: Categories
+          headers:
+            ETag:
+              $ref: '#/components/headers/ETag'
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [ data ]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Category'
+        '304':
+          description: Not modified
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /deeds:
+    get:
+      tags: [ deeds ]
+      operationId: listDeeds
+      summary: Browse/search deeds (system + own custom) (F-DEED-001, F-DEED-011, F-DEED-013)
+      parameters:
+        - $ref: '#/components/parameters/AcceptLanguage'
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Cursor'
+        - name: categoryId
+          in: query
+          schema:
+            $ref: '#/components/schemas/Uuid'
+        - name: q
+          in: query
+          schema:
+            type: string
+            minLength: 2
+            maxLength: 100
+        - name: durationMaxMin
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 600
+        - name: isFiveMinute
+          in: query
+          schema:
+            type: boolean
+        - name: source
+          in: query
+          schema:
+            type: string
+            enum: [ system, mine, all ]
+            default: all
+        - name: favorite
+          in: query
+          schema:
+            type: boolean
+        - name: sort
+          in: query
+          schema:
+            type: string
+            enum: [ title, -popularity, estimatedMinutes ]
+      responses:
+        '200':
+          description: Deeds
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeedPage'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+    post:
+      tags: [ deeds ]
+      operationId: createCustomDeed
+      summary: Create a custom deed (F-DEED-003)
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomDeedInput'
+      responses:
+        '201':
+          description: Created
+          headers:
+            Location:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Deed'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /deeds/random:
+    get:
+      tags: [ deeds ]
+      operationId: randomDeed
+      summary: Random good deed (F-DEED-012)
+      parameters:
+        - $ref: '#/components/parameters/AcceptLanguage'
+        - name: categoryId
+          in: query
+          schema:
+            $ref: '#/components/schemas/Uuid'
+        - name: maxMinutes
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 600
+        - name: excludeIds
+          in: query
+          style: form
+          explode: false
+          schema:
+            type: array
+            maxItems: 50
+            items:
+              $ref: '#/components/schemas/Uuid'
+      responses:
+        '200':
+          description: A deed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Deed'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /deeds/recommendations:
+    get:
+      tags: [ deeds ]
+      operationId: deedRecommendations
+      summary: Rule-based recommendations (F-DEED-014)
+      parameters:
+        - $ref: '#/components/parameters/AcceptLanguage'
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 10
+            default: 5
+      responses:
+        '200':
+          description: Recommendations
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [ data ]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Recommendation'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /deeds/{deedId}:
+    parameters:
+      - $ref: '#/components/parameters/DeedId'
+    get:
+      tags: [ deeds ]
+      operationId: getDeed
+      summary: Get a deed (F-DEED-001)
+      parameters:
+        - $ref: '#/components/parameters/AcceptLanguage'
+      responses:
+        '200':
+          description: Deed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Deed'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      tags: [ deeds ]
+      operationId: updateCustomDeed
+      summary: Update own custom deed (F-DEED-003)
+      parameters:
+        - $ref: '#/components/parameters/IfMatch'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomDeedPatch'
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Deed'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '412':
+          $ref: '#/components/responses/PreconditionFailed'
+    delete:
+      tags: [ deeds ]
+      operationId: deleteCustomDeed
+      summary: Soft-delete own custom deed; history kept (F-DEED-003)
+      responses:
+        '204':
+          description: Deleted
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /favorites:
+    get:
+      tags: [ deeds ]
+      operationId: listFavorites
+      summary: Favorite deeds (F-DEED-006)
+      parameters:
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Cursor'
+      responses:
+        '200':
+          description: Favorites
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeedPage'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /favorites/{deedId}:
+    parameters:
+      - $ref: '#/components/parameters/DeedId'
+    put:
+      tags: [ deeds ]
+      operationId: addFavorite
+      summary: Mark as favorite (idempotent) (F-DEED-006)
+      responses:
+        '204':
+          description: Favorited
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags: [ deeds ]
+      operationId: removeFavorite
+      summary: Remove favorite (F-DEED-006)
+      responses:
+        '204':
+          description: Removed
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  # ---------------------------------------------------------------- PLANS
+  /plans:
+    get:
+      tags: [ plans ]
+      operationId: listPlans
+      summary: User's deed plans (F-DEED-005)
+      parameters:
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Cursor'
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/PlanStatus'
+        - name: categoryId
+          in: query
+          schema:
+            $ref: '#/components/schemas/Uuid'
+      responses:
+        '200':
+          description: Plans
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [ data, page ]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DeedPlan'
+                  page:
+                    $ref: '#/components/schemas/PageInfo'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+    post:
+      tags: [ plans ]
+      operationId: createPlan
+      summary: Schedule a deed (F-DEED-004, F-DEED-005)
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeedPlanInput'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeedPlan'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /plans/{planId}:
+    parameters:
+      - $ref: '#/components/parameters/PlanId'
+    get:
+      tags: [ plans ]
+      operationId: getPlan
+      summary: Get a plan
+      responses:
+        '200':
+          description: Plan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeedPlan'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      tags: [ plans ]
+      operationId: updatePlan
+      summary: Update recurrence/target/status; applies from today (F-DEED-005)
+      parameters:
+        - $ref: '#/components/parameters/IfMatch'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeedPlanPatch'
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeedPlan'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '412':
+          $ref: '#/components/responses/PreconditionFailed'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+    delete:
+      tags: [ plans ]
+      operationId: archivePlan
+      summary: Archive a plan (completions kept) (F-DEED-005)
+      responses:
+        '204':
+          description: Archived
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /checklist/{localDate}:
+    get:
+      tags: [ plans ]
+      operationId: getChecklist
+      summary: Computed daily checklist (F-DEED-004, F-CAL-006)
+      security:
+        - cookieAuth: []
+        - bearerAuth: []
+        - deviceAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AcceptLanguage'
+        - name: localDate
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/LocalDate'
+      responses:
+        '200':
+          description: Checklist
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Checklist'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+  # ---------------------------------------------------------------- COMPLETIONS
+  /completions:
+    get:
+      tags: [ completions ]
+      operationId: listCompletions
+      summary: Activity history (F-DEED-007)
+      parameters:
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/From'
+        - $ref: '#/components/parameters/To'
+        - name: categoryId
+          in: query
+          schema:
+            $ref: '#/components/schemas/Uuid'
+        - name: deedId
+          in: query
+          schema:
+            $ref: '#/components/schemas/Uuid'
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/CompletionStatus'
+      responses:
+        '200':
+          description: Completions
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [ data, page ]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Completion'
+                  page:
+                    $ref: '#/components/schemas/PageInfo'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+    post:
+      tags: [ completions ]
+      operationId: createCompletion
+      summary: Record completion; natural key (user, plan|deed, localDate) makes it idempotent (F-DEED-004, F-DEED-008, F-DEED-009)
+      security:
+        - cookieAuth: []
+        - bearerAuth: []
+        - deviceAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompletionInput'
+      responses:
+        '200':
+          description: Already existed for this natural key; existing record returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Completion'
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Completion'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /completions/{completionId}:
+    parameters:
+      - name: completionId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/Uuid'
+    patch:
+      tags: [ completions ]
+      operationId: updateCompletion
+      summary: Edit status/note/quantity within edit window (F-DEED-008, F-DEED-009, F-CAL-011)
+      parameters:
+        - $ref: '#/components/parameters/IfMatch'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompletionPatch'
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Completion'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '412':
+          $ref: '#/components/responses/PreconditionFailed'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+    delete:
+      tags: [ completions ]
+      operationId: deleteCompletion
+      summary: Undo a completion; streaks recomputed (F-DEED-009)
+      responses:
+        '204':
+          description: Deleted
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+  # ---------------------------------------------------------------- CALENDAR
+  /calendar:
+    get:
+      tags: [ calendar ]
+      operationId: getCalendar
+      summary: Day/week/month aggregates (F-CAL-001, F-CAL-002, F-CAL-003, F-CAL-006)
+      parameters:
+        - name: view
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [ day, week, month ]
+        - name: anchor
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/LocalDate'
+      responses:
+        '200':
+          description: Calendar view
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalendarView'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /calendar/year/{year}:
+    get:
+      tags: [ calendar ]
+      operationId: getYear
+      summary: Yearly history (F-CAL-004)
+      parameters:
+        - name: year
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 2020
+            maximum: 2100
+      responses:
+        '200':
+          description: Year summary
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/YearSummary'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /heatmap:
+    get:
+      tags: [ calendar ]
+      operationId: getHeatmap
+      summary: Activity heatmap, max 400 days (F-CAL-005)
+      parameters:
+        - $ref: '#/components/parameters/FromRequired'
+        - $ref: '#/components/parameters/ToRequired'
+        - name: categoryId
+          in: query
+          schema:
+            $ref: '#/components/schemas/Uuid'
+      responses:
+        '200':
+          description: Heatmap
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Heatmap'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /streaks:
+    get:
+      tags: [ calendar ]
+      operationId: getStreaks
+      summary: Current and longest streaks (F-CAL-007, F-CAL-008, F-CAL-010)
+      parameters:
+        - name: scope
+          in: query
+          schema:
+            type: string
+            enum: [ overall, plan ]
+        - name: planId
+          in: query
+          schema:
+            $ref: '#/components/schemas/Uuid'
+      responses:
+        '200':
+          description: Streaks
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [ data ]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Streak'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  # ---------------------------------------------------------------- HEALTH
+  /health/live:
+    get:
+      tags: [ health ]
+      operationId: healthLive
+      summary: Liveness
+      security: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    const: ok
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /health/ready:
+    get:
+      tags: [ health ]
+      operationId: healthReady
+      summary: Readiness (DB, job queue, email, storage)
+      security: []
+      responses:
+        '200':
+          description: Ready
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+                  enum: [ ok, degraded, down ]
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+        "429":
+          $ref: "#/components/responses/RateLimited"
+
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: __Host-dgd_session
+      description: Opaque web session ID (HttpOnly; Secure; SameSite=Lax), stored hashed in user_sessions and looked up per request. Unsafe methods are rejected unless Origin/Sec-Fetch-Site is the app origin (403 CSRF_ORIGIN_MISMATCH). See docs/api/AUTHENTICATION.md.
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: Opaque bearer token for non-browser clients (public API keys, P10). Not a JWT.
+    deviceAuth:
+      type: http
+      scheme: bearer
+      description: Opaque Android widget device token (scope "widget"), stored hashed; expires after 180 days idle. See docs/api/AUTHENTICATION.md section 5.
+
+  headers:
+    ETag:
+      description: Weak entity tag carrying the resource version, e.g. W/"3"
+      schema:
+        type: string
+    RateLimit:
+      description: IETF RateLimit header
+      schema:
+        type: string
+
+  parameters:
+    AcceptLanguage:
+      name: Accept-Language
+      in: header
+      schema:
+        type: string
+        enum: [ en, bn ]
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: false
+      description: Optional on these operations; they are naturally idempotent or low-risk. Required only on side-effecting POSTs without a natural key (exports, invitations, AI generation, broadcasts). Stored 24 h in idempotency_keys; reuse with a different body returns 422 IDEMPOTENCY_KEY_REUSED.
+      schema:
+        $ref: '#/components/schemas/Uuid'
+    IfMatch:
+      name: If-Match
+      in: header
+      required: false
+      schema:
+        type: string
+    IfMatchRequired:
+      name: If-Match
+      in: header
+      required: true
+      schema:
+        type: string
+    IfNoneMatch:
+      name: If-None-Match
+      in: header
+      required: false
+      schema:
+        type: string
+    Limit:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+    Cursor:
+      name: cursor
+      in: query
+      schema:
+        type: string
+        maxLength: 512
+    From:
+      name: from
+      in: query
+      schema:
+        $ref: '#/components/schemas/LocalDate'
+    To:
+      name: to
+      in: query
+      schema:
+        $ref: '#/components/schemas/LocalDate'
+    FromRequired:
+      name: from
+      in: query
+      required: true
+      schema:
+        $ref: '#/components/schemas/LocalDate'
+    ToRequired:
+      name: to
+      in: query
+      required: true
+      schema:
+        $ref: '#/components/schemas/LocalDate'
+    UserId:
+      name: userId
+      in: path
+      required: true
+      schema:
+        $ref: '#/components/schemas/Uuid'
+    DeedId:
+      name: deedId
+      in: path
+      required: true
+      schema:
+        $ref: '#/components/schemas/Uuid'
+    PlanId:
+      name: planId
+      in: path
+      required: true
+      schema:
+        $ref: '#/components/schemas/Uuid'
+
+  responses:
+    BadRequest:
+      description: Bad request (e.g. TOKEN_INVALID_OR_EXPIRED, INVALID_CURSOR, OAUTH_STATE_INVALID)
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    ValidationError:
+      description: VALIDATION_FAILED
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    Unauthorized:
+      description: UNAUTHENTICATED, AUTH_SESSION_EXPIRED, AUTH_SESSION_REVOKED, STEP_UP_REQUIRED, MFA_INVALID_CODE
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    Forbidden:
+      description: PERMISSION_DENIED, CSRF_ORIGIN_MISMATCH, ACCOUNT_SUSPENDED, AUTH_EMAIL_NOT_VERIFIED, MFA_ENROLLMENT_REQUIRED
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    NotFound:
+      description: RESOURCE_NOT_FOUND (also returned for resources the caller may not see)
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    Conflict:
+      description: CONFLICT, LAST_SUPER_ADMIN, IDEMPOTENCY_IN_PROGRESS
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    PreconditionFailed:
+      description: PRECONDITION_FAILED (body includes currentResource)
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    UnprocessableEntity:
+      description: Business rule violation (LOCAL_DATE_OUT_OF_RANGE, RECURRENCE_INVALID, DEED_NOT_SCHEDULED, PASSWORD_TOO_WEAK, IDEMPOTENCY_KEY_REUSED, REPORT_RANGE_TOO_LARGE)
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    RateLimited:
+      description: RATE_LIMITED or AUTH_ACCOUNT_LOCKED
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+        RateLimit:
+          $ref: '#/components/headers/RateLimit'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    ServiceUnavailable:
+      description: DEPENDENCY_UNAVAILABLE or MAINTENANCE_MODE
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+
+  schemas:
+    # ---------- primitives
+    Uuid:
+      type: string
+      format: uuid
+    LocalDate:
+      type: string
+      format: date
+      description: Calendar day in the user's IANA time zone (YYYY-MM-DD)
+    LocalTime:
+      type: string
+      pattern: '^([01][0-9]|2[0-3]):[0-5][0-9]$'
+    Email:
+      type: string
+      format: email
+      maxLength: 254
+    Password:
+      type: string
+      minLength: 10
+      maxLength: 128
+    Locale:
+      type: string
+      enum: [ en, bn ]
+    IanaTimeZone:
+      type: string
+      maxLength: 64
+      examples: [ Asia/Dhaka ]
+    Version:
+      type: integer
+      minimum: 1
+      description: Optimistic concurrency version (mirrors ETag)
+    PageInfo:
+      type: object
+      required: [ hasMore, limit ]
+      properties:
+        nextCursor:
+          type: [ string, 'null' ]
+        hasMore:
+          type: boolean
+        limit:
+          type: integer
+    StatusResponse:
+      type: object
+      required: [ status ]
+      properties:
+        status:
+          type: string
+          examples: [ check_email ]
+    TokenRequest:
+      type: object
+      additionalProperties: false
+      required: [ token ]
+      properties:
+        token:
+          type: string
+          minLength: 20
+          maxLength: 200
+
+    Problem:
+      type: object
+      description: RFC 9457 problem details with project extensions
+      required: [ type, title, status, code, requestId ]
+      properties:
+        type:
+          type: string
+          format: uri
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string
+        instance:
+          type: string
+        code:
+          type: string
+          pattern: '^[A-Z][A-Z0-9_]+$'
+        i18nKey:
+          type: string
+        requestId:
+          type: string
+        errors:
+          type: array
+          items:
+            type: object
+            required: [ code ]
+            properties:
+              pointer:
+                type: string
+              parameter:
+                type: string
+              code:
+                type: string
+              i18nKey:
+                type: string
+              params:
+                type: object
+                additionalProperties: true
+        retryAfterSec:
+          type: integer
+        mfaToken:
+          type: string
+        currentResource:
+          type: object
+          additionalProperties: true
+
+    # ---------- identity
+    UserStatus:
+      type: string
+      enum: [ pending_verification, active, suspended, pending_deletion ]
+    RoleKey:
+      type: string
+      enum: [ user, admin, super_admin ]
+    RegisterRequest:
+      type: object
+      additionalProperties: false
+      required: [ email, password, displayName, locale, timezone, acceptTermsVersion ]
+      properties:
+        email:
+          $ref: '#/components/schemas/Email'
+        password:
+          $ref: '#/components/schemas/Password'
+        displayName:
+          type: string
+          minLength: 1
+          maxLength: 60
+        locale:
+          $ref: '#/components/schemas/Locale'
+        timezone:
+          $ref: '#/components/schemas/IanaTimeZone'
+        acceptTermsVersion:
+          type: string
+          maxLength: 20
+    LoginRequest:
+      type: object
+      additionalProperties: false
+      required: [ email, password ]
+      properties:
+        email:
+          $ref: '#/components/schemas/Email'
+        password:
+          type: string
+          maxLength: 128
+    LoginResponse:
+      type: object
+      required: [ user ]
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+    User:
+      type: object
+      required: [ id, email, displayName, status, emailVerified, roles, createdAt ]
+      properties:
+        id:
+          $ref: '#/components/schemas/Uuid'
+        email:
+          $ref: '#/components/schemas/Email'
+        displayName:
+          type: string
+        avatarUrl:
+          type: [ string, 'null' ]
+          format: uri
+        bio:
+          type: [ string, 'null' ]
+          maxLength: 280
+        status:
+          $ref: '#/components/schemas/UserStatus'
+        emailVerified:
+          type: boolean
+        mfaEnabled:
+          type: boolean
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/RoleKey'
+        createdAt:
+          type: string
+          format: date-time
+    UpdateProfileRequest:
+      type: object
+      additionalProperties: false
+      minProperties: 1
+      properties:
+        displayName:
+          type: string
+          minLength: 1
+          maxLength: 60
+        bio:
+          type: [ string, 'null' ]
+          maxLength: 280
+        avatarUploadId:
+          oneOf:
+            - $ref: '#/components/schemas/Uuid'
+            - type: 'null'
+    Preferences:
+      type: object
+      additionalProperties: false
+      required: [ locale, timezone, theme, weekStart, numeralSystem, calendarDisplay, reduceMotion ]
+      properties:
+        locale:
+          $ref: '#/components/schemas/Locale'
+        timezone:
+          $ref: '#/components/schemas/IanaTimeZone'
+        theme:
+          type: string
+          enum: [ system, light, dark ]
+        weekStart:
+          type: string
+          enum: [ sat, sun, mon ]
+        numeralSystem:
+          type: string
+          enum: [ latn, beng ]
+        calendarDisplay:
+          type: string
+          enum: [ gregorian, hijri, both ]
+        reduceMotion:
+          type: boolean
+    Session:
+      type: object
+      required: [ id, kind, createdAt, lastSeenAt, current ]
+      properties:
+        id:
+          $ref: '#/components/schemas/Uuid'
+        kind:
+          type: string
+          enum: [ web, widget ]
+        deviceLabel:
+          type: string
+        approxLocation:
+          type: [ string, 'null' ]
+          description: Country-level only
+        createdAt:
+          type: string
+          format: date-time
+        lastSeenAt:
+          type: string
+          format: date-time
+        current:
+          type: boolean
+
+    # ---------- admin
+    AdminUserSummary:
+      type: object
+      required: [ id, email, displayName, status, roles, createdAt ]
+      properties:
+        id:
+          $ref: '#/components/schemas/Uuid'
+        email:
+          $ref: '#/components/schemas/Email'
+        displayName:
+          type: string
+        status:
+          $ref: '#/components/schemas/UserStatus'
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/RoleKey'
+        emailVerified:
+          type: boolean
+        lastActiveAt:
+          type: [ string, 'null' ]
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+    AdminUserDetail:
+      description: Never contains journal, worship or activity content.
+      allOf:
+        - $ref: '#/components/schemas/AdminUserSummary'
+        - type: object
+          properties:
+            mfaEnabled:
+              type: boolean
+            activeSessions:
+              type: integer
+            suspendedUntil:
+              type: [ string, 'null' ]
+              format: date-time
+            suspensionReason:
+              type: [ string, 'null' ]
+            deletionScheduledAt:
+              type: [ string, 'null' ]
+              format: date-time
+            authProviders:
+              type: array
+              items:
+                type: string
+                enum: [ password, google ]
+            moderationCount:
+              type: integer
+    Role:
+      type: object
+      required: [ id, key, permissions, version ]
+      properties:
+        id:
+          $ref: '#/components/schemas/Uuid'
+        key:
+          $ref: '#/components/schemas/RoleKey'
+        name:
+          type: string
+        isSystem:
+          type: boolean
+        permissions:
+          type: array
+          items:
+            type: string
+        version:
+          $ref: '#/components/schemas/Version'
+    Permission:
+      type: object
+      required: [ code, description ]
+      properties:
+        code:
+          type: string
+          examples: [ users.read ]
+        description:
+          type: string
+        requiresStepUp:
+          type: boolean
+    AuditLog:
+      type: object
+      required: [ id, action, createdAt ]
+      properties:
+        id:
+          $ref: '#/components/schemas/Uuid'
+        actorId:
+          oneOf:
+            - $ref: '#/components/schemas/Uuid'
+            - type: 'null'
+        actorRole:
+          type: [ string, 'null' ]
+        action:
+          type: string
+          examples: [ user.suspend, role.assign, auth.login_failed ]
+        targetType:
+          type: [ string, 'null' ]
+        targetId:
+          type: [ string, 'null' ]
+        diff:
+          type: [ object, 'null' ]
+          description: Before/after values with secrets redacted
+          additionalProperties: true
+        ipHash:
+          type: [ string, 'null' ]
+        requestId:
+          type: [ string, 'null' ]
+        createdAt:
+          type: string
+          format: date-time
+    FeatureFlagInput:
+      type: object
+      additionalProperties: false
+      required: [ enabled ]
+      properties:
+        enabled:
+          type: boolean
+        allowRoles:
+          description: Optional allowlist; when set, the flag is on only for these roles. Percentage rollout and variants are not supported (A/B lives in experiments, P10).
+          type: array
+          items:
+            $ref: '#/components/schemas/RoleKey'
+        clientVisible:
+          type: boolean
+          default: false
+        description:
+          type: string
+          maxLength: 500
+    FeatureFlag:
+      allOf:
+        - $ref: '#/components/schemas/FeatureFlagInput'
+        - type: object
+          required: [ key, version, updatedAt ]
+          properties:
+            key:
+              type: string
+            version:
+              $ref: '#/components/schemas/Version'
+            updatedAt:
+              type: string
+              format: date-time
+            updatedBy:
+              oneOf:
+                - $ref: '#/components/schemas/Uuid'
+                - type: 'null'
+
+    # ---------- deeds
+    Category:
+      type: object
+      required: [ id, slug, title, icon, colorToken, sortOrder ]
+      properties:
+        id:
+          $ref: '#/components/schemas/Uuid'
+        slug:
+          type: string
+        title:
+          type: string
+        description:
+          type: [ string, 'null' ]
+        icon:
+          type: string
+        colorToken:
+          type: string
+          examples: [ leaf, sky, sand ]
+        sortOrder:
+          type: integer
+        lifeBalanceCategoryId:
+          oneOf:
+            - $ref: '#/components/schemas/Uuid'
+            - type: 'null'
+        deedCount:
+          type: integer
+        locale:
+          $ref: '#/components/schemas/Locale'
+        isFallback:
+          type: boolean
+    Deed:
+      type: object
+      required: [ id, title, categoryId, source, isFavorite, version ]
+      properties:
+        id:
+          $ref: '#/components/schemas/Uuid'
+        title:
+          type: string
+        description:
+          type: [ string, 'null' ]
+        categoryId:
+          $ref: '#/components/schemas/Uuid'
+        estimatedMinutes:
+          type: [ integer, 'null' ]
+          minimum: 1
+          maximum: 600
+        isFiveMinute:
+          type: boolean
+        icon:
+          type: [ string, 'null' ]
+        tags:
+          type: array
+          items:
+            type: string
+        source:
+          type: string
+          enum: [ system, mine ]
+        isFavorite:
+          type: boolean
+        locale:
+          $ref: '#/components/schemas/Locale'
+        isFallback:
+          type: boolean
+        version:
+          $ref: '#/components/schemas/Version'
+    DeedPage:
+      type: object
+      required: [ data, page ]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Deed'
+        page:
+          $ref: '#/components/schemas/PageInfo'
+    CustomDeedInput:
+      type: object
+      additionalProperties: false
+      required: [ title, categoryId ]
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 120
+        description:
+          type: string
+          maxLength: 1000
+        categoryId:
+          $ref: '#/components/schemas/Uuid'
+        estimatedMinutes:
+          type: integer
+          minimum: 1
+          maximum: 600
+        icon:
+          type: string
+          maxLength: 40
+    CustomDeedPatch:
+      type: object
+      additionalProperties: false
+      minProperties: 1
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 120
+        description:
+          type: [ string, 'null' ]
+          maxLength: 1000
+        categoryId:
+          $ref: '#/components/schemas/Uuid'
+        estimatedMinutes:
+          type: [ integer, 'null' ]
+          minimum: 1
+          maximum: 600
+        icon:
+          type: [ string, 'null' ]
+          maxLength: 40
+    Recommendation:
+      type: object
+      required: [ deed, reasonCode ]
+      properties:
+        deed:
+          $ref: '#/components/schemas/Deed'
+        reasonCode:
+          type: string
+          enum: [ category_gap, favorite_category, five_minute, seasonal ]
+
+    # ---------- plans
+    PlanStatus:
+      type: string
+      enum: [ active, paused, archived ]
+    Recurrence:
+      type: object
+      additionalProperties: false
+      required: [ freq, startDate ]
+      properties:
+        freq:
+          type: string
+          enum: [ once, daily, weekly, monthly ]
+        interval:
+          type: integer
+          minimum: 1
+          maximum: 12
+          default: 1
+        byWeekday:
+          type: array
+          uniqueItems: true
+          items:
+            type: string
+            enum: [ sat, sun, mon, tue, wed, thu, fri ]
+        byMonthDay:
+          type: array
+          uniqueItems: true
+          items:
+            type: integer
+            minimum: -1
+            maximum: 31
+            not:
+              const: 0
+        startDate:
+          $ref: '#/components/schemas/LocalDate'
+        endDate:
+          $ref: '#/components/schemas/LocalDate'
+        count:
+          type: integer
+          minimum: 1
+          maximum: 1000
+    DeedPlanInput:
+      type: object
+      additionalProperties: false
+      required: [ deedId, recurrence ]
+      properties:
+        deedId:
+          $ref: '#/components/schemas/Uuid'
+        recurrence:
+          $ref: '#/components/schemas/Recurrence'
+        targetPerDay:
+          type: integer
+          minimum: 1
+          maximum: 20
+          default: 1
+        reminderTime:
+          $ref: '#/components/schemas/LocalTime'
+        flexible:
+          type: boolean
+          default: false
+          description: If true, completions on non-scheduled days are accepted.
+    DeedPlanPatch:
+      type: object
+      additionalProperties: false
+      minProperties: 1
+      properties:
+        recurrence:
+          $ref: '#/components/schemas/Recurrence'
+        targetPerDay:
+          type: integer
+          minimum: 1
+          maximum: 20
+        reminderTime:
+          oneOf:
+            - $ref: '#/components/schemas/LocalTime'
+            - type: 'null'
+        flexible:
+          type: boolean
+        status:
+          $ref: '#/components/schemas/PlanStatus'
+        sortOrder:
+          type: integer
+    DeedPlan:
+      type: object
+      required: [ id, deed, recurrence, targetPerDay, flexible, status, version, createdAt ]
+      properties:
+        id:
+          $ref: '#/components/schemas/Uuid'
+        deed:
+          $ref: '#/components/schemas/Deed'
+        recurrence:
+          $ref: '#/components/schemas/Recurrence'
+        targetPerDay:
+          type: integer
+        reminderTime:
+          oneOf:
+            - $ref: '#/components/schemas/LocalTime'
+            - type: 'null'
+        flexible:
+          type: boolean
+        status:
+          $ref: '#/components/schemas/PlanStatus'
+        sortOrder:
+          type: integer
+        nextOccurrence:
+          oneOf:
+            - $ref: '#/components/schemas/LocalDate'
+            - type: 'null'
+        version:
+          $ref: '#/components/schemas/Version'
+        createdAt:
+          type: string
+          format: date-time
+    Checklist:
+      type: object
+      required: [ localDate, items, completionRate ]
+      properties:
+        localDate:
+          $ref: '#/components/schemas/LocalDate'
+        completionRate:
+          type: number
+          minimum: 0
+          maximum: 1
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChecklistItem'
+    ChecklistItem:
+      type: object
+      required: [ planId, deed, target, completedCount, status ]
+      properties:
+        planId:
+          $ref: '#/components/schemas/Uuid'
+        deed:
+          $ref: '#/components/schemas/Deed'
+        target:
+          type: integer
+        completedCount:
+          type: integer
+        status:
+          type: string
+          enum: [ pending, done, partial, skipped ]
+        completionId:
+          oneOf:
+            - $ref: '#/components/schemas/Uuid'
+            - type: 'null'
+        reminderTime:
+          oneOf:
+            - $ref: '#/components/schemas/LocalTime'
+            - type: 'null'
+
+    # ---------- completions
+    CompletionStatus:
+      type: string
+      enum: [ done, partial, skipped ]
+    CompletionInput:
+      type: object
+      additionalProperties: false
+      required: [ localDate, status ]
+      properties:
+        planId:
+          $ref: '#/components/schemas/Uuid'
+        deedId:
+          $ref: '#/components/schemas/Uuid'
+        localDate:
+          $ref: '#/components/schemas/LocalDate'
+        status:
+          $ref: '#/components/schemas/CompletionStatus'
+        quantity:
+          type: integer
+          minimum: 1
+          maximum: 20
+          default: 1
+        note:
+          type: string
+          maxLength: 1000
+        occurredAt:
+          type: string
+          format: date-time
+      oneOf:
+        - required: [ planId ]
+        - required: [ deedId ]
+    CompletionPatch:
+      type: object
+      additionalProperties: false
+      minProperties: 1
+      properties:
+        status:
+          $ref: '#/components/schemas/CompletionStatus'
+        quantity:
+          type: integer
+          minimum: 1
+          maximum: 20
+        note:
+          type: [ string, 'null' ]
+          maxLength: 1000
+    Completion:
+      type: object
+      required: [ id, deedId, localDate, status, quantity, version, createdAt ]
+      properties:
+        id:
+          $ref: '#/components/schemas/Uuid'
+        planId:
+          oneOf:
+            - $ref: '#/components/schemas/Uuid'
+            - type: 'null'
+        deedId:
+          $ref: '#/components/schemas/Uuid'
+        categoryId:
+          $ref: '#/components/schemas/Uuid'
+        localDate:
+          $ref: '#/components/schemas/LocalDate'
+        status:
+          $ref: '#/components/schemas/CompletionStatus'
+        quantity:
+          type: integer
+        note:
+          type: [ string, 'null' ]
+        attachmentCount:
+          type: integer
+        source:
+          type: string
+          enum: [ web, widget, sync, api ]
+        occurredAt:
+          type: string
+          format: date-time
+        version:
+          $ref: '#/components/schemas/Version'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    # ---------- calendar
+    CalendarDay:
+      type: object
+      required: [ localDate, scheduled, completed, partial, skipped, completionRate ]
+      properties:
+        localDate:
+          $ref: '#/components/schemas/LocalDate'
+        scheduled:
+          type: integer
+        completed:
+          type: integer
+        partial:
+          type: integer
+        skipped:
+          type: integer
+        completionRate:
+          type: number
+          minimum: 0
+          maximum: 1
+        hijri:
+          oneOf:
+            - $ref: '#/components/schemas/HijriDate'
+            - type: 'null'
+    HijriDate:
+      type: object
+      required: [ y, m, d ]
+      properties:
+        y:
+          type: integer
+        m:
+          type: integer
+          minimum: 1
+          maximum: 12
+        d:
+          type: integer
+          minimum: 1
+          maximum: 30
+    CalendarView:
+      type: object
+      required: [ view, range, days ]
+      properties:
+        view:
+          type: string
+          enum: [ day, week, month ]
+        range:
+          type: object
+          required: [ from, to ]
+          properties:
+            from:
+              $ref: '#/components/schemas/LocalDate'
+            to:
+              $ref: '#/components/schemas/LocalDate'
+        days:
+          type: array
+          items:
+            $ref: '#/components/schemas/CalendarDay'
+    YearSummary:
+      type: object
+      required: [ year, months ]
+      properties:
+        year:
+          type: integer
+        months:
+          type: array
+          maxItems: 12
+          items:
+            type: object
+            required: [ month, completionRate, completedCount ]
+            properties:
+              month:
+                type: integer
+                minimum: 1
+                maximum: 12
+              completionRate:
+                type: number
+              completedCount:
+                type: integer
+    Heatmap:
+      type: object
+      required: [ cells ]
+      properties:
+        cells:
+          type: array
+          maxItems: 400
+          items:
+            type: object
+            required: [ localDate, level, count ]
+            properties:
+              localDate:
+                $ref: '#/components/schemas/LocalDate'
+              level:
+                type: integer
+                minimum: 0
+                maximum: 4
+              count:
+                type: integer
+    Streak:
+      type: object
+      required: [ scope, current, longest ]
+      properties:
+        scope:
+          type: string
+          enum: [ overall, plan ]
+        planId:
+          oneOf:
+            - $ref: '#/components/schemas/Uuid'
+            - type: 'null'
+        current:
+          type: integer
+          minimum: 0
+        longest:
+          type: integer
+          minimum: 0
+        lastLocalDate:
+          oneOf:
+            - $ref: '#/components/schemas/LocalDate'
+            - type: 'null'
+        currentStartedOn:
+          oneOf:
+            - $ref: '#/components/schemas/LocalDate'
+            - type: 'null'

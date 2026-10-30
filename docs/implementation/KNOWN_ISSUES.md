@@ -1,0 +1,15 @@
+# Known Issues & Open Items
+
+No application code exists yet, so there are no software defects. The list below tracks known **blockers, open decisions, and platform limits**.
+
+| ID | Type | Description | Impact | Owner | Status |
+|---|---|---|---|---|---|
+| KI-001 | Blocker (P2) | Neon Postgres project and connection strings not provided | API/DB work can't start | User | Open |
+| KI-002 | Blocker (P2) | Git remote attached (github.com/RuhulAminDSi/daily-good-deeds); CI secrets and hosting still to configure | No preview deploys yet | User | Partially resolved |
+| KI-003 | Blocker (P2) | Domain, email provider account, and Google OAuth client not provisioned | Email verification and Google login stay unconfigured (adapters still built; staging uses a log-only email transport) | User | Open |
+| KI-004 | Blocker (P5) | Quran translation (EN/BN) and Hadith collection licensing not confirmed | Islamic content publishing | User / content | Open |
+| KI-005 | Risk | No native Bengali reviewer or Islamic content reviewer identified | Translation and religious-content quality | User | Open |
+| KI-006 | Env (P9) | `ANDROID_HOME` not set; Android SDK components not verified | Widget build | Dev | Open |
+| KI-007 | Platform limit | Facebook/Messenger/Telegram webviews: no PWA install, no push, Google OAuth blocked | Reduced capability in in-app browsers. Fallback specified (F-PWA-007). | — | Accepted |
+| KI-008 | Platform limit | iOS Web Push only for Home-Screen installed PWAs (iOS 16.4+); no Background Sync outside Chromium | Reminders on iOS rely on install or email | — | Accepted |
+| KI-009 | Open decision | Final hosting vendors (proposed: Vercel + Render/Fly + Neon) | Deployment config | User | Open |
