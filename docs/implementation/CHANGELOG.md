@@ -237,3 +237,29 @@ All notable changes to this project are recorded here. Format: [Keep a Changelog
   - Request validation (`ZodValidationPipe` + `@ZodBody`, which also publishes the request body), in T-P2-AUTH-002.
   - The `pnpm check` CI gate, in T-P2-PLAT-007.
   - The EN/BN coverage test for every error code, in T-P2-I18N-006.
+
+### Added (2026-10-31), Phase 2: T-P2-PLAT-007 CI (GitHub Actions)
+- **`ci.yml`:**
+  - `verify`: format check, then `turbo run build lint typecheck test check`.
+    - Each run gets a throwaway Neon branch from `test` (synthetic data only), with `verify-full` TLS, deleted afterwards and expiring after one day as a backstop.
+    - Integration tests fail rather than skip without the key.
+  - `e2e`: Playwright, with cached browsers.
+- **`security.yml`:**
+  - gitleaks on pushed and PR commits, plus a daily full-history scan.
+  - `pnpm audit --audit-level high`, which blocks on `dev`/`main` and only warns on PRs.
+- **Workflow setup:**
+  - All actions are pinned to commit SHAs (SEC-100), and a shared composite setup action keeps each SHA in one place.
+  - Superseded PR runs are cancelled; pushes to `dev`/`main` are always verified.
+  - The turbo cache is restored on every run and saved (pruned) only on branch pushes.
+- **turbo:**
+  - `check` is never cached, because it reads `docs/**` outside its package.
+  - API `test` inputs include the generated client files.
+  - `e2e` builds its dependencies itself, so `turbo run e2e` works from a clean checkout.
+  - Web `typecheck` runs after web `build`, because both write `.next/types`. Running them in parallel failed intermittently.
+- **Docs:** `docs/qa/CI.md` covers the required checks, fork/Dependabot behaviour, the one-time secret setup and the local equivalents.
+- **Verified locally:**
+  - The workflow files parse and every action is pinned.
+  - The full pipeline passes (17 tasks), and E2E passes through turbo (10).
+  - `pnpm audit` reports no known vulnerabilities.
+  - `actionlint` couldn't be run (downloading tools is blocked here), so GitHub's first run is the syntax check.
+- **Pending:** the `NEON_API_KEY` secret. Creating it was blocked for Claude; the owner runs the two commands in `docs/qa/CI.md`.

@@ -1,0 +1,109 @@
+# Build, lint, typecheck, tests (incl. DB integration) and E2E. Required checks and setup: docs/qa/CI.md.
+# Actions are pinned to commit SHAs (SECURITY_TEST_PLAN SEC-100).
+name: CI
+
+on:
+  push:
+    branches: [dev, main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  # Superseded PR runs are cancelled; every push to dev/main is verified.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  TURBO_TELEMETRY_DISABLED: '1'
+  NEXT_TELEMETRY_DISABLED: '1'
+
+jobs:
+  verify:
+    name: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      HAS_NEON: ${{ secrets.NEON_API_KEY != '' }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: ./.github/actions/setup
+      - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .turbo/cache
+          key: turbo-${{ runner.os }}-${{ github.sha }}
+          restore-keys: turbo-${{ runner.os }}-
+      - run: pnpm format:check
+
+      # A throwaway Neon branch per run (DL: docs/qa/CI.md). Without the key, integration tests
+      # fail on purpose: CI never silently skips them.
+      # Expressions have no date arithmetic, so the expiry is computed in a shell step.
+      - name: Branch expiry
+        if: env.HAS_NEON == 'true'
+        run: echo "EXPIRES_AT=$(date -u --date '+1 day' +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_ENV"
+      - name: Create Neon branch
+        id: neon
+        if: env.HAS_NEON == 'true'
+        uses: neondatabase/create-branch-action@fb620d43d4c565abaf088b848a4e28e5c4ea4d9c # 6.3.1
+        with:
+          project_id: ${{ vars.NEON_PROJECT_ID }}
+          api_key: ${{ secrets.NEON_API_KEY }}
+          parent_branch: test # synthetic test data only, never production data
+          branch_name: ci/${{ github.run_id }}-${{ github.run_attempt }}
+          database: dgd
+          role: neondb_owner
+          ssl: verify-full
+          # Neon deletes the branch itself after a day if the delete step never runs.
+          expires_at: ${{ env.EXPIRES_AT }}
+
+      - name: Build, lint, typecheck, test, check
+        run: pnpm exec turbo run build lint typecheck test check
+        env:
+          TEST_DATABASE_URL: ${{ steps.neon.outputs.db_url_pooled }}
+          TEST_DIRECT_URL: ${{ steps.neon.outputs.db_url }}
+
+      - name: Delete Neon branch
+        if: always() && steps.neon.outputs.branch_id != ''
+        uses: neondatabase/delete-branch-action@4468d825d5a88ef4012f1705a82f02ec3072f776 # v3.2.1
+        with:
+          project_id: ${{ vars.NEON_PROJECT_ID }}
+          branch: ${{ steps.neon.outputs.branch_id }}
+          api_key: ${{ secrets.NEON_API_KEY }}
+
+      # Only branch pushes save the cache (PR entries are not reusable); prune stale artifacts first.
+      - name: Prune turbo cache
+        if: github.event_name == 'push'
+        run: find .turbo/cache -type f -mtime +7 -delete 2>/dev/null || true
+      - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        if: github.event_name == 'push'
+        with:
+          path: .turbo/cache
+          key: turbo-${{ runner.os }}-${{ github.sha }}
+
+  e2e:
+    name: e2e
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: ./.github/actions/setup
+      - name: Playwright version
+        id: pw
+        run: echo "version=$(pnpm --filter @dgd/web exec playwright --version | awk '{print $2}')" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        id: browsers
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.pw.outputs.version }}
+      - if: steps.browsers.outputs.cache-hit != 'true'
+        run: pnpm --filter @dgd/web exec playwright install --with-deps chromium
+      - if: steps.browsers.outputs.cache-hit == 'true'
+        run: pnpm --filter @dgd/web exec playwright install-deps chromium
+      - run: pnpm exec turbo run e2e --filter=@dgd/web
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: failure()
+        with:
+          name: playwright-report
+          path: apps/web/playwright-report
+          retention-days: 7

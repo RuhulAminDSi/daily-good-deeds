@@ -1,0 +1,35 @@
+# Secret scanning and dependency audit. Pushes and PRs scan only their new commits; the daily
+# scheduled run scans the full git history (gitleaks-action scans everything on non-push/PR events).
+name: Security
+
+on:
+  push:
+    branches: [dev, main]
+  pull_request:
+  schedule:
+    - cron: '0 4 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  security:
+    name: security
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e # v3.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: ./.github/actions/setup
+        with:
+          install: 'false'
+      # New advisories appear independently of a PR's changes, so on PRs the audit only warns; it
+      # blocks on dev/main pushes and the daily run.
+      - name: Dependency audit (high and critical)
+        run: pnpm audit --audit-level high
+        continue-on-error: ${{ github.event_name == 'pull_request' }}
