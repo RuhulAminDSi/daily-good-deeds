@@ -158,6 +158,10 @@ app/
 | (app) pages | RSC shell + client islands | TanStack Query against the API (client). Only the first-paint query is prefetched in RSC, with forwarded cookies: `GET /today` for the Today page (DL-025). Functions are pinned to `sin1` (DL-026). | SW: see PWA doc |
 | admin | Client-rendered within an RSC layout | TanStack Query | no SW cache (network-only) |
 
+Conventions (T-P2-PLAT-005):
+- `loading.tsx` only in leaf segments that do slow work. A loading boundary streams the response early, so a `notFound()` beneath it returns HTTP 200. Existence checks that may 404 run above any loading boundary.
+- Public pages don't call database-backed endpoints at render time.
+
 ### 2.3 Client state
 - Server state: **TanStack Query**, persisted to IndexedDB for `(app)` reads (offline read, F-PWA-004).
 - Offline mutations: **outbox** (`packages/domain/sync` + `apps/web/lib/outbox`), applied optimistically to the query cache.

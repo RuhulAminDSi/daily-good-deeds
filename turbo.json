@@ -18,7 +18,6 @@
     },
     "check": {},
     "e2e": {
-      "dependsOn": ["build"],
       "cache": false
     },
     "dev": {

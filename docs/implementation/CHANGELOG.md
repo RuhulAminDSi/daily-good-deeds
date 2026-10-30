@@ -172,3 +172,42 @@ All notable changes to this project are recorded here. Format: [Keep a Changelog
     - With pg-boss defaults, a running worker made about 2,600 idle queries per hour, and Neon cannot suspend while it runs.
   - **Shared helpers:** `runOrExit` handles boot failures for both entrypoints, and `createTestWorker` boots the real worker module in tests. The tests use `vi.waitUntil`.
   - **Tests:** 30 passing. The worker integration tests cover the typed send, send-time rejection, the DLQ keeping a dead job, and drain on shutdown.
+
+### Added (2026-10-31), Phase 2: T-P2-PLAT-005 web app skeleton (`apps/web`)
+- **Stack:** Next.js 16.4 (App Router, Turbopack), React 19.3, TypeScript 6 (strict) and Tailwind CSS 4. Design tokens arrive with T-P2-UI-001.
+- **Routing:**
+  - Every page lives under `/{locale}` (en | bn).
+  - `proxy.ts` (Next 16's replacement for `middleware.ts`) redirects locale-less URLs using the cookie, then `Accept-Language`, then English.
+  - There is one root layout per locale, so `<html lang>` is always correct.
+  - Messages come from a small typed per-locale dictionary until next-intl and `packages/i18n` land (T-P2-I18N-001). No user-facing string is hardcoded.
+- **Route groups:** `(public)` (landing), `(app)` (Today placeholder) and `admin` (dashboard placeholder), each with its own layout.
+  - Each group re-exports a shared, accessible loading state.
+  - Error and not-found boundaries are localized and never show error details.
+  - A `[...rest]` catch-all gives unmatched URLs the localized 404, with a real 404 status.
+  - `notFound()` inside a streaming route group returns Next's "soft 404": HTTP 200 plus `noindex`.
+- **API access:** `lib/api.ts` is a typed `apiFetch` that turns problem+json errors into `ApiError`. Response types will be generated in T-P2-PLAT-006.
+  - The landing page shows live API and database readiness, and degrades to "temporarily unavailable" if the API is down or slow (3 s cap).
+- **Lint:** ESLint uses `eslint-config-next` (core-web-vitals) with the shared base applied last, so the TypeScript parser covers every file.
+- **Playwright smoke tests:** 14 passing (7 tests × desktop and mobile) against a production build. They cover:
+  - the locale redirect
+  - EN and BN rendering
+  - all three route groups
+  - the 404 for unknown pages and locales
+  - the streamed loading state
+  - the error boundary hiding details
+  - API-down degradation
+  - The loading and error cases run through a test-only route that is disabled unless `E2E_ROUTES=1`.
+- **Real run:** the built web app on a spare port, against the API on Neon `dev`.
+  - `/` redirected a Bengali browser to `/bn`, and `/bn` showed "সবকিছু ঠিকঠাক চলছে".
+  - `/en` showed "unavailable" on the very first request (Neon cold start), then "All systems working".
+  - Ports 3000 and 3001 were already taken by other programs on this machine, so the scripts now honour `PORT`.
+- **Pre-push review of T-P2-PLAT-005:**
+  - **Landing page:** now static and ISR-cached (60 s). The status probes the API's `/health/live`, which never touches the database, so public visits don't wake Neon.
+  - **Loading states:** `loading.tsx` is now allowed only in leaf segments, and the convention is documented in `components/route-loading.tsx`. Group-level loading made every `notFound()` beneath it return HTTP 200, a "soft 404". Unknown URLs keep a real 404.
+  - **Test-only routes:** the `*.e2e.tsx` routes compile only in E2E builds (`pageExtensions`, separate `.next-e2e` output). They never ship, and the normal build was checked to contain none of them. Playwright runs one dedicated build per run and never reuses a stale server.
+  - **Locale negotiation:** uses `negotiator` with `@formatjs/intl-localematcher`, so Accept-Language q-values are respected. Previously an English-first browser that also listed Bengali was sent to Bengali; a test now covers it. The proxy now only runs for paths without a locale.
+  - **Bundle size:** error and not-found boundaries get just the strings they need through a small context, instead of shipping both dictionaries to the browser.
+  - **Config:** the web env is validated with Zod at server start (`instrumentation.ts`). A missing `API_URL` in production fails boot, which was verified.
+  - **Smaller code:** a `routeMessages()` helper, a simpler `ApiError(status, problem?)`, role-based test selectors instead of test-only attributes, and removed default or unused config.
+  - **Smoke suite:** the mobile project runs only `@responsive` tests. 10 passing (8 desktop + 2 mobile).
+  - **Bug fix:** a staged `tsconfig.tsbuildinfo` build artifact was removed and is now git-ignored.

@@ -29,4 +29,12 @@ pnpm dev               # http://localhost:4000/api/v1/health/ready
 pnpm worker            # background jobs (after pnpm build)
 ```
 
+Web app (needs the API running for live status):
+
+```sh
+cd apps/web
+pnpm dev               # http://localhost:3000/en  (PORT=3210 pnpm dev if 3000 is taken)
+pnpm e2e               # Playwright smoke tests (first time: pnpm exec playwright install chromium)
+```
+
 Branching: work happens on `dev`. `main` receives reviewed merges only.

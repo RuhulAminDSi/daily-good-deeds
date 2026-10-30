@@ -32,3 +32,10 @@ test-results/
 
 # generated Prisma client
 apps/api/src/generated/
+
+# Playwright
+apps/web/playwright-report/
+apps/web/test-results/
+apps/web/next-env.d.ts
+*.tsbuildinfo
+apps/web/.next-e2e/

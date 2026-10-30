@@ -1,0 +1,31 @@
+{
+  "app": {
+    "name": "Daily Good Deeds",
+    "tagline": "Small Good Deeds, Every Day. A Better You, Every Day."
+  },
+  "status": {
+    "label": "Service status",
+    "ok": "All systems working",
+    "unavailable": "Service is temporarily unavailable"
+  },
+  "nav": {
+    "main": "Main navigation",
+    "today": "Today",
+    "admin": "Admin",
+    "home": "Home"
+  },
+  "today": {
+    "title": "Today",
+    "comingSoon": "Your daily checklist is coming soon."
+  },
+  "admin": {
+    "title": "Admin dashboard",
+    "comingSoon": "Admin tools are coming soon."
+  },
+  "common": {
+    "errorTitle": "Something went wrong",
+    "retry": "Try again",
+    "notFoundTitle": "Page not found",
+    "backHome": "Back to home"
+  }
+}
