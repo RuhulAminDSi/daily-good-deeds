@@ -1,0 +1,22 @@
+{
+  "name": "@dgd/api-client",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Typed client for the Daily Good Deeds API, generated from the API's OpenAPI document",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "openapi-fetch": "0.17.0"
+  },
+  "devDependencies": {
+    "@dgd/config": "workspace:*",
+    "eslint": "10.14.0",
+    "typescript": "6.0.3"
+  }
+}

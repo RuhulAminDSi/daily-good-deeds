@@ -16,7 +16,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "docs:gen": "pnpm --filter @dgd/docs-tools gen",
-    "docs:check": "pnpm --filter @dgd/docs-tools check"
+    "docs:check": "pnpm --filter @dgd/docs-tools check",
+    "check": "turbo run check"
   },
   "devDependencies": {
     "@dgd/config": "workspace:*",

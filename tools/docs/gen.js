@@ -2,6 +2,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { DOCS, T, allocateTestCases, loadFeatures, loadSrs, loadStatus, read } from './lib.js';
+import { checkOpenApiOverlap } from './openapi-overlap.js';
 import { renderPlan } from './plan.js';
 import { renderTestPlan } from './test-plan.js';
 import { renderTrace } from './trace.js';
@@ -28,6 +29,7 @@ for (const [rel, content] of Object.entries(files)) {
 console.log(JSON.stringify(trace.summary));
 const problems = [
   ...trace.problems,
+  ...checkOpenApiOverlap(),
   ...stale.map((rel) => `stale generated file: docs/${rel} (run pnpm docs:gen)`),
 ];
 if (problems.length) {

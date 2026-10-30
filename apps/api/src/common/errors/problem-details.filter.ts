@@ -1,14 +1,16 @@
 import { type ArgumentsHost, Catch, type ExceptionFilter, HttpException } from '@nestjs/common';
 import type { Request, Response } from 'express';
 import { ZodError, type core } from 'zod';
-import { DomainError, type DomainErrorOptions, type FieldError } from './domain-error.js';
 import {
   CODE_BY_STATUS,
   ERROR_CODES,
   type ErrorCode,
+  type FieldError,
   i18nKeyOf,
+  type Problem,
   typeUriOf,
-} from './error-codes.js';
+} from '@dgd/contracts';
+import { DomainError, type DomainErrorOptions } from './domain-error.js';
 
 type Normalized = { code: ErrorCode } & DomainErrorOptions;
 
@@ -61,9 +63,9 @@ export class ProblemDetailsFilter implements ExceptionFilter {
         instance: req.originalUrl,
         code,
         i18nKey: i18nKeyOf(code),
-        requestId: req.id,
+        requestId: String(req.id),
         ...(errors?.length ? { errors } : {}),
         ...extensions,
-      });
+      } satisfies Problem);
   }
 }

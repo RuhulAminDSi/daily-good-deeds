@@ -147,6 +147,7 @@ t(
     'Neon branch per PR create/delete',
     'osv-scanner / pnpm audit',
     'gitleaks secret scan',
+    '`pnpm check` gate: docs drift, plan/spec integrity, OpenAPI draft-vs-implemented overlap; API tests include the OpenAPI contract snapshot (CI=1 never rewrites it)',
     'Required status checks documented',
   ],
 );
@@ -289,6 +290,7 @@ t(
     'Zod error map → i18n keys',
     'problem+json `code` and `i18nKey`',
     'Client renderer for field errors',
+    'Test: every ErrorCode in @dgd/contracts has EN and BN messages (ERROR_HANDLING §4)',
   ],
 );
 t(
@@ -364,6 +366,7 @@ t(
   'M',
   'Register API + page; Argon2id hash; password policy (≥10 chars + breached-password check, fail-open logged); duplicate email gives non-enumerating response.',
   [
+    'ZodValidationPipe + @ZodBody(schema): validates bodies (VALIDATION_FAILED) and registers the OpenAPI requestBody from the same @dgd/contracts schema',
     'POST /auth/register',
     'Argon2id params benchmarked',
     'HIBP k-anonymity check',

@@ -1,14 +1,4 @@
-import type { ErrorCode } from './error-codes.js';
-
-export interface FieldError {
-  /** JSON Pointer (RFC 6901) into the body, e.g. "/title/bn". */
-  pointer?: string;
-  /** Query/path parameter name, used instead of `pointer`. */
-  parameter?: string;
-  code: string;
-  i18nKey?: string;
-  params?: Record<string, unknown>;
-}
+import type { ErrorCode, FieldError } from '@dgd/contracts';
 
 export interface DomainErrorOptions {
   detail?: string;

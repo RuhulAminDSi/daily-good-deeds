@@ -1,6 +1,6 @@
 import express, { type RequestHandler } from 'express';
 import { DomainError } from '../errors/domain-error.js';
-import type { ErrorCode } from '../errors/error-codes.js';
+import type { ErrorCode } from '@dgd/contracts';
 
 /** SRS NFR-SECURITY-019. `/sync` gets its own larger limit when that module lands (P9). */
 export const JSON_BODY_LIMIT = '256kb';

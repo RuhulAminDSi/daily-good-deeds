@@ -1,3 +1,5 @@
 pnpm-lock.yaml
 /docs/
 tools/docs/*.tpl.md
+packages/api-client/openapi.json
+packages/api-client/src/schema.ts

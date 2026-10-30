@@ -4,7 +4,9 @@ info:
   version: 1.0.0-draft
   summary: REST API for the Daily Good Deeds platform (Phase 2 and Phase 3 scope).
   description: |
-    Specification-first contract. Status: DRAFT, not implemented.
+    DESIGN DRAFT for endpoints that are not implemented yet (DL-037). Once an endpoint ships, its
+    binding contract is the code-generated document, packages/api-client/openapi.json, and the
+    endpoint is removed from this file (`pnpm docs:check` fails if a path is in both).
     Covers Phase 2 (auth, me, preferences, sessions, admin users/roles/audit, feature flags)
     and Phase 3 (categories, deeds, favorites, plans, checklist, completions, calendar, heatmap, streaks).
     Later-phase endpoints are specified in docs/api/API_SPECIFICATION.md and will be added here
@@ -1540,46 +1542,6 @@ paths:
           $ref: "#/components/responses/Unauthorized"
 
   # ---------------------------------------------------------------- HEALTH
-  /health/live:
-    get:
-      tags: [ health ]
-      operationId: healthLive
-      summary: Liveness
-      security: []
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                    const: ok
-        "429":
-          $ref: "#/components/responses/RateLimited"
-  /health/ready:
-    get:
-      tags: [ health ]
-      operationId: healthReady
-      summary: Readiness (DB, job queue, email, storage)
-      security: []
-      responses:
-        '200':
-          description: Ready
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties:
-                  type: string
-                  enum: [ ok, degraded, down ]
-        '503':
-          $ref: '#/components/responses/ServiceUnavailable'
-        "429":
-          $ref: "#/components/responses/RateLimited"
-
 components:
   securitySchemes:
     cookieAuth:
@@ -1754,12 +1716,6 @@ components:
         application/problem+json:
           schema:
             $ref: '#/components/schemas/Problem'
-    ServiceUnavailable:
-      description: DEPENDENCY_UNAVAILABLE or MAINTENANCE_MODE
-      content:
-        application/problem+json:
-          schema:
-            $ref: '#/components/schemas/Problem'
 
   schemas:
     # ---------- primitives
@@ -1822,7 +1778,7 @@ components:
     Problem:
       type: object
       description: RFC 9457 problem details with project extensions
-      required: [ type, title, status, code, requestId ]
+      required: [ type, title, status, code, i18nKey ]
       properties:
         type:
           type: string

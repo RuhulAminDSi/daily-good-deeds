@@ -29,6 +29,13 @@ pnpm dev               # http://localhost:4000/api/v1/health/ready
 pnpm worker            # background jobs (after pnpm build)
 ```
 
+API contract: hand-written Zod schemas live in `packages/contracts`. The typed client (`packages/api-client`) is generated from the API. After changing routes or response schemas, regenerate it:
+
+```sh
+pnpm --filter @dgd/api openapi   # rewrites packages/api-client; the API tests fail if it's stale
+pnpm check                       # docs/plan integrity + OpenAPI draft-vs-implemented overlap
+```
+
 Web app (needs the API running for live status):
 
 ```sh

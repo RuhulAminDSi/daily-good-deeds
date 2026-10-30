@@ -39,3 +39,6 @@ apps/web/test-results/
 apps/web/next-env.d.ts
 *.tsbuildinfo
 apps/web/.next-e2e/
+
+# Playwright MCP browser session artifacts
+.playwright-mcp/

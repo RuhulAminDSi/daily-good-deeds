@@ -1,6 +1,8 @@
 import { Controller, Get } from '@nestjs/common';
-import { ApiOkResponse, ApiServiceUnavailableResponse, ApiTags } from '@nestjs/swagger';
+import { ApiServiceUnavailableResponse, ApiTags } from '@nestjs/swagger';
+import type { HealthLive, HealthReady } from '@dgd/contracts';
 import { DomainError } from '../common/errors/domain-error.js';
+import { schemaRef, ZodOk } from '../common/openapi/openapi.js';
 import { ReadinessService } from './readiness.service.js';
 
 /**
@@ -13,15 +15,18 @@ export class HealthController {
   constructor(private readonly readiness: ReadinessService) {}
 
   @Get('live')
-  @ApiOkResponse({ description: 'Process is running' })
-  live() {
+  @ZodOk('HealthLive', 'Process is running')
+  live(): HealthLive {
     return { status: 'ok' };
   }
 
   @Get('ready')
-  @ApiOkResponse({ description: 'All registered dependencies are usable' })
-  @ApiServiceUnavailableResponse({ description: 'A dependency check failed' })
-  async ready() {
+  @ZodOk('HealthReady', 'All dependencies are usable')
+  @ApiServiceUnavailableResponse({
+    description: 'A dependency check failed',
+    schema: schemaRef('Problem'),
+  })
+  async ready(): Promise<HealthReady> {
     const checks = await this.readiness.run();
     if (Object.values(checks).some((s) => s !== 'ok')) {
       throw new DomainError('DEPENDENCY_UNAVAILABLE', { extensions: { checks } });

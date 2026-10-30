@@ -1,15 +1,8 @@
-// Server-side fetch for the Daily Good Deeds API. Response and Problem types come from
-// packages/contracts (generated from the OpenAPI document) once T-P2-PLAT-006 lands.
+// Server-side client for the Daily Good Deeds API (typed from the API's OpenAPI document).
+import 'server-only';
+import { createApiClient } from '@dgd/api-client';
+import { type Problem, ProblemSchema } from '@dgd/contracts';
 import { serverEnv } from '@/env';
-
-/** RFC 9457 problem+json body (docs/api/ERROR_HANDLING.md); the fields clients branch on. */
-export interface Problem {
-  status: number;
-  code: string;
-  i18nKey: string;
-  requestId?: string;
-  errors?: { pointer?: string; code: string; i18nKey?: string; params?: object }[];
-}
 
 /** A non-2xx response. `problem` is absent when the body was not problem+json (e.g. a proxy). */
 export class ApiError extends Error {
@@ -21,12 +14,21 @@ export class ApiError extends Error {
   }
 }
 
-export async function apiFetch<T>(path: `/${string}`, init?: RequestInit): Promise<T> {
-  const res = await fetch(`${serverEnv().API_URL}/api/v1${path}`, {
-    ...init,
-    headers: { Accept: 'application/json', ...init?.headers },
-  });
-  const body: unknown = await res.json().catch(() => undefined);
-  if (!res.ok) throw new ApiError(res.status, body as Problem | undefined);
-  return body as T;
+let client: ReturnType<typeof createApiClient> | undefined;
+
+/** The shared client; paths, params and bodies are type-checked against the API contract. */
+export const api = () => (client ??= createApiClient(serverEnv().API_URL));
+
+/** Unwraps an openapi-fetch result: returns `data`, or throws ApiError with the parsed problem. */
+export function unwrap<T>({
+  data,
+  error,
+  response,
+}: {
+  data?: T;
+  error?: unknown;
+  response: Response;
+}): T {
+  if (response.ok && data !== undefined) return data;
+  throw new ApiError(response.status, ProblemSchema.safeParse(error).data);
 }

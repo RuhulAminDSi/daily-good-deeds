@@ -1,8 +1,10 @@
 import { Injectable } from '@nestjs/common';
+import type { HealthReady } from '@dgd/contracts';
 
 /** Resolves when the dependency is usable; rejects (or times out) otherwise. */
 export type ReadinessCheck = () => Promise<void>;
-type Status = 'ok' | 'fail';
+type Checks = HealthReady['checks'];
+type Status = Checks[string];
 
 const CHECK_TIMEOUT_MS = 5000;
 /** Probes arrive every few seconds; reuse a recent result instead of re-querying dependencies. */
@@ -27,7 +29,7 @@ async function settle(check: ReadinessCheck): Promise<Status> {
 @Injectable()
 export class ReadinessService {
   private readonly checks = new Map<string, ReadinessCheck>();
-  private cached?: { at: number; result: Promise<Record<string, Status>> };
+  private cached?: { at: number; result: Promise<Checks> };
 
   register(name: string, check: ReadinessCheck): void {
     this.checks.set(name, check);
@@ -35,7 +37,7 @@ export class ReadinessService {
   }
 
   /** Status per registered check, e.g. `{ db: 'ok' }`. */
-  run(): Promise<Record<string, Status>> {
+  run(): Promise<Checks> {
     if (!this.cached || Date.now() - this.cached.at > CACHE_MS) {
       const result = Promise.all(
         [...this.checks].map(async ([name, check]) => [name, await settle(check)] as const),

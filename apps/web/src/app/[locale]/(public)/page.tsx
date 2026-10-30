@@ -1,5 +1,5 @@
 import { routeMessages } from '@/i18n/route-locale';
-import { apiFetch } from '@/lib/api';
+import { api, unwrap } from '@/lib/api';
 
 /**
  * Static and cached: regenerated at most once a minute. The status probes `/health/live`, which
@@ -9,7 +9,12 @@ export const revalidate = 60;
 
 async function apiIsUp(): Promise<boolean> {
   try {
-    await apiFetch('/health/live', { next: { revalidate }, signal: AbortSignal.timeout(3000) });
+    unwrap(
+      await api().GET('/api/v1/health/live', {
+        next: { revalidate },
+        signal: AbortSignal.timeout(3000),
+      }),
+    );
     return true;
   } catch {
     return false;

@@ -211,3 +211,29 @@ All notable changes to this project are recorded here. Format: [Keep a Changelog
   - **Smaller code:** a `routeMessages()` helper, a simpler `ApiError(status, problem?)`, role-based test selectors instead of test-only attributes, and removed default or unused config.
   - **Smoke suite:** the mobile project runs only `@responsive` tests. 10 passing (8 desktop + 2 mobile).
   - **Bug fix:** a staged `tsconfig.tsbuildinfo` build artifact was removed and is now git-ignored.
+
+### Added (2026-10-31), Phase 2: T-P2-PLAT-006 shared API contract (in review until CI exists, T-P2-PLAT-007)
+- **`@dgd/contracts`** (hand-written, ESM, built to `dist`, no Node dependencies):
+  - The error catalog (`ERROR_CODES`, `CODE_BY_STATUS`, `i18nKeyOf`, `typeUriOf`), moved from the API. The API's copy is deleted.
+  - Zod schemas for `Problem` (RFC 9457) and the health responses.
+  - `OPENAPI_SCHEMAS`, the schemas the API publishes by name.
+- **The API publishes the contract:**
+  - It registers the contract schemas in its OpenAPI 3.0 document via `z.toJSONSchema`.
+  - `@ZodOk(name)` documents a 200 response **and** requires the handler's return type to match that schema.
+  - The error filter's body is checked against the shared `Problem` type (`satisfies Problem`).
+  - The readiness types come from the contracts package.
+- **`@dgd/api-client`** (derived, consumed as TypeScript source):
+  - `openapi.json` and `src/schema.ts` are generated from the real app by `test/openapi.spec.ts`. `pnpm --filter @dgd/api openapi` runs that test with `-u`.
+  - The normal test run fails when the files are stale; it was verified to fail in CI mode on a changed endpoint description and to pass after reverting.
+  - The web app calls the API through `openapi-fetch` (`api().GET('/api/v1/health/live')`), so paths and bodies are type-checked. Errors are validated with `ProblemSchema`, and the client module is `server-only`.
+- **One binding contract (DL-037):**
+  - `docs/api/openapi.yaml` is now the design draft for endpoints that aren't built yet. The implemented health paths were removed from it, and its `Problem` was aligned with the code.
+  - `pnpm docs:check` fails if a path exists in both documents; this was verified with a negative test.
+- **Workspace:**
+  - `pnpm dev` builds upstream packages first, and contracts rebuilds in watch mode, so fresh clones and contract edits work.
+  - Added a root `pnpm check` script.
+  - Generated files are excluded from Prettier, so the comparison checks the generator's exact output.
+- **Planned follow-ups:**
+  - Request validation (`ZodValidationPipe` + `@ZodBody`, which also publishes the request body), in T-P2-AUTH-002.
+  - The `pnpm check` CI gate, in T-P2-PLAT-007.
+  - The EN/BN coverage test for every error code, in T-P2-I18N-006.
