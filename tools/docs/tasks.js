@@ -580,7 +580,8 @@ t(
   [
     'EmailSender interface + adapters',
     'React Email templates EN/BN',
-    'send-email job with retry',
+    'send-email job with retry (defineJob contract + idempotent handler)',
+    'Wire JobsClient into the API (first API producer; producer-only pg-boss: no workers, no schedules)',
     'Unconfigured-provider behaviour documented',
   ],
 );

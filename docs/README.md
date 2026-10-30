@@ -56,8 +56,7 @@ NFR categories: `SECURITY, PRIVACY, PERFORMANCE, AVAILABILITY, SCALABILITY, ACCE
 daily-good-deeds/
 ├─ apps/
 │  ├─ web/              Next.js PWA (user app + /admin area)
-│  ├─ api/              NestJS REST API (HTTP process)
-│  ├─ worker/           NestJS standalone context running pg-boss jobs (same codebase as api, separate entrypoint)
+│  ├─ api/              NestJS: REST API (src/main.ts) and pg-boss worker (src/worker.ts), two processes (DL-036)
 │  └─ android-widget/   Kotlin / Gradle project (not part of pnpm workspace)
 ├─ packages/
 │  ├─ contracts/        Zod schemas + generated OpenAPI client & types

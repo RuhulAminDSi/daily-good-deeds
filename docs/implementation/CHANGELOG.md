@@ -138,3 +138,37 @@ All notable changes to this project are recorded here. Format: [Keep a Changelog
   - **New `@dgd/config/eslint/nest` preset** with decorator-aware type-import linting, which the worker will reuse.
   - **The deferred `system_settings.updated_by` foreign key** is now a T-P2-AUTH-001 subtask.
   - **Tests:** 25 passing, including the Neon integration tests.
+
+### Added (2026-10-31), Phase 2: T-P2-PLAT-004 background worker (pg-boss 12.38)
+- **Entrypoint:** `apps/api/src/worker.ts` (`pnpm worker`). It is a Nest application context with no HTTP, in the same codebase as the API (DL-036).
+- **Job definitions:** each job is a provider marked `@Job({ name, schema, queue?, concurrency?, schedule? })` with a Zod payload. `JobRunner` discovers them. For each one it creates the queue plus `<name>.dlq` and validates every payload before handling. Recurring jobs are scheduled in UTC unless a time zone is given.
+- **Defaults (ADR-005):**
+  - 3 retries with exponential backoff (30 s up to 1 h).
+  - Terminal failures are kept in `<name>.dlq` for inspection and retry (ADMIN-014). A non-empty DLQ raises a pg-boss `queue_backlog` warning, which is logged.
+  - Idle polling every 10 s (`JOB_POLL_SECONDS`).
+  - Direct (unpooled) Neon URL with a pool of 3 (DL-026).
+- **Graceful shutdown:** SIGTERM or SIGINT stops fetching and waits up to 25 s for in-flight jobs to finish.
+- **Heartbeat job:** `system.heartbeat`, hourly.
+- **Config:** split per process. The API needs `DATABASE_URL`; the worker needs `DIRECT_URL`. Both share `NODE_ENV` and `LOG_LEVEL`.
+- **TLS:** connection strings now use `sslmode=verify-full`. Neon supports full certificate verification, and `pg`'s current alias would weaken to libpq `require` semantics in its next major version.
+- **Tests: 28 passing.** The new worker integration tests run on the Neon `test` branch and cover:
+  - a job enqueued and completed
+  - a bad payload failing and reaching the DLQ
+  - an in-flight job drained on shutdown and ending `completed`
+- **Real run:** the built worker connected to `dev`, created the heartbeat queue, and processed a manually enqueued heartbeat.
+  - On Windows, SIGTERM can't be delivered to Node, so drain behaviour was verified through `app.close()`, which is the same shutdown-hook path that SIGTERM triggers on Linux hosts.
+- **Pre-push review of T-P2-PLAT-004:**
+  - **Typed producer:** a job's contract is a `defineJob({ name, schema, queue?, schedule? })` value shared by producers and handlers. `JobsClient.send()` validates the payload before enqueueing. The API wires it in with its first producer, `email.send` in T-P2-INTG-001.
+  - **Handler context:** handlers receive `{ jobId, retryCount, signal }`. The `signal` aborts on shutdown. Handlers must be idempotent because a job can rerun after a retry or an interrupted deploy.
+  - **Dead-letter queues are no longer consumed.** Dead jobs stay `created` in the DLQ, and `warningQueueSize: 1` raises a backlog warning. This also removes one poller per queue.
+  - **Queue setup:**
+    - Queue options are re-applied on every boot (`updateQueue`).
+    - Queues register in parallel.
+    - Schedules no longer declared in code are removed at boot.
+    - Discovery uses Nest's typed `DiscoveryService.createDecorator`.
+  - **TLS is enforced in config:** remote database URLs must use `sslmode=verify-full`, and boot fails otherwise (test added).
+  - **Neon idle load:**
+    - pg-boss internal timers are tuned down, the heartbeat moved from every 5 minutes to hourly, and the always-on decision is recorded in ADR-005.
+    - With pg-boss defaults, a running worker made about 2,600 idle queries per hour, and Neon cannot suspend while it runs.
+  - **Shared helpers:** `runOrExit` handles boot failures for both entrypoints, and `createTestWorker` boots the real worker module in tests. The tests use `vi.waitUntil`.
+  - **Tests:** 30 passing. The worker integration tests cover the typed send, send-time rejection, the DLQ keeping a dead job, and drain on shutdown.

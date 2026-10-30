@@ -54,7 +54,7 @@ flowchart LR
 
   subgraph Backend[Render / Fly.io - proposed]
     api[apps/api<br/>NestJS REST /api/v1<br/>OpenAPI 3.1]
-    worker[apps/worker<br/>NestJS standalone<br/>pg-boss consumers + cron]
+    worker["worker process (apps/api src/worker.ts)<br/>NestJS standalone<br/>pg-boss consumers + cron"]
   end
 
   db["(Neon PostgreSQL 16+<br/>app schema + pgboss schema)"]
@@ -81,7 +81,7 @@ flowchart LR
 |---|---|---|
 | `apps/web` | Rendering (RSC/SSR for first paint, client components for interactivity), routing, i18n UI, PWA shell, service worker, IndexedDB outbox, admin UI | Business rules, authorization decisions (the UI only hides controls; the API enforces), DB access |
 | `apps/api` | Auth, RBAC enforcement, validation, domain logic, persistence, OpenAPI, rate limiting, audit logging, job enqueueing, sync endpoint | Long-running work (> 2 s) or scheduled work |
-| `apps/worker` | Reminders, digests, report generation, exports, future-letter delivery, AI batch jobs, streak rebuilds, cleanup, Quran cache refresh | Serving HTTP |
+| worker process (`apps/api` `src/worker.ts`) | Reminders, digests, report generation, exports, future-letter delivery, AI batch jobs, streak rebuilds, cleanup, Quran cache refresh | Serving HTTP |
 | `apps/android-widget` | Glance widgets, device linking, local cache and offline queue, deep links | Any feature UI beyond widgets and settings (the product stays web) |
 | PostgreSQL | System of record, queue (pg-boss), idempotency records | Caching large blobs |
 | R2 | Attachments, export files | Anything that must be queried |

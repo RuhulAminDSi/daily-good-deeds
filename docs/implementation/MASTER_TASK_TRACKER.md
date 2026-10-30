@@ -4,7 +4,7 @@
 >
 > Test case IDs here are **placeholders**, allocated in sequence per feature. [qa/TEST_PLAN.md](../qa/TEST_PLAN.md) defines their steps. Update **Status** as work moves (Not started → In progress → In review → Done → Verified). A task is marked Done only when its Definition of Done in the master plan is met, including tests. A UI that exists without its backend and tests does **not** count as Done.
 
-**Totals:** 200 tasks · 531 subtasks · 196 in-scope features (P2–P10) covered · 2 Won't-Have features deliberately unmapped (F-INTG-004, F-ADMIN-017).
+**Totals:** 200 tasks · 532 subtasks · 196 in-scope features (P2–P10) covered · 2 Won't-Have features deliberately unmapped (F-INTG-004, F-ADMIN-017).
 
 ## Phase 0
 
@@ -30,7 +30,7 @@
 | EP-PLAT | — | T-P2-PLAT-001 | Monorepo scaffold (pnpm via Corepack, Turborepo, packages/config) | T-P2-PLAT-001.1, T-P2-PLAT-001.2, T-P2-PLAT-001.3, T-P2-PLAT-001.4 | TC-PLAT-001-01 | Done | P2 |
 | EP-PLAT | — | T-P2-PLAT-002 | apps/api NestJS skeleton | T-P2-PLAT-002.1, T-P2-PLAT-002.2, T-P2-PLAT-002.3, T-P2-PLAT-002.4, T-P2-PLAT-002.5 | TC-PLAT-002-01 | Done | P2 |
 | EP-PLAT | — | T-P2-PLAT-003 | Prisma + Neon baseline | T-P2-PLAT-003.1, T-P2-PLAT-003.2, T-P2-PLAT-003.3, T-P2-PLAT-003.4, T-P2-PLAT-003.5 | TC-PLAT-003-01 | Done | P2 |
-| EP-PLAT | — | T-P2-PLAT-004 | apps/worker with pg-boss | T-P2-PLAT-004.1, T-P2-PLAT-004.2, T-P2-PLAT-004.3, T-P2-PLAT-004.4 | TC-PLAT-004-01 | Not started | P2 |
+| EP-PLAT | — | T-P2-PLAT-004 | apps/worker with pg-boss | T-P2-PLAT-004.1, T-P2-PLAT-004.2, T-P2-PLAT-004.3, T-P2-PLAT-004.4 | TC-PLAT-004-01 | Done | P2 |
 | EP-PLAT | — | T-P2-PLAT-005 | apps/web Next.js skeleton | T-P2-PLAT-005.1, T-P2-PLAT-005.2, T-P2-PLAT-005.3, T-P2-PLAT-005.4 | TC-PLAT-005-01 | Not started | P2 |
 | EP-PLAT | — | T-P2-PLAT-006 | packages/contracts (Zod + generated OpenAPI types) | T-P2-PLAT-006.1, T-P2-PLAT-006.2, T-P2-PLAT-006.3 | TC-PLAT-006-01 | Not started | P2 |
 | EP-PLAT | — | T-P2-PLAT-007 | CI pipeline (GitHub Actions) | T-P2-PLAT-007.1, T-P2-PLAT-007.2, T-P2-PLAT-007.3, T-P2-PLAT-007.4, T-P2-PLAT-007.5 | TC-PLAT-007-01 | Not started | P2 |
@@ -77,7 +77,7 @@
 | EP-ADMIN | F-ADMIN-009 | T-P2-ADMIN-004 | Feature flags | T-P2-ADMIN-004.1, T-P2-ADMIN-004.2, T-P2-ADMIN-004.3, T-P2-ADMIN-004.4 | TC-ADMIN-009-01 | Not started | P2 |
 | EP-ADMIN | F-ADMIN-016 | T-P2-ADMIN-005 | Audit log viewer | T-P2-ADMIN-005.1, T-P2-ADMIN-005.2 | TC-ADMIN-016-01 | Not started | P2 |
 | EP-ADMIN | — | T-P2-ADMIN-006 | System settings service | T-P2-ADMIN-006.1, T-P2-ADMIN-006.2 | TC-ADMIN-006-01 | Not started | P2 |
-| EP-INTG | F-INTG-001, F-NOTIF-005 | T-P2-INTG-001 | Email adapter & templates | T-P2-INTG-001.1, T-P2-INTG-001.2, T-P2-INTG-001.3, T-P2-INTG-001.4 | TC-INTG-001-01, TC-NOTIF-005-01 | Not started | P2 |
+| EP-INTG | F-INTG-001, F-NOTIF-005 | T-P2-INTG-001 | Email adapter & templates | T-P2-INTG-001.1, T-P2-INTG-001.2, T-P2-INTG-001.3, T-P2-INTG-001.4, T-P2-INTG-001.5 | TC-INTG-001-01, TC-NOTIF-005-01 | Not started | P2 |
 | EP-QA | — | T-P2-QA-001 | Test infrastructure | T-P2-QA-001.1, T-P2-QA-001.2, T-P2-QA-001.3, T-P2-QA-001.4 | TC-QA-001-01 | Not started | P2 |
 | EP-QA | F-AUTH-001, F-AUTH-002, F-RBAC-006 | T-P2-QA-002 | Phase 2 E2E & regression suite | T-P2-QA-002.1, T-P2-QA-002.2, T-P2-QA-002.3 | TC-AUTH-001-03, TC-AUTH-002-03, TC-RBAC-006-02 | Not started | P2 |
 

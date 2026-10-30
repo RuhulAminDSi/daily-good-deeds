@@ -1,8 +1,8 @@
 # Component Architecture
 
-> Status: Proposed. This doc defines module boundaries for `apps/api` and `apps/worker`, route groups for `apps/web`, and the responsibilities of each shared package.
+> Status: Proposed. This doc defines module boundaries for `apps/api` (HTTP entrypoint `main.ts` and worker entrypoint `worker.ts`, DL-036), route groups for `apps/web`, and the responsibilities of each shared package.
 
-## 1. NestJS modules (apps/api + apps/worker)
+## 1. NestJS modules (apps/api: API + worker entrypoints)
 
 Each module owns its tables, controllers, services, repositories, and event handlers. **The table in §1.1 is the single source of truth for which module owns which table.** `database/DATABASE_DESIGN.md` links here instead of repeating it. The table inventory itself, with counts and phases, is in [../README.md §6](../README.md#6-canonical-table-inventory-validated-from-the-directives-entity-list). **Another module's tables are never queried directly.** Cross-module access goes through an exported service interface or through domain events.
 
@@ -177,7 +177,7 @@ app/
 
 ## 4. Worker process
 
-The `apps/worker` entrypoint (`main.worker.ts`) creates a Nest application context **without HTTP**. It loads only the `jobs/` providers of each module.
+The worker entrypoint `apps/api/src/worker.ts` (`pnpm worker`, DL-036) creates a Nest application context **without HTTP**. Job handlers are providers marked `@Job({ name, schema, ... })` in each module's `jobs/` folder; `JobRunner` discovers them, creates each queue plus `<name>.dlq`, and drains in-flight jobs on SIGTERM.
 
 | Queue | Producer | Schedule | Concurrency | Retry |
 |---|---|---|---|---|

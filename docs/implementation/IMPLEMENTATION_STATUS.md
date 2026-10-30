@@ -1,13 +1,13 @@
 # Implementation Status
 
 **Last updated:** 2026-10-30  
-**Overall:** Phase 2 in progress. Monorepo scaffold, API skeleton and database baseline (Neon + Prisma) exist; no product features are implemented yet.
+**Overall:** Phase 2 in progress. Monorepo scaffold, API skeleton, database baseline (Neon + Prisma) and background worker (pg-boss) exist; no product features are implemented yet.
 
 | Phase | Name | Status | Notes |
 |---|---|---|---|
 | P0 | Repository discovery & planning | **Done** | Repository found empty; toolchain inventoried ([PROJECT_DISCOVERY.md](../PROJECT_DISCOVERY.md)) |
 | P1 | Specifications (product, SRS, architecture, DB, API, design, QA, roadmap) | **Approved (2026-10-30)** | All 53 docs written; traceability, Mermaid, and OpenAPI checks pass (see the CHANGELOG) |
-| P2 | Foundation, auth, RBAC, i18n, PWA shell | **In progress** | Plan approved 2026-10-30. Done: T-P2-PLAT-001, T-P2-PLAT-002, T-P2-PLAT-003 |
+| P2 | Foundation, auth, RBAC, i18n, PWA shell | **In progress** | Plan approved 2026-10-30. Done: T-P2-PLAT-001 to T-P2-PLAT-004 |
 | P3 | Good Deeds core & calendar | Not started | |
 | P4 | Growth, journal, planner, gamification | Not started | |
 | P5 | Islamic lifestyle | Not started | |

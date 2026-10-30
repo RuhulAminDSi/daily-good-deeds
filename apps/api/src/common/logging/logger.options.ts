@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import type { Params } from 'nestjs-pino';
 import { z } from 'zod';
-import type { AppConfig } from '../../config/env.js';
+import type { BaseConfig } from '../../config/env.js';
 
 /** Secrets and personal data that must never reach logs (NFR-PRIVACY, docs/api/ERROR_HANDLING.md §4). */
 const REDACT_PATHS = [
@@ -19,7 +19,7 @@ const REDACT_PATHS = [
 
 const isUuid = (value: unknown) => z.uuid().safeParse(value).success;
 
-export function loggerOptions(config: AppConfig): Params {
+export function loggerOptions(config: BaseConfig): Params {
   return {
     pinoHttp: {
       level: config.LOG_LEVEL,

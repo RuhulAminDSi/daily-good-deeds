@@ -1,7 +1,7 @@
 # Implementation Master Plan
 
 > **Status:** Phase 0 is complete. Phase 1 specifications are **awaiting approval**. **No application code has been written.**
-> **Scope:** 200 technical tasks and 531 subtasks across Phases 0–10. Every in-scope feature (P2–P10) in [FEATURE_ID_REGISTRY.md](../product/FEATURE_ID_REGISTRY.md) maps to at least one task. The reverse index is in [MASTER_TASK_TRACKER.md](MASTER_TASK_TRACKER.md).
+> **Scope:** 200 technical tasks and 532 subtasks across Phases 0–10. Every in-scope feature (P2–P10) in [FEATURE_ID_REGISTRY.md](../product/FEATURE_ID_REGISTRY.md) maps to at least one task. The reverse index is in [MASTER_TASK_TRACKER.md](MASTER_TASK_TRACKER.md).
 > **ID scheme:** see [docs/README.md §2](../README.md). Tasks are `T-P{phase}-{MOD}-{nnn}`, subtasks are `.n`, risks are `RISK-nnn`.
 
 Besides the feature module codes, the task IDs use these epic codes: **GOV** (governance and planning), **PLAT** (platform, infrastructure, CI, deployment, operations), **UI** (design tokens, component library, shell), and **QA** (cross-cutting test suites).
@@ -188,7 +188,7 @@ P4, P7, and P8 can run in parallel with the critical path if there is capacity:
 | T-P2-ADMIN-004 | Feature flags | F-ADMIN-009 | M | .1 feature_flags table<br>.2 Evaluation service + cache<br>.3 useFlag hook<br>.4 Admin UI | Boolean flags with optional role allowlist, evaluated server-side; client hook; admin toggle UI; audited changes (tests). A/B lives in experiments (P10, DL-029). |
 | T-P2-ADMIN-005 | Audit log viewer | F-ADMIN-016 | S | .1 Filters (actor, action, date)<br>.2 Detail view | Feature ACs pass; unit + integration (+E2E where UI) tests green in CI; EN/BN strings present; authz tested; docs/status updated. |
 | T-P2-ADMIN-006 | System settings service | — | S | .1 Table & typed accessor<br>.2 Admin edit page | system_settings typed keys (Settings registry keys, e.g. completions.edit_window_days=7) readable via service; changes audited. |
-| T-P2-INTG-001 | Email adapter & templates | F-INTG-001, F-NOTIF-005 | M | .1 EmailSender interface + adapters<br>.2 React Email templates EN/BN<br>.3 send-email job with retry<br>.4 Unconfigured-provider behaviour documented | Resend + SMTP adapters behind EmailSender; dev file sink; verify/reset/deletion templates in EN/BN; sent via worker with retries (tests). |
+| T-P2-INTG-001 | Email adapter & templates | F-INTG-001, F-NOTIF-005 | M | .1 EmailSender interface + adapters<br>.2 React Email templates EN/BN<br>.3 send-email job with retry (defineJob contract + idempotent handler)<br>.4 Wire JobsClient into the API (first API producer; producer-only pg-boss: no workers, no schedules)<br>.5 Unconfigured-provider behaviour documented | Resend + SMTP adapters behind EmailSender; dev file sink; verify/reset/deletion templates in EN/BN; sent via worker with retries (tests). |
 | T-P2-QA-001 | Test infrastructure | — | M | .1 Vitest config<br>.2 API test DB lifecycle<br>.3 Playwright projects<br>.4 axe helper | Vitest (unit + API via Supertest, Neon test branch), Playwright (mobile + desktop projects, EN/BN), axe helper all runnable via turbo. |
 | T-P2-QA-002 | Phase 2 E2E & regression suite | F-AUTH-001, F-AUTH-002, F-RBAC-006 | S | .1 User auth journey<br>.2 Admin journey<br>.3 Locale run | E2E: register→verify→login→prefs→logout (EN & BN); admin login with TOTP; in-app browser banner. |
 

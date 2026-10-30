@@ -29,4 +29,13 @@ describe('loadConfig', () => {
   it('requires DATABASE_URL', () => {
     expect(() => loadConfig({})).toThrow(/DATABASE_URL/);
   });
+
+  it('requires certificate verification for remote databases', () => {
+    const remote = 'postgresql://u:p@db.example.com/dgd';
+    expect(() => loadConfig({ DATABASE_URL: `${remote}?sslmode=require` })).toThrow(/verify-full/);
+    expect(() => loadConfig({ DATABASE_URL: remote })).toThrow(/verify-full/);
+    expect(loadConfig({ DATABASE_URL: `${remote}?sslmode=verify-full` }).DATABASE_URL).toContain(
+      'verify-full',
+    );
+  });
 });

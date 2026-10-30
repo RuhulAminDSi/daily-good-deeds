@@ -26,6 +26,7 @@ cd apps/api
 pnpm db:deploy         # apply migrations (uses DIRECT_URL)
 pnpm build && pnpm db:seed   # insert missing reference data (idempotent)
 pnpm dev               # http://localhost:4000/api/v1/health/ready
+pnpm worker            # background jobs (after pnpm build)
 ```
 
 Branching: work happens on `dev`. `main` receives reviewed merges only.

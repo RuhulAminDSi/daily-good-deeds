@@ -26,7 +26,7 @@
 
 ```mermaid
 flowchart LR
-  subgraph DGD[apps/api + apps/worker]
+  subgraph DGD["apps/api (API + worker entrypoints)"]
     mail[MailSender]
     push[PushSender]
     oidc[OidcProvider]
