@@ -32,8 +32,8 @@
 | EP-PLAT | — | T-P2-PLAT-003 | Prisma + Neon baseline | T-P2-PLAT-003.1, T-P2-PLAT-003.2, T-P2-PLAT-003.3, T-P2-PLAT-003.4, T-P2-PLAT-003.5 | TC-PLAT-003-01 | Done | P2 |
 | EP-PLAT | — | T-P2-PLAT-004 | apps/worker with pg-boss | T-P2-PLAT-004.1, T-P2-PLAT-004.2, T-P2-PLAT-004.3, T-P2-PLAT-004.4 | TC-PLAT-004-01 | Done | P2 |
 | EP-PLAT | — | T-P2-PLAT-005 | apps/web Next.js skeleton | T-P2-PLAT-005.1, T-P2-PLAT-005.2, T-P2-PLAT-005.3, T-P2-PLAT-005.4 | TC-PLAT-005-01 | Done | P2 |
-| EP-PLAT | — | T-P2-PLAT-006 | packages/contracts (Zod + generated OpenAPI types) | T-P2-PLAT-006.1, T-P2-PLAT-006.2, T-P2-PLAT-006.3 | TC-PLAT-006-01 | In review | P2 |
-| EP-PLAT | — | T-P2-PLAT-007 | CI pipeline (GitHub Actions) | T-P2-PLAT-007.1, T-P2-PLAT-007.2, T-P2-PLAT-007.3, T-P2-PLAT-007.4, T-P2-PLAT-007.5, T-P2-PLAT-007.6 | TC-PLAT-007-01 | In progress | P2 |
+| EP-PLAT | — | T-P2-PLAT-006 | packages/contracts (Zod + generated OpenAPI types) | T-P2-PLAT-006.1, T-P2-PLAT-006.2, T-P2-PLAT-006.3 | TC-PLAT-006-01 | Done | P2 |
+| EP-PLAT | — | T-P2-PLAT-007 | CI pipeline (GitHub Actions) | T-P2-PLAT-007.1, T-P2-PLAT-007.2, T-P2-PLAT-007.3, T-P2-PLAT-007.4, T-P2-PLAT-007.5, T-P2-PLAT-007.6 | TC-PLAT-007-01 | Done | P2 |
 | EP-PLAT | — | T-P2-PLAT-008 | Security baseline middleware | T-P2-PLAT-008.1, T-P2-PLAT-008.2, T-P2-PLAT-008.3, T-P2-PLAT-008.4 | TC-PLAT-008-01 | Not started | P2 |
 | EP-PLAT | — | T-P2-PLAT-009 | Observability | T-P2-PLAT-009.1, T-P2-PLAT-009.2 | TC-PLAT-009-01 | Not started | P2 |
 | EP-PLAT | — | T-P2-PLAT-010 | Staging deployment | T-P2-PLAT-010.1, T-P2-PLAT-010.2, T-P2-PLAT-010.3, T-P2-PLAT-010.4, T-P2-PLAT-010.5 | TC-PLAT-010-01 | Not started | P2 |

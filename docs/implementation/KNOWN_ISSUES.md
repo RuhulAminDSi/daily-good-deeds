@@ -5,7 +5,7 @@ No application code exists yet, so there are no software defects. The list below
 | ID | Type | Description | Impact | Owner | Status |
 |---|---|---|---|---|---|
 | KI-001 | Blocker (P2) | Neon project `daily-good-deeds` (Singapore, PostgreSQL 18) created 2026-10-31 with branches main/staging/dev; dev strings in `apps/api/.env` (git-ignored) | — | — | Resolved |
-| KI-002 | Blocker (P2) | Git remote attached (github.com/RuhulAminDSi/daily-good-deeds); CI secrets and hosting still to configure | No preview deploys yet | User | Partially resolved |
+| KI-002 | Blocker (P2) | Git remote + CI: GitHub Actions green (2026-10-31); Neon key/project set as Actions secret/variable. Hosting secrets come with T-P2-PLAT-010 | — | — | Resolved |
 | KI-003 | Blocker (P2) | Domain, email provider account, and Google OAuth client not provisioned | Email verification and Google login stay unconfigured (adapters still built; staging uses a log-only email transport) | User | Open |
 | KI-004 | Blocker (P5) | Quran translation (EN/BN) and Hadith collection licensing not confirmed | Islamic content publishing | User / content | Open |
 | KI-005 | Risk | No native Bengali reviewer or Islamic content reviewer identified | Translation and religious-content quality | User | Open |

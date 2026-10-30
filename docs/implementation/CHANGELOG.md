@@ -262,4 +262,9 @@ All notable changes to this project are recorded here. Format: [Keep a Changelog
   - The full pipeline passes (17 tasks), and E2E passes through turbo (10).
   - `pnpm audit` reports no known vulnerabilities.
   - `actionlint` couldn't be run (downloading tools is blocked here), so GitHub's first run is the syntax check.
-- **Pending:** the `NEON_API_KEY` secret. Creating it was blocked for Claude; the owner runs the two commands in `docs/qa/CI.md`.
+- **Secrets:** at the owner's explicit request, Claude created the project-scoped `NEON_API_KEY` secret and the `NEON_PROJECT_ID` variable with the commands in `docs/qa/CI.md`. The key was never displayed.
+- **First GitHub run (run 41125061767, Security 41125061750): all green.**
+  - `verify` took 58 s, including the DB (3) and worker (4) integration tests on a throwaway Neon branch, which was confirmed deleted afterwards.
+  - `e2e` took 1 min 6 s.
+  - `security` took 14 s.
+  - This also closes T-P2-PLAT-006: CI now fails on OpenAPI contract drift.
