@@ -1,0 +1,26 @@
+// Database schema. Tables follow docs/database/DATA_DICTIONARY.md; the inventory and phases are in
+// docs/README.md §6. IDs default to PostgreSQL 18's native uuidv7() (time-ordered).
+
+generator client {
+  provider               = "prisma-client"
+  output                 = "../src/generated/prisma"
+  moduleFormat           = "esm"
+  importFileExtension    = "js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// Tunable platform settings. Keys and defaults come from the Settings registry
+/// (src/settings/settings.registry.ts, docs/database/DATA_DICTIONARY.md).
+model SystemSetting {
+  key       String   @id
+  value     Json
+  isPublic  Boolean  @default(false) @map("is_public")
+  /// FK to users is added with the users table (T-P2-AUTH-001).
+  updatedBy String?  @map("updated_by") @db.Uuid
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("system_settings")
+}

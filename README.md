@@ -19,4 +19,13 @@ pnpm lint && pnpm typecheck && pnpm test
 pnpm docs:check        # planning docs are consistent and up to date
 ```
 
+Database (Neon Postgres): copy `apps/api/.env.example` to `apps/api/.env` and `apps/api/.env.test`, using the `dev` and `test` branch connection strings respectively. Then run:
+
+```sh
+cd apps/api
+pnpm db:deploy         # apply migrations (uses DIRECT_URL)
+pnpm build && pnpm db:seed   # insert missing reference data (idempotent)
+pnpm dev               # http://localhost:4000/api/v1/health/ready
+```
+
 Branching: work happens on `dev`. `main` receives reviewed merges only.

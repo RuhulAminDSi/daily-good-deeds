@@ -4,7 +4,7 @@ No application code exists yet, so there are no software defects. The list below
 
 | ID | Type | Description | Impact | Owner | Status |
 |---|---|---|---|---|---|
-| KI-001 | Blocker (P2) | Neon Postgres project and connection strings not provided | API/DB work can't start | User | Open |
+| KI-001 | Blocker (P2) | Neon project `daily-good-deeds` (Singapore, PostgreSQL 18) created 2026-10-31 with branches main/staging/dev; dev strings in `apps/api/.env` (git-ignored) | — | — | Resolved |
 | KI-002 | Blocker (P2) | Git remote attached (github.com/RuhulAminDSi/daily-good-deeds); CI secrets and hosting still to configure | No preview deploys yet | User | Partially resolved |
 | KI-003 | Blocker (P2) | Domain, email provider account, and Google OAuth client not provisioned | Email verification and Google login stay unconfigured (adapters still built; staging uses a log-only email transport) | User | Open |
 | KI-004 | Blocker (P5) | Quran translation (EN/BN) and Hadith collection licensing not confirmed | Islamic content publishing | User / content | Open |

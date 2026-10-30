@@ -182,6 +182,7 @@ t(
     'Render/Fly (api, worker)',
     'Secrets management per env',
     'Post-deploy smoke job',
+    'Probes: liveness → /health/live (frequent); /health/ready only for deploy gating, so Neon compute can autosuspend',
   ],
 );
 t(
@@ -348,8 +349,13 @@ t(
   'Identity schema',
   ['F-AUTH-001'],
   'S',
-  'Migration creates users, user_preferences, auth_identities, user_sessions, verification_tokens with constraints from DATA_DICTIONARY.',
-  ['Prisma models & migration', 'Unique citext email', 'Repository layer with user scoping'],
+  'Migration creates users, user_preferences, auth_identities, user_sessions, verification_tokens with constraints from DATA_DICTIONARY, and adds the deferred FK system_settings.updated_by → users ON DELETE SET NULL.',
+  [
+    'Prisma models & migration',
+    'Unique citext email',
+    'Repository layer with user scoping',
+    'FK system_settings.updated_by → users (deferred from T-P2-PLAT-003)',
+  ],
 );
 t(
   'T-P2-AUTH-002',

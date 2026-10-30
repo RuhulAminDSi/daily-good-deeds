@@ -5,7 +5,9 @@ import { loggerOptions } from './logger.options.js';
 
 describe('log redaction', () => {
   it('removes credentials and personal data using the production redact config', () => {
-    const { redact } = loggerOptions(loadConfig({ NODE_ENV: 'test' })).pinoHttp as LoggerOptions;
+    const { redact } = loggerOptions(
+      loadConfig({ NODE_ENV: 'test', DATABASE_URL: 'postgresql://u:p@localhost/x' }),
+    ).pinoHttp as LoggerOptions;
     const lines: string[] = [];
     const stream = new Writable({
       write(chunk, _enc, done) {

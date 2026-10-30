@@ -96,3 +96,45 @@ All notable changes to this project are recorded here. Format: [Keep a Changelog
   - **OpenAPI** is built once at boot. The YAML route is off.
   - **Build:** the build cleans `dist/` and emits no `.d.ts`. Dev uses the SWC builder (compiles in about 0.3 s).
   - The readiness check registry is planned into T-P2-PLAT-003.
+
+### Added (2026-10-31), Phase 2: T-P2-PLAT-003 Prisma + Neon baseline
+- **Neon project `daily-good-deeds`:** Singapore `aws-ap-southeast-1`, PostgreSQL 18, created by Claude via `neonctl` on the account the user confirmed.
+  - Database `dgd`. Branches: `main` (production), `staging`, `dev` (local development) and `test` (integration tests).
+  - Connection strings live only in the git-ignored `apps/api/.env` and `.env.test`. `apps/api/.env.example` documents both.
+- **Prisma 7.10.1:**
+  - `prisma-client` generator with ESM output to `src/generated/prisma` (git-ignored; the turbo `db:generate` task runs before build, typecheck and test).
+  - `@prisma/adapter-pg` with the pooled `DATABASE_URL`. Pool size comes from `DB_POOL_MAX`, default 5 (DL-026).
+  - The CLI uses `DIRECT_URL` (set in `prisma.config.ts`).
+  - IDs use PostgreSQL 18's native `uuidv7()`, so no helper function is needed.
+- **Baseline migration:** the `citext`, `pg_trgm` and `pgcrypto` extensions plus `system_settings`.
+  - The FK from `system_settings.updated_by` to `users` is added with T-P2-AUTH-001.
+  - A drift check against the schema produced an empty migration.
+- **Settings registry** (`src/settings/settings.registry.ts`): Zod schemas and defaults with SRS sources.
+  - Seeds insert only missing rows, so admin edits are never overwritten.
+  - `pnpm db:seed` inserts 11 settings on the first run and 0 on the second.
+  - `ai.monthly_budget_usd` is deliberately not seeded; it is set at the P8 kickoff.
+- **Readiness registry:** modules register checks, and `/health/ready` returns 503 `DEPENDENCY_UNAVAILABLE` with per-check status when any check fails or times out (3 s).
+  - The `db` check covers reachability and the absence of failed migrations.
+- **API wiring:**
+  - `ConfigModule` is now global, so `AppModule` stays non-global; a global `AppModule` reorders middleware and the body parser lost its request ID.
+  - API lint knows about decorator metadata, so Nest DI imports aren't turned into type-only imports.
+- **Tests: 21 passing.**
+  - Includes 3 integration tests against the Neon `test` branch: `migrate deploy`, seed idempotency, the no-overwrite rule, and readiness 200.
+  - The integration tests are skipped with a visible reason when no test database is configured.
+- **Real-run verification:** `db:deploy` and `db:seed` ran on `dev`. The built server's `/health/ready` returned `{"db":"ok"}`.
+- **Pre-push review of T-P2-PLAT-003:**
+  - **Readiness now catches pending migrations** (NFR-AVAILABILITY-003). It checks that every migration shipped with the build is applied, not just that none failed. This closes the "new code against an old schema" gap.
+  - **Readiness results are cached for 10 s.** Each check times out at 5 s with its timer cleared.
+  - **The pool fails fast** (`connectionTimeoutMillis` 5 s) instead of queueing forever.
+  - **Probe guidance for Neon autosuspend:** use `/live` for frequent probes and `/ready` only for deploy gating. Planned into T-P2-PLAT-010.
+  - **`prisma generate` needs no database secrets** (fresh clone and CI). turbo passes `TEST_*` and `CI` through to tests, and integration tests fail in CI when their database is not configured.
+  - **One `.env` mechanism:** Node's `--env-file-if-exists` in the `start`, `dev` and `db:seed` scripts. Only `prisma.config.ts` loads `.env` itself, because the Prisma CLI reads that file directly.
+  - **Smaller code:**
+    - The seed uses a Nest-free Prisma client factory (`prisma-client.ts`).
+    - One `seedSystemSettings` function replaces the seed framework.
+    - The settings registry is compact, with a shared `settingDefaults()` used by the seed and its test.
+    - Integration and HTTP specs share one `createTestApp` helper.
+    - Prisma generator options that only restated defaults are removed.
+  - **New `@dgd/config/eslint/nest` preset** with decorator-aware type-import linting, which the worker will reuse.
+  - **The deferred `system_settings.updated_by` foreign key** is now a T-P2-AUTH-001 subtask.
+  - **Tests:** 25 passing, including the Neon integration tests.

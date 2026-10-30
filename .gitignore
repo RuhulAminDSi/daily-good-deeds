@@ -29,3 +29,6 @@ Thumbs.db
 # test artifacts
 playwright-report/
 test-results/
+
+# generated Prisma client
+apps/api/src/generated/

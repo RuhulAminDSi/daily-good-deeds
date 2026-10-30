@@ -1,11 +1,8 @@
 import { Body, Controller, Get, type INestApplication, Module, Post } from '@nestjs/common';
-import { Test } from '@nestjs/testing';
 import request from 'supertest';
 import { z } from 'zod';
-import { AppModule } from '../src/app.module.js';
-import { APP_OPTIONS, configureApp } from '../src/app.setup.js';
 import { DomainError } from '../src/common/errors/domain-error.js';
-import { loadConfig } from '../src/config/env.js';
+import { createTestApp } from './helpers.js';
 
 // Test-only routes that raise each kind of error the filter must render.
 @Controller('test-errors')
@@ -36,12 +33,8 @@ describe('API skeleton (HTTP)', () => {
   let app: INestApplication;
 
   beforeAll(async () => {
-    const config = loadConfig({ NODE_ENV: 'test', LOG_LEVEL: 'silent' });
-    const moduleRef = await Test.createTestingModule({
-      imports: [AppModule.forRoot(config), ErrorsModule],
-    }).compile();
-    app = configureApp(moduleRef.createNestApplication(APP_OPTIONS), config);
-    await app.init();
+    // Nothing listens on port 1, so the db readiness check fails fast.
+    app = await createTestApp('postgresql://u:p@127.0.0.1:1/none', [ErrorsModule]);
   });
 
   afterAll(() => app.close());
@@ -53,8 +46,9 @@ describe('API skeleton (HTTP)', () => {
     expect(res.body).toEqual({ status: 'ok' });
   });
 
-  it('GET /api/v1/health/ready returns 200', async () => {
-    await api().get('/api/v1/health/ready').expect(200);
+  it('GET /api/v1/health/ready is 503 DEPENDENCY_UNAVAILABLE when the db is unreachable', async () => {
+    const res = await api().get('/api/v1/health/ready').expect(503);
+    expect(res.body).toMatchObject({ code: 'DEPENDENCY_UNAVAILABLE', checks: { db: 'fail' } });
   });
 
   it('serves the generated OpenAPI document at /api/v1/openapi.json', async () => {

@@ -5,7 +5,7 @@ import { defineConfig } from 'eslint/config';
 import tseslint from 'typescript-eslint';
 
 export default defineConfig(
-  { ignores: ['**/dist/**', '**/.next/**', '**/coverage/**', '**/.turbo/**'] },
+  { ignores: ['**/dist/**', '**/.next/**', '**/coverage/**', '**/.turbo/**', '**/generated/**'] },
   js.configs.recommended,
   tseslint.configs.recommended,
   {

@@ -4,7 +4,7 @@
 >
 > Test case IDs here are **placeholders**, allocated in sequence per feature. [qa/TEST_PLAN.md](../qa/TEST_PLAN.md) defines their steps. Update **Status** as work moves (Not started → In progress → In review → Done → Verified). A task is marked Done only when its Definition of Done in the master plan is met, including tests. A UI that exists without its backend and tests does **not** count as Done.
 
-**Totals:** 200 tasks · 529 subtasks · 196 in-scope features (P2–P10) covered · 2 Won't-Have features deliberately unmapped (F-INTG-004, F-ADMIN-017).
+**Totals:** 200 tasks · 531 subtasks · 196 in-scope features (P2–P10) covered · 2 Won't-Have features deliberately unmapped (F-INTG-004, F-ADMIN-017).
 
 ## Phase 0
 
@@ -29,14 +29,14 @@
 |---|---|---|---|---|---|---|---|
 | EP-PLAT | — | T-P2-PLAT-001 | Monorepo scaffold (pnpm via Corepack, Turborepo, packages/config) | T-P2-PLAT-001.1, T-P2-PLAT-001.2, T-P2-PLAT-001.3, T-P2-PLAT-001.4 | TC-PLAT-001-01 | Done | P2 |
 | EP-PLAT | — | T-P2-PLAT-002 | apps/api NestJS skeleton | T-P2-PLAT-002.1, T-P2-PLAT-002.2, T-P2-PLAT-002.3, T-P2-PLAT-002.4, T-P2-PLAT-002.5 | TC-PLAT-002-01 | Done | P2 |
-| EP-PLAT | — | T-P2-PLAT-003 | Prisma + Neon baseline | T-P2-PLAT-003.1, T-P2-PLAT-003.2, T-P2-PLAT-003.3, T-P2-PLAT-003.4, T-P2-PLAT-003.5 | TC-PLAT-003-01 | Not started | P2 |
+| EP-PLAT | — | T-P2-PLAT-003 | Prisma + Neon baseline | T-P2-PLAT-003.1, T-P2-PLAT-003.2, T-P2-PLAT-003.3, T-P2-PLAT-003.4, T-P2-PLAT-003.5 | TC-PLAT-003-01 | Done | P2 |
 | EP-PLAT | — | T-P2-PLAT-004 | apps/worker with pg-boss | T-P2-PLAT-004.1, T-P2-PLAT-004.2, T-P2-PLAT-004.3, T-P2-PLAT-004.4 | TC-PLAT-004-01 | Not started | P2 |
 | EP-PLAT | — | T-P2-PLAT-005 | apps/web Next.js skeleton | T-P2-PLAT-005.1, T-P2-PLAT-005.2, T-P2-PLAT-005.3, T-P2-PLAT-005.4 | TC-PLAT-005-01 | Not started | P2 |
 | EP-PLAT | — | T-P2-PLAT-006 | packages/contracts (Zod + generated OpenAPI types) | T-P2-PLAT-006.1, T-P2-PLAT-006.2, T-P2-PLAT-006.3 | TC-PLAT-006-01 | Not started | P2 |
 | EP-PLAT | — | T-P2-PLAT-007 | CI pipeline (GitHub Actions) | T-P2-PLAT-007.1, T-P2-PLAT-007.2, T-P2-PLAT-007.3, T-P2-PLAT-007.4, T-P2-PLAT-007.5 | TC-PLAT-007-01 | Not started | P2 |
 | EP-PLAT | — | T-P2-PLAT-008 | Security baseline middleware | T-P2-PLAT-008.1, T-P2-PLAT-008.2, T-P2-PLAT-008.3, T-P2-PLAT-008.4 | TC-PLAT-008-01 | Not started | P2 |
 | EP-PLAT | — | T-P2-PLAT-009 | Observability | T-P2-PLAT-009.1, T-P2-PLAT-009.2 | TC-PLAT-009-01 | Not started | P2 |
-| EP-PLAT | — | T-P2-PLAT-010 | Staging deployment | T-P2-PLAT-010.1, T-P2-PLAT-010.2, T-P2-PLAT-010.3, T-P2-PLAT-010.4 | TC-PLAT-010-01 | Not started | P2 |
+| EP-PLAT | — | T-P2-PLAT-010 | Staging deployment | T-P2-PLAT-010.1, T-P2-PLAT-010.2, T-P2-PLAT-010.3, T-P2-PLAT-010.4, T-P2-PLAT-010.5 | TC-PLAT-010-01 | Not started | P2 |
 | EP-UI | — | T-P2-UI-001 | packages/tokens | T-P2-UI-001.1, T-P2-UI-001.2, T-P2-UI-001.3, T-P2-UI-001.4 | TC-UI-001-01 | Not started | P2 |
 | EP-UI | — | T-P2-UI-002 | packages/ui core components | T-P2-UI-002.1, T-P2-UI-002.2, T-P2-UI-002.3, T-P2-UI-002.4 | TC-UI-002-01 | Not started | P2 |
 | EP-UI | F-PWA-002 | T-P2-UI-003 | App shell & responsive navigation | T-P2-UI-003.1, T-P2-UI-003.2, T-P2-UI-003.3 | TC-PWA-002-01 | Not started | P2 |
@@ -52,7 +52,7 @@
 | EP-PWA | F-PWA-003 | T-P2-PWA-002 | Service worker app shell (Serwist) | T-P2-PWA-002.1, T-P2-PWA-002.2, T-P2-PWA-002.3, T-P2-PWA-002.4 | TC-PWA-003-01 | Not started | P2 |
 | EP-PWA | F-PWA-007 | T-P2-PWA-003 | In-app browser detection & fallback | T-P2-PWA-003.1, T-P2-PWA-003.2, T-P2-PWA-003.3 | TC-PWA-007-01 | Not started | P2 |
 | EP-PWA | F-PWA-008 | T-P2-PWA-004 | Capability detection & graceful degradation | T-P2-PWA-004.1, T-P2-PWA-004.2 | TC-PWA-008-01 | Not started | P2 |
-| EP-AUTH | F-AUTH-001 | T-P2-AUTH-001 | Identity schema | T-P2-AUTH-001.1, T-P2-AUTH-001.2, T-P2-AUTH-001.3 | TC-AUTH-001-01 | Not started | P2 |
+| EP-AUTH | F-AUTH-001 | T-P2-AUTH-001 | Identity schema | T-P2-AUTH-001.1, T-P2-AUTH-001.2, T-P2-AUTH-001.3, T-P2-AUTH-001.4 | TC-AUTH-001-01 | Not started | P2 |
 | EP-AUTH | F-AUTH-001 | T-P2-AUTH-002 | Registration | T-P2-AUTH-002.1, T-P2-AUTH-002.2, T-P2-AUTH-002.3, T-P2-AUTH-002.4, T-P2-AUTH-002.5 | TC-AUTH-001-02 | Not started | P2 |
 | EP-AUTH | F-AUTH-004 | T-P2-AUTH-003 | Email verification | T-P2-AUTH-003.1, T-P2-AUTH-003.2, T-P2-AUTH-003.3 | TC-AUTH-004-01 | Not started | P2 |
 | EP-AUTH | F-AUTH-002 | T-P2-AUTH-004 | Login, tokens & sessions | T-P2-AUTH-004.1, T-P2-AUTH-004.2, T-P2-AUTH-004.3, T-P2-AUTH-004.4, T-P2-AUTH-004.5 | TC-AUTH-002-01 | Not started | P2 |

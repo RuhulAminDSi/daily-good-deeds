@@ -1,1 +1,1 @@
-export { default } from '@dgd/config/eslint/node';
+export { default } from '@dgd/config/eslint/nest';
