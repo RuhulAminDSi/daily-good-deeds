@@ -2,6 +2,7 @@
 // CSS variables, so themes switch by overriding variables alone.
 import {
   COLORS,
+  FONT_SANS,
   MOTION,
   RADII,
   SHADOWS,
@@ -42,6 +43,7 @@ export function toCss(): string {
         `--text-${name}--line-height: ${t.lineHeight};`,
         `--text-${name}--font-weight: ${t.weight};`,
       ]),
+      `--font-sans: ${FONT_SANS};`,
       `--ease-standard: ${MOTION.ease};`,
     ]),
     block(':root', [

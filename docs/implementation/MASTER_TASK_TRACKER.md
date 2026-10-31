@@ -45,7 +45,7 @@
 | EP-I18N | F-I18N-001, F-I18N-009 | T-P2-I18N-002 | No-hardcoded-strings lint & missing-key check | T-P2-I18N-002.1, T-P2-I18N-002.2, T-P2-I18N-002.3 | TC-I18N-001-02, TC-I18N-009-01 | Done | P2 |
 | EP-I18N | F-I18N-002, F-I18N-003 | T-P2-I18N-003 | Language switcher & persistence | T-P2-I18N-003.1, T-P2-I18N-003.2, T-P2-I18N-003.3 | TC-I18N-002-01, TC-I18N-003-01 | In progress | P2 |
 | EP-I18N | F-I18N-004 | T-P2-I18N-004 | Locale formatting helpers | T-P2-I18N-004.1, T-P2-I18N-004.2, T-P2-I18N-004.3 | TC-I18N-004-01 | Done | P2 |
-| EP-I18N | F-I18N-005 | T-P2-I18N-005 | Bengali typography | T-P2-I18N-005.1, T-P2-I18N-005.2 | TC-I18N-005-01 | Not started | P2 |
+| EP-I18N | F-I18N-005 | T-P2-I18N-005 | Bengali typography | T-P2-I18N-005.1, T-P2-I18N-005.2 | TC-I18N-005-01 | In progress | P2 |
 | EP-I18N | F-I18N-007 | T-P2-I18N-006 | Localized validation & API errors | T-P2-I18N-006.1, T-P2-I18N-006.2, T-P2-I18N-006.3, T-P2-I18N-006.4 | TC-I18N-007-01 | Not started | P2 |
 | EP-I18N | F-I18N-009 | T-P2-I18N-007 | Fallback & missing-key reporting | T-P2-I18N-007.1, T-P2-I18N-007.2 | TC-I18N-009-02 | Not started | P2 |
 | EP-PWA | F-PWA-001 | T-P2-PWA-001 | Web manifest & installability | T-P2-PWA-001.1, T-P2-PWA-001.2, T-P2-PWA-001.3 | TC-PWA-001-01 | Not started | P2 |

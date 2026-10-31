@@ -575,3 +575,19 @@ All notable changes to this project are recorded here. Format: [Keep a Changelog
   - **One formatting path:** the web app's lint bans next-intl's `useFormatter` and `getFormatter`, which would ignore the digit preference and use a different locale tag.
   - **Accepted:** the Hijri offset adds whole 24-hour days. That is exact in Bangladesh, which has no DST, and P5 revisits it.
 
+### Added (2026-10-31), Phase 2: T-P2-I18N-005 Bengali typography (device check pending)
+- **Fonts via `next/font`** (self-hosted, size-adjusted fallbacks, `display: swap`): Inter (variable, Latin, preloaded) and Hind Siliguri (Bengali, 400 and 600, not preloaded). One stack serves both languages: Inter, Hind Siliguri, then Noto Sans Bengali, Nirmala UI and Vrinda. Bengali characters fall through to Hind Siliguri, and per-subset `unicode-range` keeps English pages from downloading it unless Bengali appears (the "বাংলা" endonym).
+- **Measured** with every font delayed 800 ms (worst case):
+  - CLS 0 in both languages.
+  - English pages 47 KB, or 87 KB on desktop with the endonym.
+  - Bengali pages 125 KB, because Inter also loads for spaces and punctuation.
+
+  The spec's 4 Bengali weights (~205 KB) contradicted its own 120 KB budget. DL-042 settles on 2 weights and a 130 KB Bengali budget: 500 renders as 400, and 700 as 600, never synthesized bold.
+- **Tests:** `e2e/fonts.spec.ts` checks CLS ≤ 0.05, the per-locale budgets, that Bengali text renders in Hind Siliguri, and that English pages load at most one Bengali face.
+- **Conjuncts in Chromium:** ক্ষ, জ্ঞ, ন্ত্র, হ্ম, কৃষ্ণ, শ্রী, স্ত্রী, ষ্ট্র, the ya-phala and all vowel signs render correctly at both weights.
+- **Line heights:** the locale-specific line-height tokens were already in place (`:lang(bn)` in `@dgd/tokens`, T-P2-UI-001).
+- **Pre-push review:**
+  - **Shared font stack:** the stack moved into `@dgd/tokens` (`FONT_SANS`, with `var(--font-inter, 'Inter')`-style fallbacks), so Storybook shares it. The web app's `next/font` supplies the variables.
+  - **No guessed waits:** the CLS read uses a buffered `PerformanceObserver` and two animation frames after `fonts.ready`. A planned switch to `getEntriesByType` was dropped: layout-shift entries never appear there, so the test would always have read 0. An injected shift registered (CLS 0.022), so the measurement sees shifts.
+- **Pending (task stays in progress):** the visual conjunct check on Android Chrome and iOS Safari, which needs a real device. It can be done on staging.
+

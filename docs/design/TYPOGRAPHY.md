@@ -5,7 +5,7 @@
 | Script | Font | Fallback stack | Source |
 |---|---|---|---|
 | Latin (EN UI) | **Inter** (variable, wght 400–700) | `system-ui, -apple-system, "Segoe UI", Roboto, sans-serif` | Self-hosted via `next/font/google` (no runtime request to Google) |
-| Bengali (BN UI) | **Hind Siliguri** (400, 500, 600, 700) | `"Noto Sans Bengali", "Nirmala UI", "Vrinda", sans-serif` | Self-hosted via `next/font/google` |
+| Bengali (BN UI) | **Hind Siliguri** (400, 600; 500 renders as 400 and 700 as 600, DL-042) | `"Noto Sans Bengali", "Nirmala UI", "Vrinda", sans-serif` | Self-hosted via `next/font/google` |
 | Arabic (Quran, Dua, Dhikr text) | **Amiri Quran** for Quranic āyāt; **Amiri** for duas/dhikr | `"Noto Naskh Arabic", "Traditional Arabic", serif` | Self-hosted |
 | Numerals in data (tables, counters) | Inter with `font-variant-numeric: tabular-nums` | — | — |
 
@@ -72,4 +72,6 @@ On mobile (< 640px), `h1` steps down to 1.5rem and `display` to 1.875rem.
 ## 7. Loading strategy
 - `next/font` with `display: swap` and `adjustFontFallback` keeps layout shift close to zero.
 - Only the UI-language font is preloaded. Arabic fonts load lazily on Islamic pages.
-- Subsets: Latin plus Latin-ext for Inter; Bengali for Hind Siliguri; Arabic for Amiri. Budget for the first load: **≤ 120 KB of fonts** for either locale.
+- Subsets: Latin for Inter, Bengali for Hind Siliguri, Arabic for Amiri. One stack serves both languages (Inter, then Hind Siliguri, then the fallbacks), and per-subset `unicode-range` means a page downloads only the faces its characters need.
+- Budget for the first load: **≤ 120 KB** for English and **≤ 130 KB** for Bengali, where Inter also loads for spaces and punctuation. Measured 47–87 KB and 125 KB, with CLS 0 (DL-042, `apps/web/e2e/fonts.spec.ts`).
+- Only Inter is preloaded: next/font cannot preload per locale, and English pages must not pay for the Bengali font.

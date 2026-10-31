@@ -7,7 +7,7 @@
 |---|---|---|---|
 | P0 | Repository discovery & planning | **Done** | Repository found empty; toolchain inventoried ([PROJECT_DISCOVERY.md](../PROJECT_DISCOVERY.md)) |
 | P1 | Specifications (product, SRS, architecture, DB, API, design, QA, roadmap) | **Approved (2026-10-30)** | All 53 docs written; traceability, Mermaid, and OpenAPI checks pass (see the CHANGELOG) |
-| P2 | Foundation, auth, RBAC, i18n, PWA shell | **In progress** | Plan approved 2026-10-30. Done: T-P2-PLAT-001 to T-P2-PLAT-010 T-P2-UI-001 to T-P2-UI-004 and T-P2-I18N-001/002/004; T-P2-I18N-003 guest part done, account sync waits for auth (CI green on GitHub; public staging via Tailscale Funnel, docs/qa/STAGING.md) |
+| P2 | Foundation, auth, RBAC, i18n, PWA shell | **In progress** | Plan approved 2026-10-30. Done: T-P2-PLAT-001 to T-P2-PLAT-010 T-P2-UI-001 to T-P2-UI-004 and T-P2-I18N-001/002/004; T-P2-I18N-003 guest part done, account sync waits for auth; T-P2-I18N-005 done except the on-device conjunct check (CI green on GitHub; public staging via Tailscale Funnel, docs/qa/STAGING.md) |
 | P3 | Good Deeds core & calendar | Not started | |
 | P4 | Growth, journal, planner, gamification | Not started | |
 | P5 | Islamic lifestyle | Not started | |

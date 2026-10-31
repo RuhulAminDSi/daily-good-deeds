@@ -103,6 +103,22 @@ export const TYPE_SCALE = {
   counter: { size: '3rem', lineHeight: 1.1, weight: 700 },
 } as const satisfies Record<string, TypeStyle>;
 
+/**
+ * Font stack for both languages (TYPOGRAPHY §1, DL-042): Latin from Inter, Bengali from Hind
+ * Siliguri (Inter has no Bengali glyphs), then fonts Bengali devices ship. Apps load the web fonts
+ * (next/font sets `--font-inter` / `--font-hind-siliguri`); elsewhere the names fall back to any
+ * installed copy.
+ */
+export const FONT_SANS = [
+  "var(--font-inter, 'Inter')",
+  "var(--font-hind-siliguri, 'Hind Siliguri')",
+  "'Noto Sans Bengali'",
+  "'Nirmala UI'",
+  "'Vrinda'",
+  'system-ui',
+  'sans-serif',
+].join(', ');
+
 /** Motion (DESIGN_SYSTEM §2). Disabled under `prefers-reduced-motion` by components. */
 export const MOTION = {
   duration: { micro: '120ms', enter: '200ms', sheet: '280ms' },
