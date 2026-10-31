@@ -7,14 +7,13 @@ import type { PrismaService } from '../src/database/prisma.service.js';
 import { UsersRepository } from '../src/users/users.repository.js';
 import { seedSystemSettings } from '../src/database/seeds.js';
 import { settingDefaults } from '../src/settings/settings.registry.js';
-import { createTestApp, migrateTestDatabase, testDatabaseConfigured } from './helpers.js';
+import { createTestApp, testDatabaseConfigured } from './helpers.js';
 
 const { TEST_DATABASE_URL } = process.env;
+const inAnHour = () => new Date(Date.now() + 3_600_000);
 
 describe.skipIf(!testDatabaseConfigured())('database (integration)', () => {
   const prisma = createPrismaClient(TEST_DATABASE_URL!, 2);
-
-  beforeAll(migrateTestDatabase, 120_000);
 
   afterAll(() => prisma.$disconnect());
 
@@ -61,6 +60,9 @@ describe.skipIf(!testDatabaseConfigured())('database (integration)', () => {
       return user;
     };
 
+    /** Shared by the CHECK cases: each rejected update leaves it unchanged. */
+    let checked: Awaited<ReturnType<typeof newUser>> | undefined;
+
     afterAll(() => prisma.user.deleteMany({ where: { id: { in: created } } }));
 
     it('creates a user with a UUIDv7 id and default preferences', async () => {
@@ -89,15 +91,15 @@ describe.skipIf(!testDatabaseConfigured())('database (integration)', () => {
       ['an unknown status', { status: 'banned' }],
       ['pending_deletion without a request time', { status: 'pending_deletion' }],
     ])('rejects %s (CHECK)', async (_, data) => {
-      const user = await newUser();
-      await expect(prisma.user.update({ where: { id: user.id }, data })).rejects.toThrow();
+      checked ??= await newUser();
+      await expect(prisma.user.update({ where: { id: checked.id }, data })).rejects.toThrow();
     });
 
     it('rejects invalid preferences and verification tokens (CHECK)', async () => {
       const user = await newUser();
       await expect(users.updatePreferences(user.id, { weekStart: 7 })).rejects.toThrow();
       await expect(users.updatePreferences(user.id, { theme: 'neon' })).rejects.toThrow();
-      const token = { userId: user.id, expiresAt: new Date(Date.now() + 3600_000) };
+      const token = { userId: user.id, expiresAt: inAnHour() };
       await expect(
         prisma.verificationToken.create({
           data: { ...token, type: 'email_change', tokenHash: randomUUID() },
@@ -123,7 +125,7 @@ describe.skipIf(!testDatabaseConfigured())('database (integration)', () => {
           userId: user.id,
           sessionTokenHash: randomUUID(),
           client: 'web',
-          expiresAt: new Date(Date.now() + 3600_000),
+          expiresAt: inAnHour(),
         },
       });
       await prisma.authIdentity.create({

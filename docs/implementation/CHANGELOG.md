@@ -648,5 +648,9 @@ All notable changes to this project are recorded here. Format: [Keep a Changelog
 - **`users` module**: `UsersRepository` creates an account with its preferences in one statement, looks users up by id or case-insensitive email, and reads/updates preferences for the acting user only (the ownership rule for every user-owned repository: actor id first, always filtered, so another user's row is not found).
 - **Prisma errors in problem+json** (ERROR_HANDLING §4): `P2002` → 409 `CONFLICT`, `P2025` → 404 `RESOURCE_NOT_FOUND`, anything else → 500 without the database message.
 - **Tests:** against the Neon `test` branch, defaults and UUIDv7 ids, citext lookup and uniqueness, each CHECK rejecting bad rows, actor scoping, cascades and the `SET NULL` on `system_settings`; `test/schema/identity.spec.ts` asserts every hand-written constraint and index from `pg_constraint` / `pg_indexes` (drift check); the Prisma error mapping. API suite: 61 passed. The readiness unit test now reads the shipped migrations instead of naming the baseline.
-- **Staging** gets the migration with the next `pnpm staging` (its release step runs `prisma migrate deploy`).
+- **Pre-push review:**
+  - **Cascade-friendly indexes** (migration `20261031130000_identity_cascade_indexes`): the per-user indexes on `user_sessions` and `verification_tokens` are full instead of partial, because deleting a user cascades through `user_id` and a partial index cannot serve that. INDEXING_STRATEGY updated. A follow-up migration rather than an edit, since the first was already applied to the test branch.
+  - **One drift test for all migrations** (`test/schema/hand-written.spec.ts`): reads the "Hand-written" section of every shipped migration, minus objects a later migration drops, and checks each CHECK and index in the catalog.
+  - **Migrate once per run** via Vitest `globalSetup`; shared `testDatabaseConfigured()` (worker spec too) and `expectedMigrations()`. Unused repository methods removed.
+- **Staging** gets both migrations with the next `pnpm staging` (its release step runs `prisma migrate deploy`).
 

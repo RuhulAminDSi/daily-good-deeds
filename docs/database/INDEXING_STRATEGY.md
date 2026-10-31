@@ -25,10 +25,10 @@ Legend: **U** = unique, **P** = partial.
 | users | `lower(display_name) gin_trgm_ops` | GIN trigram | Admin user search (F-ADMIN-001) |
 | auth_identities | `(provider, provider_subject)` U | btree | OAuth callback lookup |
 | user_sessions | `(session_token_hash)` U | btree | **Session lookup on every request** (DL-012) |
-| user_sessions | `(user_id, last_used_at DESC) P WHERE revoked_at IS NULL` | btree | "Your devices" list (F-AUTH-007) |
+| user_sessions | `(user_id, last_used_at DESC)` | btree | "Your devices" list (F-AUTH-007). Not partial: it also serves the `ON DELETE CASCADE` from `users` |
 | user_sessions | `(expires_at)` | btree | Purge job |
 | verification_tokens | `(token_hash)` U | btree | Verify and reset links |
-| verification_tokens | `(user_id, type) P WHERE consumed_at IS NULL` | btree | Invalidate older tokens on reissue |
+| verification_tokens | `(user_id, type)` | btree | Invalidate older tokens on reissue. Not partial: it also serves the cascade from `users` |
 | user_roles | PK `(user_id, role_id)` | btree | Load permissions with the session (cached ≤ 60 s) |
 | user_roles | `(role_id)` | btree | "Users with role X" (admin) |
 

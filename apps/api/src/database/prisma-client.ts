@@ -17,7 +17,7 @@ export const createPrismaClient = (connectionString: string, max: number) =>
   new PrismaClient(prismaOptions(connectionString, max));
 
 /** Migration folders shipped with the app (prisma/migrations), i.e. the schema this code expects. */
-const expectedMigrations = (): string[] => {
+export const expectedMigrations = (): string[] => {
   try {
     return readdirSync(new URL('../../prisma/migrations', import.meta.url), { withFileTypes: true })
       .filter((e) => e.isDirectory())

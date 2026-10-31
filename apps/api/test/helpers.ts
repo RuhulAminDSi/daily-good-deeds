@@ -46,17 +46,17 @@ export async function createTestWorker(
  * Integration tests run against a dedicated database (Neon `test` branch; vitest.config.ts) and
  * are skipped locally without one. In CI a missing database is an error.
  */
-export function testDatabaseConfigured(): boolean {
-  const { TEST_DATABASE_URL, TEST_DIRECT_URL, CI } = process.env;
-  const configured = Boolean(TEST_DATABASE_URL && TEST_DIRECT_URL);
-  if (CI && !configured) {
-    throw new Error('CI must set TEST_DATABASE_URL and TEST_DIRECT_URL for integration tests.');
+export function testDatabaseConfigured(
+  vars: string[] = ['TEST_DATABASE_URL', 'TEST_DIRECT_URL'],
+): boolean {
+  const configured = vars.every((name) => process.env[name]);
+  if (process.env.CI && !configured) {
+    throw new Error(`CI must set ${vars.join(' and ')} for integration tests.`);
   }
   return configured;
 }
 
-/** Applies the shipped migrations, the same command the release step runs. Safe to run from
- *  several test files at once: Prisma serializes deploys with an advisory lock. */
+/** Applies the shipped migrations, the same command the release step runs (from global-setup.ts). */
 export function migrateTestDatabase(): void {
   execFileSync('pnpm', ['exec', 'prisma', 'migrate', 'deploy'], {
     env: { ...process.env, DIRECT_URL: process.env.TEST_DIRECT_URL },

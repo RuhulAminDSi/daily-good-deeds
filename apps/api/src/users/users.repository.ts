@@ -24,10 +24,7 @@ export class UsersRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   /** A new account with its preferences row, in one statement. A taken email → CONFLICT (P2002). */
-  create({
-    preferences,
-    ...user
-  }: NewUser): Promise<User & { preferences: UserPreferences | null }> {
+  create({ preferences, ...user }: NewUser) {
     return this.prisma.user.create({
       data: { ...user, preferences: { create: preferences ?? {} } },
       include: { preferences: true },
@@ -37,14 +34,6 @@ export class UsersRepository {
   /** Case-insensitive (citext). */
   findByEmail(email: string): Promise<User | null> {
     return this.prisma.user.findUnique({ where: { email } });
-  }
-
-  findById(id: string): Promise<User | null> {
-    return this.prisma.user.findUnique({ where: { id } });
-  }
-
-  preferences(actorId: string): Promise<UserPreferences | null> {
-    return this.prisma.userPreferences.findUnique({ where: { userId: actorId } });
   }
 
   /** Updates the actor's own preferences; a missing row → RESOURCE_NOT_FOUND (P2025). */
