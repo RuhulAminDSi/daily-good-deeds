@@ -1,5 +1,12 @@
+import { readdirSync } from 'node:fs';
 import type { PrismaClient } from '../generated/prisma/client.js';
 import { assertDatabaseReady } from './prisma-client.js';
+
+const SHIPPED = readdirSync(new URL('../../prisma/migrations', import.meta.url), {
+  withFileTypes: true,
+})
+  .filter((e) => e.isDirectory())
+  .map((e) => e.name);
 
 // Rows as returned from _prisma_migrations; the shipped migrations are read from prisma/migrations.
 const db = (rows: { migration_name: string; done: boolean }[]) =>
@@ -8,7 +15,7 @@ const db = (rows: { migration_name: string; done: boolean }[]) =>
 describe('assertDatabaseReady', () => {
   it('passes when every shipped migration is applied', async () => {
     await expect(
-      assertDatabaseReady(db([{ migration_name: '20261030183427_baseline', done: true }])),
+      assertDatabaseReady(db(SHIPPED.map((migration_name) => ({ migration_name, done: true })))),
     ).resolves.toBeUndefined();
   });
 

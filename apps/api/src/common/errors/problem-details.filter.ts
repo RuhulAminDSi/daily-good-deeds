@@ -12,10 +12,17 @@ import {
 } from '@dgd/contracts';
 import { DEFAULT_LOCALE, LOCALES, type Locale } from '@dgd/i18n';
 import { translator } from '@dgd/i18n/messages';
+import { Prisma } from '../../generated/prisma/client.js';
 import { ErrorReporter } from '../observability/error-reporter.js';
 import { DomainError, type DomainErrorOptions } from './domain-error.js';
 
 type Normalized = { code: ErrorCode } & DomainErrorOptions;
+
+/** Prisma request errors with a catalog code (ERROR_HANDLING §4); others are internal errors. */
+const CODE_BY_PRISMA_ERROR: Record<string, ErrorCode> = {
+  P2002: 'CONFLICT', // unique constraint
+  P2025: 'RESOURCE_NOT_FOUND', // record to update or delete not found
+};
 
 const translators = Object.fromEntries(
   LOCALES.map((locale) => [locale, translator(locale)]),
@@ -30,6 +37,9 @@ function normalize(exception: unknown): Normalized {
   if (exception instanceof DomainError) return { code: exception.code, ...exception.options };
   if (exception instanceof ZodError) {
     return { code: 'VALIDATION_FAILED', errors: exception.issues.map(fieldErrorFromIssue) };
+  }
+  if (exception instanceof Prisma.PrismaClientKnownRequestError) {
+    return { code: CODE_BY_PRISMA_ERROR[exception.code] ?? 'INTERNAL_ERROR' };
   }
   if (exception instanceof HttpException) {
     return { code: CODE_BY_STATUS.get(exception.getStatus()) ?? 'INTERNAL_ERROR' };

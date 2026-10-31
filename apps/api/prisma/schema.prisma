@@ -1,5 +1,7 @@
 // Database schema. Tables follow docs/database/DATA_DICTIONARY.md; the inventory and phases are in
-// docs/README.md §6. IDs default to PostgreSQL 18's native uuidv7() (time-ordered).
+// docs/README.md §6. IDs default to PostgreSQL 18's native uuidv7() (time-ordered); clients may
+// also supply their own UUIDv7 (offline outbox, DATABASE_DESIGN §8). CHECK constraints and partial
+// or trigram indexes Prisma cannot express are added by hand in the migration SQL.
 
 generator client {
   provider               = "prisma-client"
@@ -18,9 +20,153 @@ model SystemSetting {
   key       String   @id
   value     Json
   isPublic  Boolean  @default(false) @map("is_public")
-  /// FK to users is added with the users table (T-P2-AUTH-001).
   updatedBy String?  @map("updated_by") @db.Uuid
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
 
+  updater User? @relation(fields: [updatedBy], references: [id], onDelete: SetNull)
+
   @@map("system_settings")
+}
+
+// ---------------------------------------------------------------- Identity & access (§1)
+
+enum LocaleCode {
+  en
+  bn
+
+  @@map("locale_code")
+}
+
+enum VerificationTokenType {
+  email_verify
+  password_reset
+  email_change
+  widget_link
+
+  @@map("verification_token_type")
+}
+
+enum SessionClient {
+  web
+  pwa
+  android_widget
+  api
+
+  @@map("session_client")
+}
+
+/// The identity root (F-AUTH-001..009). Checks: display_name length 1–60, status values,
+/// pending_deletion requires deletion_requested_at.
+model User {
+  id                  String    @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  email               String    @unique @db.Citext
+  /// Argon2id PHC string; null for OAuth-only accounts.
+  passwordHash        String?   @map("password_hash")
+  emailVerifiedAt     DateTime? @map("email_verified_at") @db.Timestamptz(6)
+  displayName         String    @map("display_name")
+  avatarKey           String?   @map("avatar_key")
+  /// active | locked | suspended | pending_deletion (CHECK).
+  status              String    @default("active")
+  suspendedUntil      DateTime? @map("suspended_until") @db.Timestamptz(6)
+  failedLoginCount    Int       @default(0) @map("failed_login_count") @db.SmallInt
+  lockedUntil         DateTime? @map("locked_until") @db.Timestamptz(6)
+  lastLoginAt         DateTime? @map("last_login_at") @db.Timestamptz(6)
+  deletionRequestedAt DateTime? @map("deletion_requested_at") @db.Timestamptz(6)
+  termsVersion        String    @map("terms_version")
+  createdAt           DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt           DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  preferences        UserPreferences?
+  identities         AuthIdentity[]
+  sessions           UserSession[]
+  verificationTokens VerificationToken[]
+  updatedSettings    SystemSetting[]
+
+  @@index([createdAt])
+  @@map("users")
+}
+
+/// One row per user (F-AUTH-010, F-I18N-003/004). Checks: theme values, week_start 0–6.
+model UserPreferences {
+  userId           String     @id @map("user_id") @db.Uuid
+  locale           LocaleCode @default(en)
+  /// IANA zone, validated in the app.
+  timezone         String     @default("Asia/Dhaka")
+  /// light | dark | system (CHECK).
+  theme            String     @default("system")
+  /// 0 = Sunday; Saturday is the common Bangladeshi convention.
+  weekStart        Int        @default(6) @map("week_start") @db.SmallInt
+  bengaliDigits    Boolean    @default(false) @map("bengali_digits")
+  showHijri        Boolean    @default(true) @map("show_hijri")
+  /// AI is off until the user opts in (F-AI-002).
+  aiEnabled        Boolean    @default(false) @map("ai_enabled")
+  analyticsConsent Boolean    @default(false) @map("analytics_consent")
+  updatedAt        DateTime   @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_preferences")
+}
+
+/// External login links (F-AUTH-003). Check: provider values (google).
+model AuthIdentity {
+  id              String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  userId          String   @map("user_id") @db.Uuid
+  provider        String
+  /// OIDC `sub`.
+  providerSubject String   @map("provider_subject")
+  emailAtLink     String?  @map("email_at_link") @db.Citext
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerSubject])
+  @@unique([userId, provider])
+  @@map("auth_identities")
+}
+
+/// One row per signed-in session; the opaque session ID lives in an HttpOnly cookie and only its
+/// hash is stored (F-AUTH-006/007, DL-012). Lifetimes: SRS FR-AUTH-002-03.
+model UserSession {
+  id               String        @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  userId           String        @map("user_id") @db.Uuid
+  /// SHA-256 of the 256-bit random session ID.
+  sessionTokenHash String        @unique @map("session_token_hash")
+  client           SessionClient
+  deviceLabel      String?       @map("device_label")
+  ipFirst          String?       @map("ip_first") @db.Inet
+  ipLast           String?       @map("ip_last") @db.Inet
+  lastUsedAt       DateTime      @default(now()) @map("last_used_at") @db.Timestamptz(6)
+  expiresAt        DateTime      @map("expires_at") @db.Timestamptz(6)
+  revokedAt        DateTime?     @map("revoked_at") @db.Timestamptz(6)
+  /// logout, logout_all, password_change, role_change, admin, deletion, idle_timeout.
+  revokedReason    String?       @map("revoked_reason")
+  /// Last step-up re-authentication (window: SRS FR-RBAC-006-01).
+  stepupAt         DateTime?     @map("stepup_at") @db.Timestamptz(6)
+  createdAt        DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime      @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([expiresAt])
+  @@map("user_sessions")
+}
+
+/// Single-use email verification, password reset, email change and widget link tokens.
+/// Check: new_email is set exactly for email_change.
+model VerificationToken {
+  id         String                @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  userId     String                @map("user_id") @db.Uuid
+  type       VerificationTokenType
+  /// SHA-256 of a 32-byte random token.
+  tokenHash  String                @unique @map("token_hash")
+  newEmail   String?               @map("new_email") @db.Citext
+  expiresAt  DateTime              @map("expires_at") @db.Timestamptz(6)
+  consumedAt DateTime?             @map("consumed_at") @db.Timestamptz(6)
+  createdAt  DateTime              @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("verification_tokens")
 }

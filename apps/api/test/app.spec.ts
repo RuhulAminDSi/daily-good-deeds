@@ -1,7 +1,8 @@
-import { Body, Controller, Get, type INestApplication, Module, Post } from '@nestjs/common';
+import { Body, Controller, Get, type INestApplication, Module, Param, Post } from '@nestjs/common';
 import request from 'supertest';
 import { z } from 'zod';
 import { DomainError } from '../src/common/errors/domain-error.js';
+import { Prisma } from '../src/generated/prisma/client.js';
 import { createTestApp } from './helpers.js';
 
 // Test-only routes that raise each kind of error the filter must render.
@@ -18,6 +19,11 @@ class ErrorsController {
   @Post('zod')
   zod(@Body() body: unknown) {
     return z.object({ title: z.string().max(5), email: z.email().optional() }).parse(body);
+  }
+
+  @Get('prisma/:code')
+  prisma(@Param('code') code: string) {
+    throw new Prisma.PrismaClientKnownRequestError('db says no', { code, clientVersion: 'test' });
   }
 
   @Get('crash')
@@ -152,6 +158,16 @@ describe('API skeleton (HTTP)', () => {
       .send({ title: 'x'.repeat(300 * 1024) })
       .expect(413);
     expect(res.body.code).toBe('PAYLOAD_TOO_LARGE');
+  });
+
+  it.each([
+    ['P2002', 409, 'CONFLICT'],
+    ['P2025', 404, 'RESOURCE_NOT_FOUND'],
+    ['P2003', 500, 'INTERNAL_ERROR'],
+  ])('maps Prisma %s to %s %s', async (prismaCode, status, code) => {
+    const res = await api().get(`/api/v1/test-errors/prisma/${prismaCode}`).expect(status);
+    expect(res.body.code).toBe(code);
+    expect(JSON.stringify(res.body)).not.toContain('db says no');
   });
 
   it('keeps 5xx responses generic (no internals leaked)', async () => {

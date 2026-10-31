@@ -16,6 +16,7 @@ import { ConfigModule } from './config/config.module.js';
 import type { AppConfig } from './config/env.js';
 import { DatabaseModule } from './database/database.module.js';
 import { HealthModule } from './health/health.module.js';
+import { UsersModule } from './users/users.module.js';
 
 @Module({})
 export class AppModule implements NestModule {
@@ -29,6 +30,7 @@ export class AppModule implements NestModule {
         ThrottlerModule.forRoot(THROTTLE_OPTIONS),
         HealthModule,
         DatabaseModule,
+        UsersModule,
       ],
       providers: [
         { provide: APP_FILTER, useClass: ProblemDetailsFilter },
