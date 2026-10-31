@@ -2,6 +2,7 @@
 // sign-in is blocked, installing is impossible and storage may not survive. Detection uses the user
 // agent plus one feature check (Telegram injects a bridge object); it is pure, so it is tested
 // against real user-agent fixtures (in-app-browser.spec.ts).
+import { useSyncExternalStore } from 'react';
 
 export type InAppApp =
   | 'facebook'
@@ -20,12 +21,15 @@ export interface InAppBrowser {
   os: 'android' | 'ios' | 'other';
 }
 
+/** iPhone, iPad (older iPadOS) and iPod user agents. */
+export const IOS_UA = /iPhone|iPad|iPod/i;
+
 /** First match wins: Messenger also carries Facebook's markers. */
 const APPS: [InAppApp, RegExp][] = [
-  ['messenger', /\bMessenger|FBAN\/Messenger|FB_IAB\/Orca/i],
+  ['messenger', /\bMessenger|FB_IAB\/Orca/i],
   ['instagram', /\bInstagram\b/i],
   ['facebook', /\bFBAN\/|\bFBAV\/|\bFB_IAB\/|\bFBIOS\b/i],
-  ['telegram', /\bTelegram-Android\b|\bTelegram\b/i],
+  ['telegram', /\bTelegram\b/i],
   ['line', /\bLine\/\d/i],
   ['tiktok', /\bmusical_ly\b|\bBytedanceWebview\b|\bTikTok\b/i],
   ['wechat', /\bMicroMessenger\b/i],
@@ -46,7 +50,7 @@ export function detectInAppBrowser({
   telegramBridge = false,
   standalone = false,
 }: DetectionEnv): InAppBrowser | null {
-  const os = /Android/i.test(ua) ? 'android' : /iPhone|iPad|iPod/i.test(ua) ? 'ios' : 'other';
+  const os = /Android/i.test(ua) ? 'android' : IOS_UA.test(ua) ? 'ios' : 'other';
   const named = APPS.find(([, pattern]) => pattern.test(ua))?.[0];
   if (named) return { app: named, os };
   if (telegramBridge) return { app: 'telegram', os };
@@ -67,6 +71,9 @@ export function androidIntentUrl(href: string): string {
   return `intent://${url.host}${url.pathname}${url.search}#Intent;scheme=${url.protocol.slice(0, -1)};S.browser_fallback_url=${fallback};end`;
 }
 
+/** Browser only: running as an installed iOS home-screen app. */
+export const isIosStandalone = () => (navigator as { standalone?: boolean }).standalone === true;
+
 let current: InAppBrowser | null | undefined;
 
 /** Browser only: this page's in-app browser (computed once; it cannot change). */
@@ -75,8 +82,19 @@ export function inAppBrowser(): InAppBrowser | null {
     current = detectInAppBrowser({
       userAgent: navigator.userAgent,
       telegramBridge: 'TelegramWebviewProxy' in window,
-      standalone: (navigator as { standalone?: boolean }).standalone === true,
+      standalone: isIosStandalone(),
     });
   }
   return current;
 }
+
+/**
+ * The in-app browser this page runs in, or null (also on the server and during hydration). The
+ * Google sign-in button (T-P2-AUTH-005) hides itself when this is set.
+ */
+export const useInAppBrowser = () =>
+  useSyncExternalStore(
+    () => () => {},
+    inAppBrowser,
+    () => null,
+  );

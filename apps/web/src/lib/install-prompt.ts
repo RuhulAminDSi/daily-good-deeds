@@ -1,7 +1,8 @@
 // Install prompt state (F-PWA-001, FR-PWA-001-02), browser only. The browser's own
 // `beforeinstallprompt` fires once, possibly before React hydrates, so it is captured from
 // src/instrumentation-client.ts and kept here for the InstallPrompt banner.
-import { inAppBrowser } from './in-app-browser';
+import { inAppBrowser, IOS_UA, isIosStandalone } from './in-app-browser';
+import { safely } from './storage';
 
 /** Chromium's install event (not in TypeScript's DOM types). */
 interface BeforeInstallPromptEvent extends Event {
@@ -50,15 +51,6 @@ export async function promptInstall(): Promise<'accepted' | 'dismissed'> {
   return (await event.userChoice).outcome;
 }
 
-/** Storage can be unavailable (private mode, blocked): then the prompt simply never shows. */
-function safely<T>(fn: () => T, fallback: T): T {
-  try {
-    return fn();
-  } catch {
-    return fallback;
-  }
-}
-
 /** Counts this visit (once per browser session) and returns the total. */
 export function countVisit(): number {
   return safely(() => {
@@ -79,9 +71,7 @@ export const snoozeInstallPrompt = () =>
  */
 export function shouldOfferInstall(visits: number): boolean {
   const dismissedAt = Number(safely(() => localStorage.getItem(DISMISSED_KEY), null) ?? 0);
-  const installed =
-    matchMedia('(display-mode: standalone)').matches ||
-    (navigator as { standalone?: boolean }).standalone === true;
+  const installed = matchMedia('(display-mode: standalone)').matches || isIosStandalone();
   return (
     visits >= MIN_VISITS && Date.now() - dismissedAt >= SNOOZE_MS && !installed && !inAppBrowser()
   );
@@ -89,5 +79,5 @@ export function shouldOfferInstall(visits: number): boolean {
 
 /** iOS has no install event; its users get Add to Home Screen steps instead. */
 export const isIos = () =>
-  /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+  IOS_UA.test(navigator.userAgent) ||
   (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);

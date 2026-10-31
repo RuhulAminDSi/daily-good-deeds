@@ -108,7 +108,7 @@
   "inApp": {
     "title": "For the best experience, open this in your browser",
     "body": "Installing the app and signing in with Google don’t work inside {app, select, facebook {Facebook} messenger {Messenger} instagram {Instagram} telegram {Telegram} line {LINE} tiktok {TikTok} wechat {WeChat} linkedin {LinkedIn} other {this app}}.",
-    "steps": "{app, select, facebook {Tap ⋯ at the top right, then “Open in external browser”.} messenger {Tap ⋯ at the top right, then “Open in external browser”.} instagram {Tap ⋯ at the top right, then “Open in external browser”.} telegram {Tap ⋯ at the top right, then “Open in Safari”.} other {Copy the link and paste it into Safari or Chrome.}}",
+    "steps": "{app, select, meta {Tap ⋯ at the top right, then “Open in external browser”.} telegram {Tap ⋯ at the top right, then “Open in Safari”.} other {Copy the link and paste it into Safari or Chrome.}}",
     "open": "Open in browser",
     "copy": "Copy link",
     "copied": "Link copied",

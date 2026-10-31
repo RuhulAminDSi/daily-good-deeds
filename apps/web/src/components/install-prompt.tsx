@@ -1,8 +1,8 @@
 'use client';
 
-import { Button, Card } from '@dgd/ui';
+import { Button } from '@dgd/ui';
 import { Download } from 'lucide-react';
-import { useEffect, useId, useState, useSyncExternalStore } from 'react';
+import { useEffect, useState, useSyncExternalStore } from 'react';
 import { useClientTranslations } from '@/i18n/client';
 import {
   canPromptNatively,
@@ -13,6 +13,7 @@ import {
   snoozeInstallPrompt,
   subscribe,
 } from '@/lib/install-prompt';
+import { BannerCard } from './banner-card';
 
 /**
  * The app's own install invitation (F-PWA-001, FR-PWA-001-02): from the second visit, never on the
@@ -21,7 +22,6 @@ import {
  */
 export function InstallPrompt() {
   const t = useClientTranslations('install');
-  const titleId = useId();
   const native = useSyncExternalStore(subscribe, canPromptNatively, () => false);
   const [eligible, setEligible] = useState(false);
 
@@ -45,14 +45,11 @@ export function InstallPrompt() {
   };
 
   return (
-    <Card as="section" variant="highlight" aria-labelledby={titleId} className="flex gap-3">
-      <Download aria-hidden className="mt-0.5 size-5 shrink-0" />
-      <div className="flex min-w-0 flex-1 flex-col gap-1">
-        <p id={titleId} className="text-label">
-          {t('title')}
-        </p>
-        <p className="text-body-sm">{ios ? t('iosSteps') : t('body')}</p>
-        <div className="mt-2 flex flex-wrap gap-2">
+    <BannerCard
+      icon={Download}
+      title={t('title')}
+      actions={
+        <>
           {!ios && (
             <Button size="sm" onClick={install}>
               {t('install')}
@@ -61,8 +58,10 @@ export function InstallPrompt() {
           <Button size="sm" variant="ghost" onClick={dismiss}>
             {t('dismiss')}
           </Button>
-        </div>
-      </div>
-    </Card>
+        </>
+      }
+    >
+      <p className="text-body-sm">{ios ? t('iosSteps') : t('body')}</p>
+    </BannerCard>
   );
 }
