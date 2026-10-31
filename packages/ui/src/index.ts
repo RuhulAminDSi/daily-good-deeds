@@ -25,6 +25,11 @@ export { Field, type FieldProps, Input, Textarea } from './components/field';
 export { Dialog, DialogClose, type ModalProps, Sheet } from './components/modal';
 export { UiProvider, type UiStrings } from './components/provider';
 export { Select, type SelectOption, type SelectProps } from './components/select';
+export {
+  SegmentedControl,
+  type SegmentedControlProps,
+  type SegmentedOption,
+} from './components/segmented';
 export { Tabs, TabsContent, TabsList, TabsTrigger } from './components/tabs';
 export { type ToastOptions, useToast } from './components/toast';
 export { Tooltip, type TooltipProps } from './components/tooltip';

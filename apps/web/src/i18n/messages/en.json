@@ -30,6 +30,12 @@
     "notification": "Notification",
     "required": "required"
   },
+  "theme": {
+    "label": "Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
   "section": {
     "comingSoon": "This section is coming in a later update."
   },

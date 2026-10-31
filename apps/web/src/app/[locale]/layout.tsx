@@ -2,6 +2,8 @@ import { UiProvider } from '@dgd/ui';
 import type { Metadata } from 'next';
 import { BoundaryMessagesProvider } from '@/i18n/boundary-messages';
 import { routeMessages } from '@/i18n/route-locale';
+import { themeAttribute } from '@/theme';
+import { readTheme } from '@/theme.server';
 import '../globals.css';
 
 /**
@@ -20,9 +22,10 @@ export async function generateMetadata({ params }: LayoutProps<'/[locale]'>): Pr
 
 /** Root layout: one per locale, so `<html lang>` is always correct (screen readers, fonts). */
 export default async function LocaleLayout({ children, params }: LayoutProps<'/[locale]'>) {
-  const { locale, m } = await routeMessages(params);
+  const [{ locale, m }, theme] = await Promise.all([routeMessages(params), readTheme()]);
   return (
-    <html lang={locale}>
+    // The saved theme is in the server-rendered HTML, so the first paint is already right.
+    <html lang={locale} data-theme={themeAttribute(theme)}>
       <body className="min-h-dvh bg-bg text-body text-text antialiased">
         <UiProvider locale={locale} strings={m.ui}>
           <BoundaryMessagesProvider value={{ locale, common: m.common }}>

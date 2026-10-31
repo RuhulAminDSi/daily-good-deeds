@@ -178,6 +178,6 @@ Ratios were **computed** with the WCAG relative-luminance formula (Node script r
 | `--shadow-lg` | `0 8px 24px rgba(31,42,36,.12)` | `0 8px 24px rgba(0,0,0,.5)` |
 
 ## 6. Theme switching
-- The default is `system` (follows `prefers-color-scheme`). The user preference (`light` / `dark` / `system`) is stored in `user_preferences.theme` and mirrored to a cookie, so SSR renders the correct theme without a flash.
+- The default is `system` (follows `prefers-color-scheme`). The preference (`light` / `dark` / `system`) is kept in the `dgd_theme` cookie for one year. The server renders `<html data-theme>` from it, so the first paint is already right, without a flash and without an inline script. Mirroring it to `user_preferences.theme`, so it follows the account across devices, comes with the settings work after auth.
 - `color-scheme: light dark` is set on `:root` so native controls and scrollbars match.
 - The widget follows Android system dark mode via Glance `ColorProviders(day, night)` built from the same tokens.

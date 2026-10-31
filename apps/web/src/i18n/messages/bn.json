@@ -30,6 +30,12 @@
     "notification": "বিজ্ঞপ্তি",
     "required": "আবশ্যক"
   },
+  "theme": {
+    "label": "থিম",
+    "light": "লাইট",
+    "dark": "ডার্ক",
+    "system": "সিস্টেম"
+  },
   "section": {
     "comingSoon": "এই অংশটি পরবর্তী হালনাগাদে আসছে।"
   },

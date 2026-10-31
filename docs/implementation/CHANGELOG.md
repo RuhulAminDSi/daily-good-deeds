@@ -485,3 +485,23 @@ All notable changes to this project are recorded here. Format: [Keep a Changelog
   - **Bundles:** `@dgd/ui` is marked side-effect free except for its CSS and listed in `optimizePackageImports`, so a route ships only the components it uses.
   - **Accepted, not changed:** feature-flag and role conditions on nav items wait for the flags (Phase 2 RBAC and admin) and the Islamic-module switch.
 
+### Added (2026-10-31), Phase 2: T-P2-UI-004 theme switching
+- **Light / dark / system switch** in the app's top bar (icon segmented control, labelled in EN and BN).
+  - It applies at once, without a reload.
+  - It is stored in the `dgd_theme` cookie for one year (`SameSite=Lax`, plus `Secure` over https).
+  - "System" follows the OS through `prefers-color-scheme`.
+- **No flash, no script:** the root layout reads the cookie and renders `<html data-theme>` on the server, so the first paint is correct without a pre-paint script (which the strict CSP would also have needed to allow). Invalid cookie values fall back to "system".
+- **`SegmentedControl` in `@dgd/ui`** (Radix ToggleGroup, a radiogroup): arrow keys move, Space/Enter select, and pressing the selected option keeps it. Optional icon-only mode keeps the labels as accessible names. 4 story tests in EN/BN × light/dark.
+- **Tests** (Playwright, 3 new; web E2E 23 passing):
+  - The default follows the OS.
+  - Choosing Light on a dark OS applies at once and sets the cookie, and the **server HTML after reload already carries `data-theme="light"`**.
+  - Switching back to System removes it.
+  - An invalid cookie is ignored.
+  - The switch works from the keyboard in Bengali.
+- **Pre-push review of T-P2-UI-004:**
+  - **Shared switcher:** `ThemeSwitcher` moved to `components/` and its cookie-plus-DOM logic to an `applyTheme()` helper, so public and admin pages can add it without copying.
+  - **One read per request:** `readTheme()` is wrapped in React `cache()`, so both layouts share one read.
+  - **Tooltips:** icon-only SegmentedControl options use the shared Tooltip, like IconButton, instead of the native `title`.
+  - **Accepted:** the browser writes the cookie for now. A server action takes over when the account preference arrives, and `applyTheme` documents this.
+- **Not yet:** saving the preference to the account (`user_preferences.theme`) with the settings work after auth (COLOR_TOKENS §6 updated).
+
