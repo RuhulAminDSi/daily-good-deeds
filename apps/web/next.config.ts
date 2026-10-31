@@ -1,4 +1,5 @@
 import type { NextConfig } from 'next';
+import createNextIntlPlugin from 'next-intl/plugin';
 
 // E2E builds (E2E_ROUTES=1) also compile `*.e2e.tsx` test-only routes, into a separate output
 // directory so they never mix with, or ship in, the normal build.
@@ -27,4 +28,5 @@ const config: NextConfig = {
   headers: async () => [{ source: '/:path*', headers: SECURITY_HEADERS }],
 };
 
-export default config;
+// Points next-intl at the per-request catalog loader.
+export default createNextIntlPlugin('./src/i18n/request.ts')(config);

@@ -1,7 +1,9 @@
+import type { Messages } from '@dgd/i18n/messages';
 import { UiProvider } from '@dgd/ui';
 import type { Metadata } from 'next';
-import { BoundaryMessagesProvider } from '@/i18n/boundary-messages';
-import { routeMessages } from '@/i18n/route-locale';
+import { NextIntlClientProvider } from 'next-intl';
+import { getMessages, getTranslations } from 'next-intl/server';
+import { routeLocale } from '@/i18n/route-locale';
 import { themeAttribute } from '@/theme';
 import { readTheme } from '@/theme.server';
 import '../globals.css';
@@ -12,26 +14,34 @@ import '../globals.css';
  */
 export const dynamic = 'force-dynamic';
 
-export async function generateMetadata({ params }: LayoutProps<'/[locale]'>): Promise<Metadata> {
-  const { m } = await routeMessages(params);
+/** Namespaces client components use; only these are sent to the browser. */
+const CLIENT_NAMESPACES = ['common', 'nav', 'theme'] as const satisfies (keyof Messages)[];
+
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('app');
   return {
-    title: { default: m.app.name, template: `%s · ${m.app.name}` },
-    description: m.app.tagline,
+    title: { default: t('name'), template: `%s · ${t('name')}` },
+    description: t('tagline'),
   };
 }
 
 /** Root layout: one per locale, so `<html lang>` is always correct (screen readers, fonts). */
 export default async function LocaleLayout({ children, params }: LayoutProps<'/[locale]'>) {
-  const [{ locale, m }, theme] = await Promise.all([routeMessages(params), readTheme()]);
+  const [locale, theme, messages] = await Promise.all([
+    routeLocale(params),
+    readTheme(),
+    getMessages(),
+  ]);
+  const clientMessages = Object.fromEntries(CLIENT_NAMESPACES.map((ns) => [ns, messages[ns]]));
   return (
     // The saved theme is in the server-rendered HTML, so the first paint is already right.
     <html lang={locale} data-theme={themeAttribute(theme)}>
       <body className="min-h-dvh bg-bg text-body text-text antialiased">
-        <UiProvider locale={locale} strings={m.ui}>
-          <BoundaryMessagesProvider value={{ locale, common: m.common }}>
+        <NextIntlClientProvider messages={clientMessages}>
+          <UiProvider locale={locale} strings={messages.ui}>
             {children}
-          </BoundaryMessagesProvider>
-        </UiProvider>
+          </UiProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

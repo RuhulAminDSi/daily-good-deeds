@@ -1,0 +1,7 @@
+- main:
+    - heading "Page not found" [level=1]
+    - link "Back to home":
+        - /url: /en
+- region "Notifications (F8)":
+    - list
+- alert

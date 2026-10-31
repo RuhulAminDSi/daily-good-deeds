@@ -1,4 +1,4 @@
-import { routeMessages } from '@/i18n/route-locale';
+import { getTranslations } from 'next-intl/server';
 import { api, unwrap } from '@/lib/api';
 
 /**
@@ -21,16 +21,15 @@ async function apiIsUp(): Promise<boolean> {
   }
 }
 
-export default async function Landing({ params }: PageProps<'/[locale]'>) {
-  const { m } = await routeMessages(params);
-  const up = await apiIsUp();
+export default async function Landing() {
+  const [t, up] = await Promise.all([getTranslations(), apiIsUp()]);
   return (
     <main className="mx-auto flex max-w-xl flex-col gap-6 px-4 py-16">
-      <h1 className="text-display text-primary">{m.app.name}</h1>
-      <p className="text-h3 font-normal text-text-muted">{m.app.tagline}</p>
+      <h1 className="text-display text-primary">{t('app.name')}</h1>
+      <p className="text-h3 font-normal text-text-muted">{t('app.tagline')}</p>
       <p className="text-body-sm">
-        <span className="font-medium">{m.status.label}: </span>
-        {up ? m.status.ok : m.status.unavailable}
+        <span className="font-medium">{t('status.label')}: </span>
+        {up ? t('status.ok') : t('status.unavailable')}
       </p>
     </main>
   );

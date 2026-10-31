@@ -1,0 +1,10 @@
+- navigation "Admin":
+    - text: ''
+    - link "Home":
+        - /url: /en
+- main:
+    - heading "Admin dashboard" [level=1]
+    - paragraph: Admin tools are coming soon.
+- region "Notifications (F8)":
+    - list
+- alert

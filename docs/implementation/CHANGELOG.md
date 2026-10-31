@@ -505,3 +505,23 @@ All notable changes to this project are recorded here. Format: [Keep a Changelog
   - **Accepted:** the browser writes the cookie for now. A server action takes over when the account preference arrives, and `applyTheme` documents this.
 - **Not yet:** saving the preference to the account (`user_preferences.theme`) with the settings work after auth (COLOR_TOKENS §6 updated).
 
+### Added (2026-10-31), Phase 2: T-P2-I18N-001 catalogs and next-intl
+- **`@dgd/i18n`** holds the EN/BN catalogs (ICU MessageFormat, namespaced: app, status, nav, ui, theme, section, today, admin, common), moved out of the web app.
+  - **Root export:** locales only, so it is browser-safe.
+  - **`@dgd/i18n/messages`:** the catalogs, the `Messages` type, and `translator(locale)`, a `use-intl` translator with typed keys that the API and worker use for emails, push and errors. It runs in plain Node; verified on the built output.
+  - **4 unit tests:** key parity between locales, no empty messages, and translation in both languages.
+- **Web on next-intl 4.14.9** (DL-041):
+  - Server components use `getTranslations` and client components `useTranslations`; keys are type-checked against the English catalog (`AppConfig` augmentation).
+  - The proxy sets next-intl's locale header for every page request, prefetches included.
+  - Only the namespaces client components use are sent to the browser.
+  - The stopgap dictionary and the boundary-messages provider are removed, and `UiProvider` gets its strings from the catalog.
+- **Tests** (web E2E: 38 passing):
+  - Every shipped page (landing, today, calendar, islamic, growth, admin, not found) has an **accessibility-tree snapshot in EN and in BN** (`toMatchAriaSnapshot`, platform-independent files). A missing or untranslated string, server- or client-rendered, changes a snapshot. A scan of the BN snapshots found no English text.
+  - Client-side navigation in Bengali stays Bengali, which exercises the prefetch path.
+- **Pre-push review of T-P2-I18N-001:**
+  - **Locale-aware links:** next-intl's `Link` and `usePathname` (`createNavigation`, `src/i18n/navigation.ts`) add the locale prefix, so hand-built `/${locale}` links and their `useLocale` calls are gone. Snapshots are unchanged.
+  - **Fewer translation calls:** placeholder pages and metadata use a single `getTranslations`, and the catalog test uses one `leaves()` walk.
+  - **Proxy header documented:** the proxy's use of next-intl's undocumented locale header has a comment, and the i18n E2E tests would fail on a breaking upgrade.
+  - **Deferred to I18N-002:** a check that every client `useTranslations()` namespace is in `CLIENT_NAMESPACES`. Today a missing one only fails at runtime. Added to the task definition.
+- **Not reproduced:** one full E2E run had a single `toHaveAttribute` failure. It didn't recur in three more full runs or in 304 repeated runs (38 tests × 8, in parallel). If it shows up in CI, the trace will show which test.
+

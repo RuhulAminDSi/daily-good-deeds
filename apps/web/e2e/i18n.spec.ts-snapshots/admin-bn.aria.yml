@@ -1,0 +1,10 @@
+- navigation "অ্যাডমিন":
+    - text: ''
+    - link "হোম":
+        - /url: /bn
+- main:
+    - heading "অ্যাডমিন ড্যাশবোর্ড" [level=1]
+    - paragraph: অ্যাডমিন টুলস শিগগিরই আসছে।
+- region "বিজ্ঞপ্তিসমূহ (F8)":
+    - list
+- alert

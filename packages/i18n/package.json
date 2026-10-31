@@ -1,0 +1,33 @@
+{
+  "name": "@dgd/i18n",
+  "version": "0.0.0",
+  "private": true,
+  "description": "UI message catalogs (EN/BN, ICU MessageFormat) and locales, shared by web, API and worker (ADR-015, DL-010)",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./messages": {
+      "types": "./dist/messages.d.ts",
+      "default": "./dist/messages.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "use-intl": "4.14.9"
+  },
+  "devDependencies": {
+    "@dgd/config": "workspace:*",
+    "@types/node": "24.19.2",
+    "eslint": "10.14.0",
+    "typescript": "6.0.3",
+    "vitest": "5.0.5"
+  }
+}

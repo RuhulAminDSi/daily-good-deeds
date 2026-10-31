@@ -1,0 +1,36 @@
+- link "মূল বিষয়বস্তুতে যান":
+    - /url: '#main'
+- navigation "প্রধান নেভিগেশন":
+    - region "দৈনন্দিন":
+        - paragraph: দৈনন্দিন
+        - list:
+            - listitem:
+                - link "আজ":
+                    - /url: /bn/today
+            - listitem:
+                - link "ক্যালেন্ডার":
+                    - /url: /bn/calendar
+    - region "ঈমান":
+        - paragraph: ঈমান
+        - list:
+            - listitem:
+                - link "ইসলামিক":
+                    - /url: /bn/islamic
+    - region "উন্নতি":
+        - paragraph: উন্নতি
+        - list:
+            - listitem:
+                - link "উন্নতি":
+                    - /url: /bn/growth
+- banner:
+    - text: ডেইলি গুড ডিডস
+    - radiogroup "থিম":
+        - radio "লাইট"
+        - radio "ডার্ক"
+        - radio "সিস্টেম" [checked]
+- main:
+    - heading "ইসলামিক" [level=1]
+    - paragraph: এই অংশটি পরবর্তী হালনাগাদে আসছে।
+- region "বিজ্ঞপ্তিসমূহ (F8)":
+    - list
+- alert

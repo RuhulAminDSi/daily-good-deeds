@@ -1,0 +1,7 @@
+- main:
+    - heading "পৃষ্ঠাটি পাওয়া যায়নি" [level=1]
+    - link "হোমে ফিরে যান":
+        - /url: /bn
+- region "বিজ্ঞপ্তিসমূহ (F8)":
+    - list
+- alert

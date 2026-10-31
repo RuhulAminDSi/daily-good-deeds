@@ -1,7 +1,7 @@
 # Implementation Master Plan
 
 > **Status:** Phase 0 is complete. Phase 1 specifications are **awaiting approval**. **No application code has been written.**
-> **Scope:** 200 technical tasks and 540 subtasks across Phases 0–10. Every in-scope feature (P2–P10) in [FEATURE_ID_REGISTRY.md](../product/FEATURE_ID_REGISTRY.md) maps to at least one task. The reverse index is in [MASTER_TASK_TRACKER.md](MASTER_TASK_TRACKER.md).
+> **Scope:** 200 technical tasks and 541 subtasks across Phases 0–10. Every in-scope feature (P2–P10) in [FEATURE_ID_REGISTRY.md](../product/FEATURE_ID_REGISTRY.md) maps to at least one task. The reverse index is in [MASTER_TASK_TRACKER.md](MASTER_TASK_TRACKER.md).
 > **ID scheme:** see [docs/README.md §2](../README.md). Tasks are `T-P{phase}-{MOD}-{nnn}`, subtasks are `.n`, risks are `RISK-nnn`.
 
 Besides the feature module codes, the task IDs use these epic codes: **GOV** (governance and planning), **PLAT** (platform, infrastructure, CI, deployment, operations), **UI** (design tokens, component library, shell), and **QA** (cross-cutting test suites).
@@ -153,7 +153,7 @@ P4, P7, and P8 can run in parallel with the critical path if there is capacity:
 | T-P2-UI-003 | App shell & responsive navigation | F-PWA-002 | M | .1 App shell layout<br>.2 Mobile bottom nav, desktop sidebar<br>.3 Offline / in-app-browser banner slots | Bottom nav (<768px) / sidebar (≥1024px) verified at 360/768/1280 widths in Playwright; focus order correct. |
 | T-P2-UI-004 | Theme switching (light/dark/system) | F-AUTH-010 | S | .1 Theme provider & pre-paint script<br>.2 Persist to cookie + preferences | No flash of wrong theme on reload (E2E); preference persisted. |
 | T-P2-I18N-001 | EN/BN catalogs & next-intl setup | F-I18N-001 | M | .1 packages/i18n en.json/bn.json with namespaces<br>.2 next-intl provider (server + client)<br>.3 API-side message loader for emails/errors | All shipped pages render in EN and BN (E2E snapshot per locale). |
-| T-P2-I18N-002 | No-hardcoded-strings lint & missing-key check | F-I18N-001, F-I18N-009 | S | .1 eslint no-literal-string rule<br>.2 Key parity script | CI fails on JSX literal strings and on keys missing from bn.json (allowlist documented). |
+| T-P2-I18N-002 | No-hardcoded-strings lint & missing-key check | F-I18N-001, F-I18N-009 | S | .1 eslint no-literal-string rule<br>.2 Key parity script<br>.3 Client namespaces check: every useTranslations() namespace in a client file is in CLIENT_NAMESPACES (apps/web/src/app/[locale]/layout.tsx) | CI fails on JSX literal strings and on keys missing from bn.json (allowlist documented). |
 | T-P2-I18N-003 | Language switcher & persistence | F-I18N-002, F-I18N-003 | S | .1 Switcher component<br>.2 Guest cookie<br>.3 Sync to user_preferences on login | Switch persists across reload (guest cookie) and across devices (account preference) — E2E. |
 | T-P2-I18N-004 | Locale formatting helpers | F-I18N-004 | S | .1 Intl wrappers (date, time, relative, number)<br>.2 Bengali digit option<br>.3 Hijri formatting hook (stub until P5) | Unit tests for dates/times/numbers in en & bn incl. Bengali digits toggle. |
 | T-P2-I18N-005 | Bengali typography | F-I18N-005 | S | .1 Font loading & subsetting<br>.2 Locale-specific line-height tokens | BN font loads via next/font with no CLS > 0.05; conjunct rendering visually checked on Android Chrome & iOS Safari. |

@@ -2,12 +2,13 @@
 
 import { SegmentedControl } from '@dgd/ui';
 import { Monitor, Moon, Sun } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
-import type { Messages } from '@/i18n/dictionary';
 import { applyTheme, type Theme } from '@/theme';
 
 /** Light / dark / system, for any shell's top bar. Applies at once, remembered for a year. */
-export function ThemeSwitcher({ initial, labels }: { initial: Theme; labels: Messages['theme'] }) {
+export function ThemeSwitcher({ initial }: { initial: Theme }) {
+  const t = useTranslations('theme');
   const [theme, setTheme] = useState(initial);
 
   const choose = (next: Theme) => {
@@ -17,14 +18,14 @@ export function ThemeSwitcher({ initial, labels }: { initial: Theme; labels: Mes
 
   return (
     <SegmentedControl
-      label={labels.label}
+      label={t('label')}
       iconOnly
       value={theme}
       onValueChange={choose}
       options={[
-        { value: 'light', label: labels.light, icon: <Sun className="size-4" /> },
-        { value: 'dark', label: labels.dark, icon: <Moon className="size-4" /> },
-        { value: 'system', label: labels.system, icon: <Monitor className="size-4" /> },
+        { value: 'light', label: t('light'), icon: <Sun className="size-4" /> },
+        { value: 'dark', label: t('dark'), icon: <Moon className="size-4" /> },
+        { value: 'system', label: t('system'), icon: <Monitor className="size-4" /> },
       ]}
     />
   );

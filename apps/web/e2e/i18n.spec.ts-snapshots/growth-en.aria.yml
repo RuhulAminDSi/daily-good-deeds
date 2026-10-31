@@ -1,0 +1,36 @@
+- link "Skip to main content":
+    - /url: '#main'
+- navigation "Main navigation":
+    - region "Daily":
+        - paragraph: Daily
+        - list:
+            - listitem:
+                - link "Today":
+                    - /url: /en/today
+            - listitem:
+                - link "Calendar":
+                    - /url: /en/calendar
+    - region "Faith":
+        - paragraph: Faith
+        - list:
+            - listitem:
+                - link "Islamic":
+                    - /url: /en/islamic
+    - region "Growth":
+        - paragraph: Growth
+        - list:
+            - listitem:
+                - link "Growth":
+                    - /url: /en/growth
+- banner:
+    - text: Daily Good Deeds
+    - radiogroup "Theme":
+        - radio "Light"
+        - radio "Dark"
+        - radio "System" [checked]
+- main:
+    - heading "Growth" [level=1]
+    - paragraph: This section is coming in a later update.
+- region "Notifications (F8)":
+    - list
+- alert

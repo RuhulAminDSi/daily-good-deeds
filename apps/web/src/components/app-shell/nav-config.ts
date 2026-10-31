@@ -3,7 +3,7 @@
 // their pages ship (a link never points at a page that does not exist), and feature-flag or role
 // conditions will filter this one list.
 import { BookHeart, Calendar, type LucideIcon, Sprout, Sun } from 'lucide-react';
-import type { Messages } from '@/i18n/dictionary';
+import type { Messages } from '@dgd/i18n/messages';
 
 export interface NavItem {
   label: Exclude<keyof Messages['nav'], 'groups'>;

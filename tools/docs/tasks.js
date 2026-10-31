@@ -255,7 +255,11 @@ t(
   ['F-I18N-001', 'F-I18N-009'],
   'S',
   'CI fails on JSX literal strings and on keys missing from bn.json (allowlist documented).',
-  ['eslint no-literal-string rule', 'Key parity script'],
+  [
+    'eslint no-literal-string rule',
+    'Key parity script',
+    'Client namespaces check: every useTranslations() namespace in a client file is in CLIENT_NAMESPACES (apps/web/src/app/[locale]/layout.tsx)',
+  ],
 );
 t(
   'T-P2-I18N-003',

@@ -1,8 +1,8 @@
+import { getTranslations } from 'next-intl/server';
 import { PageHeader } from '@/components/page-header';
-import { routeMessages } from '@/i18n/route-locale';
 
 // Placeholder until its phase ships (NAVIGATION_MAP §3): the navigation never links to a 404.
-export default async function CalendarPage({ params }: PageProps<'/[locale]/calendar'>) {
-  const { m } = await routeMessages(params);
-  return <PageHeader title={m.nav.calendar} description={m.section.comingSoon} />;
+export default async function CalendarPage() {
+  const t = await getTranslations();
+  return <PageHeader title={t('nav.calendar')} description={t('section.comingSoon')} />;
 }

@@ -1,0 +1,7 @@
+- main:
+    - heading "Daily Good Deeds" [level=1]
+    - paragraph: Small Good Deeds, Every Day. A Better You, Every Day.
+    - paragraph: 'Service status: Service is temporarily unavailable'
+- region "Notifications (F8)":
+    - list
+- alert

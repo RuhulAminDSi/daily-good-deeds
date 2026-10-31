@@ -1,15 +1,10 @@
 import type { ReactNode } from 'react';
-import type { Messages } from '@/i18n/dictionary';
-import type { Locale } from '@/i18n/locales';
-import type { Theme } from '@/theme';
+import { getTranslations } from 'next-intl/server';
+import { readTheme } from '@/theme.server';
 import { Navigation } from './navigation';
 import { ThemeSwitcher } from '../theme-switcher';
 
 interface AppShellProps {
-  locale: Locale;
-  m: Messages;
-  /** The saved theme, for the switcher's initial state. */
-  theme: Theme;
   /** System banners (offline, in-app browser, update…), stacked above the content. Their content
    *  arrives with the PWA tasks; the slot is here so pages never need to change. */
   banners?: ReactNode;
@@ -21,21 +16,22 @@ interface AppShellProps {
  * top bar, main. It fills the dynamic viewport (`dvh`), so in-app browsers' toolbars never
  * cover the bottom bar.
  */
-export function AppShell({ locale, m, theme, banners, children }: AppShellProps) {
+export async function AppShell({ banners, children }: AppShellProps) {
+  const [t, theme] = await Promise.all([getTranslations(), readTheme()]);
   return (
     <div className="flex min-h-dvh flex-col md:flex-row">
       <a
         href="#main"
         className="sr-only rounded-md bg-surface-raised px-4 py-2 text-label shadow-md focus:not-sr-only focus:fixed focus:start-2 focus:top-2 focus:z-50"
       >
-        {m.nav.skipToContent}
+        {t('nav.skipToContent')}
       </a>
-      <Navigation locale={locale} labels={m.nav} />
+      <Navigation />
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="sticky top-0 z-20 flex min-h-14 items-center gap-3 border-b border-border bg-surface px-4 md:px-6">
-          <span className="text-h3 text-primary">{m.app.name}</span>
+          <span className="text-h3 text-primary">{t('app.name')}</span>
           <div className="ms-auto">
-            <ThemeSwitcher initial={theme} labels={m.theme} />
+            <ThemeSwitcher initial={theme} />
           </div>
         </header>
         {banners && <div className="flex flex-col gap-2 px-4 pt-4 md:px-6">{banners}</div>}
