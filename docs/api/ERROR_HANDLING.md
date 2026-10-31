@@ -132,7 +132,9 @@ Every non-2xx response has `Content-Type: application/problem+json`:
 - A NestJS global `ProblemDetailsFilter` maps `DomainError(code, status, params)`, `ZodError`, Prisma errors, and `HttpException` to the format above:
   - Prisma `P2002` unique violation → `CONFLICT`
   - `P2025` not found → `RESOURCE_NOT_FOUND`
-- The error catalog lives in `packages/contracts/src/errors.ts` as a single typed map (`code → status, i18nKey`), shared by the API and the web client. A unit test asserts that every code has EN and BN messages.
+- The error catalog lives in `packages/contracts/src/errors.ts` as a single typed map (`code → status`; `i18nKey` = `errors.<code>`), shared by the API and the web client. Messages live in `@dgd/i18n` (`errors.*`, `validation.*`). A unit test asserts that every code and every validation key has EN and BN messages.
+- `title` is rendered from `i18nKey` in the locale negotiated from `Accept-Language` (q-weighted, `bn-BD` → `bn`, default `en`); responses carry `Content-Language` and `Vary: Accept-Language`. `detail` is passed by the thrower and must already be localized.
+- **Validation keys.** `@dgd/contracts` installs a global Zod error map, so every issue's message is a `validation.*` key: a missing value is `validation.required`, anything else `validation.<zod issue code>`. `fieldErrorFromIssue` turns an issue into `{ pointer, code, i18nKey, params }`, where `code` is the key without its namespace and `params` feed ICU (`max`/`min` + `origin`, `format`, `divisor`, `keys`). A schema names its own message with a key: `.refine(ok, { error: 'validation.password_weak' })` gives `code: "password_weak"`; plain-prose messages fall back to the generic key.
 - 4xx responses are logged at `info`, 5xx at `error`, both with `requestId`, `userId` (hashed), route, and `code`. Repeated 401/403 bursts per IP feed the security alerting (NFR-OBSERVABILITY).
 
 ## 5. Client handling contract
@@ -140,7 +142,7 @@ Every non-2xx response has `Content-Type: application/problem+json`:
 |---|---|
 | `AUTH_SESSION_EXPIRED`, `AUTH_SESSION_REVOKED` | Clear local user data and go to login (widget: "Re-link device" state) |
 | `STEP_UP_REQUIRED` | Open the re-auth modal, then replay |
-| `VALIDATION_FAILED` | Map `errors[].pointer` to form fields and show localized messages |
+| `VALIDATION_FAILED` | Map `errors[].pointer` to form fields and show localized messages (web: `useProblemMessages()` in `apps/web/src/i18n/problem.ts`; unknown keys show the generic `validation.custom` message) |
 | `PRECONDITION_FAILED` | Admin editors: show "This was changed elsewhere" with reload or overwrite |
 | `RATE_LIMITED`, `AI_QUOTA_EXCEEDED` | Show a calm, non-blocking notice with the reset time |
 | `AI_DISABLED`, `FEATURE_DISABLED` | Hide or disable the feature entry point. This is never a blocking error. |

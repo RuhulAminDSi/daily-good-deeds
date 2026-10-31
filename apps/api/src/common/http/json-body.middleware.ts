@@ -53,7 +53,14 @@ export function jsonBody(limit = JSON_BODY_LIMIT): RequestHandler {
       if (type === TOO_DEEP) {
         return next(
           new DomainError('VALIDATION_FAILED', {
-            errors: [{ pointer: '', code: 'max_depth', params: { max: JSON_MAX_DEPTH } }],
+            errors: [
+              {
+                pointer: '',
+                code: 'max_depth',
+                i18nKey: 'validation.max_depth',
+                params: { max: JSON_MAX_DEPTH },
+              },
+            ],
           }),
         );
       }

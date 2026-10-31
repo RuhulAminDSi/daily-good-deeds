@@ -57,5 +57,35 @@
     "retry": "Try again",
     "notFoundTitle": "Page not found",
     "backHome": "Back to home"
+  },
+  "errors": {
+    "validation_failed": "Some fields are invalid",
+    "malformed_json": "The request body is not valid JSON",
+    "unauthenticated": "Sign in to continue",
+    "permission_denied": "You do not have permission to do this",
+    "resource_not_found": "Not found",
+    "method_not_allowed": "Method not allowed",
+    "conflict": "This conflicts with existing data",
+    "payload_too_large": "The request is too large",
+    "unsupported_media_type": "Unsupported content type",
+    "business_rule_violation": "This action is not allowed",
+    "rate_limited": "Too many requests",
+    "internal_error": "Something went wrong",
+    "dependency_unavailable": "A service is temporarily unavailable"
+  },
+  "validation": {
+    "required": "This field is required.",
+    "max_depth": "The data is nested too deeply.",
+    "invalid_type": "Enter a valid value.",
+    "too_big": "{origin, select, string {Use at most {max, plural, one {# character} other {# characters}}.} array {Choose at most {max, plural, one {# item} other {# items}}.} set {Choose at most {max, plural, one {# item} other {# items}}.} file {The file can be at most {max, number} bytes.} other {Enter {max, number} or less.}}",
+    "too_small": "{origin, select, string {Use at least {min, plural, one {# character} other {# characters}}.} array {Choose at least {min, plural, one {# item} other {# items}}.} set {Choose at least {min, plural, one {# item} other {# items}}.} file {The file must be at least {min, number} bytes.} other {Enter {min, number} or more.}}",
+    "invalid_format": "{format, select, email {Enter a valid email address.} url {Enter a valid web address.} uuid {Enter a valid ID.} other {This value is not in the right format.}}",
+    "not_multiple_of": "Enter a multiple of {divisor, number}.",
+    "unrecognized_keys": "Unknown fields: {keys}.",
+    "invalid_union": "Enter a valid value.",
+    "invalid_key": "Contains an invalid key.",
+    "invalid_element": "Contains an invalid item.",
+    "invalid_value": "Choose one of the allowed options.",
+    "custom": "This value is not valid."
   }
 }

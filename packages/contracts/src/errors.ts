@@ -2,24 +2,24 @@ import { z } from 'zod';
 
 /**
  * Error catalog (docs/api/ERROR_HANDLING.md §3), shared by the API and its clients. Clients branch
- * on `code` and render the message from `i18nKey`. `title` is the English fallback until the API
- * localizes titles from `i18nKey` (T-P2-I18N-006).
+ * on `code` and render the message from `i18nKey` (`errors.<code>` in @dgd/i18n, EN and BN); the
+ * API localizes `title` from the same key.
  */
 export const ERROR_CODES = {
-  VALIDATION_FAILED: { status: 400, title: 'Some fields are invalid' },
-  MALFORMED_JSON: { status: 400, title: 'The request body is not valid JSON' },
-  UNAUTHENTICATED: { status: 401, title: 'Sign in to continue' },
-  PERMISSION_DENIED: { status: 403, title: 'You do not have permission to do this' },
-  RESOURCE_NOT_FOUND: { status: 404, title: 'Not found' },
-  METHOD_NOT_ALLOWED: { status: 405, title: 'Method not allowed' },
-  CONFLICT: { status: 409, title: 'This conflicts with existing data' },
-  PAYLOAD_TOO_LARGE: { status: 413, title: 'The request is too large' },
-  UNSUPPORTED_MEDIA_TYPE: { status: 415, title: 'Unsupported content type' },
-  BUSINESS_RULE_VIOLATION: { status: 422, title: 'This action is not allowed' },
-  RATE_LIMITED: { status: 429, title: 'Too many requests' },
-  INTERNAL_ERROR: { status: 500, title: 'Something went wrong' },
-  DEPENDENCY_UNAVAILABLE: { status: 503, title: 'A service is temporarily unavailable' },
-} as const satisfies Record<string, { status: number; title: string }>;
+  VALIDATION_FAILED: { status: 400 },
+  MALFORMED_JSON: { status: 400 },
+  UNAUTHENTICATED: { status: 401 },
+  PERMISSION_DENIED: { status: 403 },
+  RESOURCE_NOT_FOUND: { status: 404 },
+  METHOD_NOT_ALLOWED: { status: 405 },
+  CONFLICT: { status: 409 },
+  PAYLOAD_TOO_LARGE: { status: 413 },
+  UNSUPPORTED_MEDIA_TYPE: { status: 415 },
+  BUSINESS_RULE_VIOLATION: { status: 422 },
+  RATE_LIMITED: { status: 429 },
+  INTERNAL_ERROR: { status: 500 },
+  DEPENDENCY_UNAVAILABLE: { status: 503 },
+} as const satisfies Record<string, { status: number }>;
 
 export type ErrorCode = keyof typeof ERROR_CODES;
 export const ErrorCodeSchema = z.enum(Object.keys(ERROR_CODES) as [ErrorCode, ...ErrorCode[]]);
@@ -32,7 +32,7 @@ export const CODE_BY_STATUS: ReadonlyMap<number, ErrorCode> = new Map(
 );
 
 /** errors.validation_failed */
-export const i18nKeyOf = (code: ErrorCode) => `errors.${code.toLowerCase()}`;
+export const i18nKeyOf = (code: ErrorCode) => `errors.${code.toLowerCase()}` as const;
 
 /** https://docs.dailygooddeeds.app/errors/validation-failed */
 export const typeUriOf = (code: ErrorCode) =>

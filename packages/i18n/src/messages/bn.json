@@ -57,5 +57,35 @@
     "retry": "আবার চেষ্টা করুন",
     "notFoundTitle": "পৃষ্ঠাটি পাওয়া যায়নি",
     "backHome": "হোমে ফিরে যান"
+  },
+  "errors": {
+    "validation_failed": "কিছু ঘরে ভুল আছে",
+    "malformed_json": "অনুরোধের বডি সঠিক JSON নয়",
+    "unauthenticated": "চালিয়ে যেতে সাইন ইন করুন",
+    "permission_denied": "এটি করার অনুমতি আপনার নেই",
+    "resource_not_found": "খুঁজে পাওয়া যায়নি",
+    "method_not_allowed": "এই পদ্ধতিটি অনুমোদিত নয়",
+    "conflict": "এটি বিদ্যমান তথ্যের সঙ্গে মিলছে না",
+    "payload_too_large": "অনুরোধটি অনেক বড়",
+    "unsupported_media_type": "এই ধরনের কনটেন্ট সমর্থিত নয়",
+    "business_rule_violation": "এই কাজটি অনুমোদিত নয়",
+    "rate_limited": "অনেক বেশি অনুরোধ",
+    "internal_error": "কিছু একটা ভুল হয়েছে",
+    "dependency_unavailable": "একটি সেবা সাময়িকভাবে বন্ধ আছে"
+  },
+  "validation": {
+    "required": "এই ঘরটি পূরণ করা আবশ্যক।",
+    "max_depth": "ডেটার স্তর অনেক বেশি গভীর।",
+    "invalid_type": "সঠিক মান লিখুন।",
+    "too_big": "{origin, select, string {সর্বোচ্চ {max, number}টি অক্ষর ব্যবহার করুন।} array {সর্বোচ্চ {max, number}টি বেছে নিন।} set {সর্বোচ্চ {max, number}টি বেছে নিন।} file {ফাইলের আকার সর্বোচ্চ {max, number} বাইট হতে পারে।} other {{max, number} বা তার কম লিখুন।}}",
+    "too_small": "{origin, select, string {কমপক্ষে {min, number}টি অক্ষর ব্যবহার করুন।} array {কমপক্ষে {min, number}টি বেছে নিন।} set {কমপক্ষে {min, number}টি বেছে নিন।} file {ফাইলের আকার কমপক্ষে {min, number} বাইট হতে হবে।} other {{min, number} বা তার বেশি লিখুন।}}",
+    "invalid_format": "{format, select, email {সঠিক ইমেইল ঠিকানা লিখুন।} url {সঠিক ওয়েব ঠিকানা লিখুন।} uuid {সঠিক আইডি লিখুন।} other {মানটি সঠিক ফরম্যাটে নেই।}}",
+    "not_multiple_of": "{divisor, number}-এর গুণিতক লিখুন।",
+    "unrecognized_keys": "অজানা ঘর: {keys}।",
+    "invalid_union": "সঠিক মান লিখুন।",
+    "invalid_key": "একটি অবৈধ কী রয়েছে।",
+    "invalid_element": "একটি অবৈধ আইটেম রয়েছে।",
+    "invalid_value": "অনুমোদিত বিকল্পগুলোর একটি বেছে নিন।",
+    "custom": "মানটি সঠিক নয়।"
   }
 }

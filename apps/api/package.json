@@ -20,6 +20,7 @@
   },
   "dependencies": {
     "@dgd/contracts": "workspace:*",
+    "@dgd/i18n": "workspace:*",
     "@dgd/observability": "workspace:*",
     "@nestjs/common": "12.3.2",
     "@nestjs/core": "12.3.2",

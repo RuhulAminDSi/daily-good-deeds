@@ -17,7 +17,7 @@ class ErrorsController {
 
   @Post('zod')
   zod(@Body() body: unknown) {
-    return z.object({ title: z.string().max(5) }).parse(body);
+    return z.object({ title: z.string().max(5), email: z.email().optional() }).parse(body);
   }
 
   @Get('crash')
@@ -91,8 +91,47 @@ describe('API skeleton (HTTP)', () => {
     const res = await api().post('/api/v1/test-errors/zod').send({ title: 'too long' }).expect(400);
     expect(res.body.code).toBe('VALIDATION_FAILED');
     expect(res.body.errors).toEqual([
-      { pointer: '/title', code: 'too_big', i18nKey: 'validation.too_big', params: { max: 5 } },
+      {
+        pointer: '/title',
+        code: 'too_big',
+        i18nKey: 'validation.too_big',
+        params: { max: 5, origin: 'string' },
+      },
     ]);
+  });
+
+  // T-P2-I18N-006: stable code + i18nKey in every locale; `title` follows Accept-Language.
+  it.each([
+    ['en-US,en;q=0.9', 'en', 'Some fields are invalid'],
+    ['bn-BD,bn;q=0.9,en;q=0.8', 'bn', 'কিছু ঘরে ভুল আছে'],
+    ['fr-FR', 'en', 'Some fields are invalid'],
+  ])('localizes validation errors for Accept-Language %s', async (header, locale, title) => {
+    const res = await api()
+      .post('/api/v1/test-errors/zod')
+      .set('Accept-Language', header)
+      .send({ email: 'nope' })
+      .expect(400);
+    expect(res.headers['content-language']).toBe(locale);
+    expect(res.headers.vary).toMatch(/Accept-Language/i);
+    expect(res.body).toMatchObject({
+      title,
+      code: 'VALIDATION_FAILED',
+      i18nKey: 'errors.validation_failed',
+      errors: [
+        { pointer: '/title', code: 'required', i18nKey: 'validation.required' },
+        {
+          pointer: '/email',
+          code: 'invalid_format',
+          i18nKey: 'validation.invalid_format',
+          params: { format: 'email' },
+        },
+      ],
+    });
+  });
+
+  it('localizes non-validation errors too', async () => {
+    const res = await api().get('/api/v1/nope').set('Accept-Language', 'bn').expect(404);
+    expect(res.body).toMatchObject({ code: 'RESOURCE_NOT_FOUND', title: 'খুঁজে পাওয়া যায়নি' });
   });
 
   it('maps malformed JSON to MALFORMED_JSON', async () => {

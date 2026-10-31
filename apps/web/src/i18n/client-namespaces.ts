@@ -7,7 +7,9 @@ import type { Messages } from '@dgd/i18n/messages';
  */
 export const CLIENT_NAMESPACES = [
   'common',
+  'errors',
   'language',
   'nav',
   'theme',
+  'validation',
 ] as const satisfies (keyof Messages)[];
