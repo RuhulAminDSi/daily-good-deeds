@@ -27,7 +27,15 @@ const ZOD_ISSUE_CODES = Object.keys({
 } satisfies Record<z.core.$ZodIssue['code'], 1>);
 
 /** Every key this package produces (asserted to exist in EN and BN). */
-export const VALIDATION_KEYS = ['required', 'max_depth', ...ZOD_ISSUE_CODES].map(validationKeyOf);
+export const VALIDATION_KEYS = [
+  'required',
+  'max_depth',
+  // Named by schemas (auth.ts) and services.
+  'timezone',
+  'terms_required',
+  'password_breached',
+  ...ZOD_ISSUE_CODES,
+].map(validationKeyOf);
 
 /**
  * Global Zod error map: the issue's message becomes its i18n key. Only here is the raw input

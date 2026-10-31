@@ -8,6 +8,7 @@ import type { Request, Response } from 'express';
 import { DomainError } from '../errors/domain-error.js';
 
 const MINUTE = 60_000;
+const HOUR = 60 * MINUTE;
 const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
 
 /**
@@ -28,6 +29,12 @@ export const THROTTLE_OPTIONS: ThrottlerModuleOptions = {
     },
   ],
 };
+
+/**
+ * `auth-strict` tier (API_CONVENTIONS §10): 5 per IP per hour on register, login and password reset.
+ * `@Throttle(AUTH_STRICT)` on the route.
+ */
+export const AUTH_STRICT = { default: { limit: 5, ttl: HOUR } };
 
 /** ThrottlerGuard that answers with the standard `Retry-After` header and a RATE_LIMITED problem. */
 @Injectable()

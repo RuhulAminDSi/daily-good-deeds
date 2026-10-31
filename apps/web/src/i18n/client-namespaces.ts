@@ -13,6 +13,7 @@ export const CLIENT_NAMESPACES = [
   'language',
   'nav',
   'pwa',
+  'register',
   'theme',
   'validation',
 ] as const satisfies (keyof Messages)[];

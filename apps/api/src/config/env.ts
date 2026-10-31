@@ -47,6 +47,11 @@ const ApiSchema = BaseSchema.extend({
   DATABASE_URL: postgresUrl,
   /** Connections per process; Neon pooler fronts these (DL-026). */
   DB_POOL_MAX: z.coerce.number().int().min(1).max(50).default(5),
+  /**
+   * Server-side secret mixed into every password hash (AUTHENTICATION §3), so a database leak alone
+   * cannot be brute-forced. Required in production; changing it invalidates every password.
+   */
+  PASSWORD_PEPPER: z.string().min(32).optional(),
 });
 
 /** Local web dev servers: Next's default port, and 3210 used where 3000 is taken (README). */
@@ -54,7 +59,7 @@ export const DEV_WEB_ORIGINS = ['http://localhost:3000', 'http://localhost:3210'
 
 const ApiConfigSchema = ApiSchema.transform((env, ctx) => {
   if (env.NODE_ENV === 'production') {
-    for (const key of ['WEB_ORIGINS', 'TRUST_PROXY'] as const) {
+    for (const key of ['WEB_ORIGINS', 'TRUST_PROXY', 'PASSWORD_PEPPER'] as const) {
       if (env[key] === undefined) {
         ctx.addIssue({ code: 'custom', path: [key], message: 'required in production' });
       }

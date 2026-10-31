@@ -1,5 +1,7 @@
+import { Button } from '@dgd/ui';
 import { getTranslations } from 'next-intl/server';
 import { InAppBrowserBanner } from '@/components/in-app-browser-banner';
+import { Link } from '@/i18n/navigation';
 import { api, unwrap } from '@/lib/api';
 
 /**
@@ -29,6 +31,14 @@ export default async function Landing() {
       <InAppBrowserBanner />
       <h1 className="text-display text-primary">{t('app.name')}</h1>
       <p className="text-h3 font-normal text-text-muted">{t('app.tagline')}</p>
+      <div className="flex flex-wrap gap-3">
+        <Button asChild size="lg">
+          <Link href="/register">{t('landing.createAccount')}</Link>
+        </Button>
+        <Button asChild size="lg" variant="secondary">
+          <Link href="/today">{t('landing.explore')}</Link>
+        </Button>
+      </div>
       <p className="text-body-sm">
         <span className="font-medium">{t('status.label')}: </span>
         {up ? t('status.ok') : t('status.unavailable')}

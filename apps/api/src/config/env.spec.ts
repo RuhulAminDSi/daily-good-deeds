@@ -42,16 +42,22 @@ describe('loadConfig', () => {
     );
   });
 
-  it('requires WEB_ORIGINS and TRUST_PROXY in production and validates them', () => {
+  it('requires WEB_ORIGINS, TRUST_PROXY and PASSWORD_PEPPER in production and validates them', () => {
     const prod = { NODE_ENV: 'production', DATABASE_URL };
     const run = () => loadConfig(prod);
     expect(run).toThrow(/WEB_ORIGINS/);
     expect(run).toThrow(/TRUST_PROXY/);
-    expect(() => loadConfig({ ...prod, TRUST_PROXY: '1', WEB_ORIGINS: 'not a url' })).toThrow(
-      /WEB_ORIGINS/,
+    expect(run).toThrow(/PASSWORD_PEPPER/);
+    const pepper = { PASSWORD_PEPPER: 'p'.repeat(32) };
+    expect(() => loadConfig({ ...prod, ...pepper, PASSWORD_PEPPER: 'short' })).toThrow(
+      /PASSWORD_PEPPER/,
     );
+    expect(() =>
+      loadConfig({ ...prod, ...pepper, TRUST_PROXY: '1', WEB_ORIGINS: 'not a url' }),
+    ).toThrow(/WEB_ORIGINS/);
     const ok = loadConfig({
       ...prod,
+      ...pepper,
       TRUST_PROXY: '0',
       WEB_ORIGINS: 'https://a.example, https://b.example',
     });

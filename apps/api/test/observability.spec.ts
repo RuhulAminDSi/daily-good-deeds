@@ -3,7 +3,7 @@
 import { Controller, Get, type INestApplication, Module } from '@nestjs/common';
 import { createTransport, type NodeOptions } from '@sentry/node';
 import request from 'supertest';
-import { createErrorReporter } from '../src/common/observability/error-reporter.js';
+import { createErrorReporter, ErrorReporter } from '../src/common/observability/error-reporter.js';
 import { loadConfig } from '../src/config/env.js';
 import { createTestApp } from './helpers.js';
 
@@ -41,7 +41,7 @@ describe('error reporting', () => {
       capture,
     );
     app = await createTestApp(UNREACHABLE_DB, [CrashModule], {
-      errorReporter: reporter,
+      overrides: [[ErrorReporter, reporter]],
     });
   });
 

@@ -16,6 +16,7 @@ export const ERROR_CODES = {
   PAYLOAD_TOO_LARGE: { status: 413 },
   UNSUPPORTED_MEDIA_TYPE: { status: 415 },
   BUSINESS_RULE_VIOLATION: { status: 422 },
+  PASSWORD_TOO_WEAK: { status: 422 },
   RATE_LIMITED: { status: 429 },
   INTERNAL_ERROR: { status: 500 },
   DEPENDENCY_UNAVAILABLE: { status: 503 },

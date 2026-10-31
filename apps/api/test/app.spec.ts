@@ -170,6 +170,28 @@ describe('API skeleton (HTTP)', () => {
     expect(JSON.stringify(res.body)).not.toContain('db says no');
   });
 
+  it('validates registration with the contract schema, 5 attempts per IP per hour', async () => {
+    const attempt = () =>
+      api().post('/api/v1/auth/register').send({ email: 'x', password: 'short' });
+    const first = await attempt().expect(400);
+    expect(first.body.code).toBe('VALIDATION_FAILED');
+    expect(first.body.errors).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          pointer: '/password',
+          code: 'too_small',
+          params: { min: 10, origin: 'string' },
+        }),
+        expect.objectContaining({ pointer: '/displayName', code: 'required' }),
+      ]),
+    );
+    // The throttle runs before validation, so invalid attempts count too (FR-AUTH-001-05).
+    for (let i = 0; i < 4; i++) expect((await attempt()).status).toBe(400);
+    const limited = await attempt().expect(429);
+    expect(limited.body.code).toBe('RATE_LIMITED');
+    expect(Number(limited.headers['retry-after'])).toBeGreaterThan(0);
+  });
+
   it('keeps 5xx responses generic (no internals leaked)', async () => {
     const res = await api().get('/api/v1/test-errors/crash').expect(500);
     expect(res.body).toMatchObject({ code: 'INTERNAL_ERROR', title: 'Something went wrong' });

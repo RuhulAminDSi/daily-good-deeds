@@ -17,8 +17,14 @@ export const APP_ICONS = {
 
 export type AppIcon = keyof typeof APP_ICONS;
 
-/** `{ src, sizes, type }` for manifest and metadata entries. */
+/** `{ src, sizes, type }` for manifest entries. */
 export const iconRef = (file: AppIcon) => {
   const { size } = APP_ICONS[file];
   return { src: `/icons/${file}`, sizes: `${size}x${size}`, type: 'image/png' };
+};
+
+/** `{ url, sizes, type }` for page metadata (`<link rel="icon">`). */
+export const iconLink = (file: AppIcon) => {
+  const { src: url, ...rest } = iconRef(file);
+  return { url, ...rest };
 };

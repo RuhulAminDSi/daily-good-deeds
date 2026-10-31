@@ -33,7 +33,7 @@ const PROBLEM: Problem = {
 export function FieldErrorsForm() {
   const [problem, setProblem] = useState<Problem>();
   const messages = useProblemMessages();
-  const errors = problem ? messages.fieldErrors(problem) : {};
+  const errors = messages.fieldMessages(problem?.errors ?? []);
   return (
     <form
       noValidate

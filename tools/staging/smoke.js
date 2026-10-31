@@ -4,7 +4,7 @@
 import { readFileSync } from 'node:fs';
 
 const en = JSON.parse(
-  readFileSync(new URL('../../apps/web/src/i18n/messages/en.json', import.meta.url), 'utf8'),
+  readFileSync(new URL('../../packages/i18n/src/messages/en.json', import.meta.url), 'utf8'),
 );
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 

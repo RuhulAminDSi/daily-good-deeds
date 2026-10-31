@@ -1,3 +1,4 @@
+import { RegisterRequestSchema, RegisterResponseSchema } from './auth.js';
 import { ProblemSchema } from './errors.js';
 import { HealthLiveSchema, HealthReadySchema } from './health.js';
 
@@ -9,4 +10,6 @@ export const OPENAPI_SCHEMAS = {
   Problem: ProblemSchema,
   HealthLive: HealthLiveSchema,
   HealthReady: HealthReadySchema,
+  RegisterRequest: RegisterRequestSchema,
+  RegisterResponse: RegisterResponseSchema,
 } as const;

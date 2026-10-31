@@ -33,6 +33,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/auth/register": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["AuthController_register_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -44,7 +60,7 @@ export interface components {
             detail?: string;
             instance?: string;
             /** @enum {string} */
-            code: "VALIDATION_FAILED" | "MALFORMED_JSON" | "UNAUTHENTICATED" | "PERMISSION_DENIED" | "RESOURCE_NOT_FOUND" | "METHOD_NOT_ALLOWED" | "CONFLICT" | "PAYLOAD_TOO_LARGE" | "UNSUPPORTED_MEDIA_TYPE" | "BUSINESS_RULE_VIOLATION" | "RATE_LIMITED" | "INTERNAL_ERROR" | "DEPENDENCY_UNAVAILABLE";
+            code: "VALIDATION_FAILED" | "MALFORMED_JSON" | "UNAUTHENTICATED" | "PERMISSION_DENIED" | "RESOURCE_NOT_FOUND" | "METHOD_NOT_ALLOWED" | "CONFLICT" | "PAYLOAD_TOO_LARGE" | "UNSUPPORTED_MEDIA_TYPE" | "BUSINESS_RULE_VIOLATION" | "PASSWORD_TOO_WEAK" | "RATE_LIMITED" | "INTERNAL_ERROR" | "DEPENDENCY_UNAVAILABLE";
             i18nKey: string;
             requestId?: string;
             errors?: {
@@ -69,6 +85,21 @@ export interface components {
             checks: {
                 [key: string]: "ok" | "fail";
             };
+        };
+        RegisterRequest: {
+            /** Format: email */
+            email: string;
+            password: string;
+            displayName: string;
+            /** @enum {string} */
+            locale: "en" | "bn";
+            timezone: string;
+            /** @enum {string} */
+            acceptTermsVersion: "2026-10-31";
+        };
+        RegisterResponse: {
+            /** @enum {string} */
+            status: "check_email";
         };
     };
     responses: never;
@@ -119,6 +150,39 @@ export interface operations {
             };
             /** @description A dependency check failed */
             503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
+    AuthController_register_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RegisterRequest"];
+            };
+        };
+        responses: {
+            /** @description Check your email */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RegisterResponse"];
+                };
+            };
+            /** @description PASSWORD_TOO_WEAK: the password appears in a data breach */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };

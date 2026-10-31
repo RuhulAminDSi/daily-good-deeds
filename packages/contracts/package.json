@@ -18,11 +18,11 @@
     "dev": "tsc -p tsconfig.build.json --watch --preserveWatchOutput"
   },
   "dependencies": {
+    "@dgd/i18n": "workspace:*",
     "zod": "4.6.7"
   },
   "devDependencies": {
     "@dgd/config": "workspace:*",
-    "@dgd/i18n": "workspace:*",
     "eslint": "10.14.0",
     "typescript": "6.0.3",
     "vitest": "5.0.5"

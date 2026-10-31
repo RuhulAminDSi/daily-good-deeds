@@ -7,7 +7,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, getTranslations } from 'next-intl/server';
 import { ServiceWorker } from '@/components/service-worker';
 import { CLIENT_NAMESPACES } from '@/i18n/client-namespaces';
-import { iconRef } from '@/lib/app-icons';
+import { iconLink } from '@/lib/app-icons';
 import { routeLocale } from '@/i18n/route-locale';
 import { themeAttribute } from '@/theme';
 import { readTheme } from '@/theme.server';
@@ -43,8 +43,8 @@ export async function generateMetadata(): Promise<Metadata> {
     title: { default: t('name'), template: `%s · ${t('name')}` },
     description: t('tagline'),
     icons: {
-      icon: { ...iconRef('tab-32.png'), url: iconRef('tab-32.png').src },
-      apple: { ...iconRef('apple-180.png'), url: iconRef('apple-180.png').src },
+      icon: iconLink('tab-32.png'),
+      apple: iconLink('apple-180.png'),
     },
   };
 }

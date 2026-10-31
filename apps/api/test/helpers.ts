@@ -3,21 +3,23 @@ import type { INestApplication, INestApplicationContext, Type } from '@nestjs/co
 import { Test } from '@nestjs/testing';
 import { AppModule } from '../src/app.module.js';
 import { APP_OPTIONS, configureApp } from '../src/app.setup.js';
-import { ErrorReporter } from '../src/common/observability/error-reporter.js';
 import { loadConfig, loadWorkerConfig } from '../src/config/env.js';
 import { WorkerModule } from '../src/jobs/worker.module.js';
 
-/** Boots the real app (same setup as main.ts), optionally with extra test-only modules. */
+/**
+ * Boots the real app (same setup as main.ts), optionally with extra test-only modules and
+ * providers replaced by test doubles: `overrides: [[ErrorReporter, fake]]`.
+ */
 export async function createTestApp(
   databaseUrl: string,
   extraImports: Type[] = [],
-  { errorReporter }: { errorReporter?: ErrorReporter } = {},
+  { overrides = [] }: { overrides?: [token: unknown, value: unknown][] } = {},
 ): Promise<INestApplication> {
   const config = loadConfig({ NODE_ENV: 'test', LOG_LEVEL: 'silent', DATABASE_URL: databaseUrl });
   let builder = Test.createTestingModule({
     imports: [AppModule.forRoot(config), ...extraImports],
   });
-  if (errorReporter) builder = builder.overrideProvider(ErrorReporter).useValue(errorReporter);
+  for (const [token, value] of overrides) builder = builder.overrideProvider(token).useValue(value);
   const moduleRef = await builder.compile();
   const app = configureApp(moduleRef.createNestApplication(APP_OPTIONS), config);
   await app.init();

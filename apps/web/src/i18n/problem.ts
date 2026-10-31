@@ -22,19 +22,22 @@ export function useProblemMessages() {
     return t?.has(key) ? t(key, params as Params | undefined) : undefined;
   };
 
+  /** One message per field, keyed by JSON pointer (or query parameter); the first issue wins. */
+  const fieldMessages = (errors: FieldError[]): Record<string, string> => {
+    const byField: Record<string, string> = {};
+    for (const error of errors) {
+      const field = error.pointer ?? error.parameter ?? '';
+      byField[field] ??=
+        message(error.i18nKey ?? validationKeyOf(error.code), error.params) ??
+        namespaces.validation('custom');
+    }
+    return byField;
+  };
+
   return {
     /** Summary line for the whole problem. */
     title: (problem: Problem) => message(problem.i18nKey) ?? problem.title,
-    /** One message per field, keyed by JSON pointer (or query parameter); the first issue wins. */
-    fieldErrors: (problem: Problem): Record<string, string> => {
-      const byField: Record<string, string> = {};
-      for (const error of problem.errors ?? []) {
-        const field = error.pointer ?? error.parameter ?? '';
-        byField[field] ??=
-          message(error.i18nKey ?? validationKeyOf(error.code), error.params) ??
-          namespaces.validation('custom');
-      }
-      return byField;
-    },
+    /** Field errors from any source, e.g. client-side validation with a contract schema. */
+    fieldMessages,
   };
 }

@@ -6,6 +6,7 @@ import { expect, test } from '@playwright/test';
 
 const PAGES = [
   ['landing', ''],
+  ['register', '/register'],
   ['today', '/today'],
   ['calendar', '/calendar'],
   ['islamic', '/islamic'],

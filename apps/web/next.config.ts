@@ -27,6 +27,15 @@ const config: NextConfig = {
   pageExtensions: e2e ? ['e2e.tsx', 'tsx', 'ts'] : ['tsx', 'ts'],
   distDir: e2e ? '.next-e2e' : '.next',
   headers: async () => [{ source: '/:path*', headers: SECURITY_HEADERS }],
+  // The browser calls the API same-origin (AUTHENTICATION §2): session cookies stay first-party,
+  // also in in-app browsers and Safari, and CSP `connect-src 'self'` covers it.
+  rewrites: async () => [
+    {
+      source: '/api/v1/:path*',
+      // Same default as src/env.ts (development); production requires API_URL.
+      destination: `${process.env.API_URL ?? 'http://localhost:4000'}/api/v1/:path*`,
+    },
+  ],
 };
 
 // Points next-intl at the per-request catalog loader.

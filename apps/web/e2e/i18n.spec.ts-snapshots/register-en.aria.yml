@@ -1,0 +1,19 @@
+- main:
+  - heading "Create your account" [level=1]
+  - paragraph: Save your good deeds and keep them in sync on all your devices.
+  - text: Your name(required)
+  - textbox "Your name(required)"
+  - text: Email(required)
+  - textbox "Email(required)"
+  - text: Password(required)
+  - paragraph: /At least \d+ characters\. A short sentence is easy to remember\./
+  - textbox "Password(required)"
+  - text: Time zone
+  - paragraph: Detected from this device. Reminders and your daily list follow it.
+  - combobox "Time zone": Asia/Dhaka
+  - checkbox "I agree to the Terms and the Privacy Policy"
+  - text: I agree to the Terms and the Privacy Policy
+  - button "Create account"
+- region "Notifications (F8)":
+  - list
+- alert

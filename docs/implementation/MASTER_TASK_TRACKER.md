@@ -53,7 +53,7 @@
 | EP-PWA | F-PWA-007 | T-P2-PWA-003 | In-app browser detection & fallback | T-P2-PWA-003.1, T-P2-PWA-003.2, T-P2-PWA-003.3 | TC-PWA-007-01 | Done | P2 |
 | EP-PWA | F-PWA-008 | T-P2-PWA-004 | Capability detection & graceful degradation | T-P2-PWA-004.1, T-P2-PWA-004.2 | TC-PWA-008-01 | Done | P2 |
 | EP-AUTH | F-AUTH-001 | T-P2-AUTH-001 | Identity schema | T-P2-AUTH-001.1, T-P2-AUTH-001.2, T-P2-AUTH-001.3, T-P2-AUTH-001.4 | TC-AUTH-001-01 | Done | P2 |
-| EP-AUTH | F-AUTH-001 | T-P2-AUTH-002 | Registration | T-P2-AUTH-002.1, T-P2-AUTH-002.2, T-P2-AUTH-002.3, T-P2-AUTH-002.4, T-P2-AUTH-002.5, T-P2-AUTH-002.6 | TC-AUTH-001-02 | Not started | P2 |
+| EP-AUTH | F-AUTH-001 | T-P2-AUTH-002 | Registration | T-P2-AUTH-002.1, T-P2-AUTH-002.2, T-P2-AUTH-002.3, T-P2-AUTH-002.4, T-P2-AUTH-002.5, T-P2-AUTH-002.6 | TC-AUTH-001-02 | Done | P2 |
 | EP-AUTH | F-AUTH-004 | T-P2-AUTH-003 | Email verification | T-P2-AUTH-003.1, T-P2-AUTH-003.2, T-P2-AUTH-003.3 | TC-AUTH-004-01 | Not started | P2 |
 | EP-AUTH | F-AUTH-002 | T-P2-AUTH-004 | Login, tokens & sessions | T-P2-AUTH-004.1, T-P2-AUTH-004.2, T-P2-AUTH-004.3, T-P2-AUTH-004.4, T-P2-AUTH-004.5 | TC-AUTH-002-01 | Not started | P2 |
 | EP-AUTH | F-AUTH-003 | T-P2-AUTH-005 | Google OAuth (PKCE redirect) | T-P2-AUTH-005.1, T-P2-AUTH-005.2, T-P2-AUTH-005.3, T-P2-AUTH-005.4, T-P2-AUTH-005.5 | TC-AUTH-003-01 | Not started | P2 |

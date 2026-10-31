@@ -44,34 +44,6 @@ tags:
 
 paths:
   # ---------------------------------------------------------------- AUTH
-  /auth/register:
-    post:
-      tags: [ auth ]
-      operationId: register
-      summary: Register with email and password (F-AUTH-001)
-      security: []
-      parameters:
-        - $ref: '#/components/parameters/IdempotencyKey'
-        - $ref: '#/components/parameters/AcceptLanguage'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/RegisterRequest'
-      responses:
-        '202':
-          description: Always returned (enumeration-safe). Session cookies are set only for a newly created account.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/StatusResponse'
-        '400':
-          $ref: '#/components/responses/ValidationError'
-        '422':
-          $ref: '#/components/responses/UnprocessableEntity'
-        '429':
-          $ref: '#/components/responses/RateLimited'
   /auth/login:
     post:
       tags: [ auth ]

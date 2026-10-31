@@ -1,5 +1,11 @@
-import { applyDecorators, type INestApplication } from '@nestjs/common';
-import { ApiOkResponse, DocumentBuilder, type OpenAPIObject, SwaggerModule } from '@nestjs/swagger';
+import { applyDecorators, Body, type INestApplication, type PipeTransform } from '@nestjs/common';
+import {
+  ApiBody,
+  ApiResponse,
+  DocumentBuilder,
+  type OpenAPIObject,
+  SwaggerModule,
+} from '@nestjs/swagger';
 import { OPENAPI_SCHEMAS } from '@dgd/contracts';
 import { z } from 'zod';
 
@@ -10,16 +16,42 @@ type Body<N extends SchemaName> = z.infer<(typeof OPENAPI_SCHEMAS)[N]>;
 export const schemaRef = (name: SchemaName) => ({ $ref: `#/components/schemas/${name}` });
 
 /**
- * Documents a 200 response with a contract schema **and** requires the handler to return that
+ * Documents a success response with a contract schema **and** requires the handler to return that
  * schema's type, so the published OpenAPI document cannot drift from what the handler returns.
  */
-export function ZodOk<N extends SchemaName>(name: N, description?: string) {
-  const decorate = applyDecorators(ApiOkResponse({ description, schema: schemaRef(name) }));
+export function ZodResponse<N extends SchemaName>(status: number, name: N, description?: string) {
+  const decorate = applyDecorators(ApiResponse({ status, description, schema: schemaRef(name) }));
   return <M extends (...args: never[]) => Body<N> | Promise<Body<N>>>(
     target: object,
     key: string | symbol,
     descriptor: TypedPropertyDescriptor<M>,
   ) => decorate(target, key, descriptor);
+}
+
+/** `ZodResponse` for the common 200. */
+export const ZodOk = <N extends SchemaName>(name: N, description?: string) =>
+  ZodResponse(200, name, description);
+
+/** Parses a value with a contract schema; a ZodError becomes VALIDATION_FAILED (ProblemDetailsFilter). */
+class ZodValidationPipe implements PipeTransform {
+  constructor(private readonly schema: z.ZodType) {}
+
+  transform(value: unknown): unknown {
+    return this.schema.parse(value);
+  }
+}
+
+/**
+ * The request body, validated (and normalized) by a contract schema, which is also documented as
+ * the operation's requestBody: `register(@ZodBody('RegisterRequest') body: RegisterRequest)`.
+ */
+export function ZodBody(name: SchemaName): ParameterDecorator {
+  return (target, key, index) => {
+    Body(new ZodValidationPipe(OPENAPI_SCHEMAS[name]))(target, key, index);
+    if (key === undefined) return;
+    const method = Object.getOwnPropertyDescriptor(target, key);
+    if (method) ApiBody({ schema: schemaRef(name) })(target, key, method);
+  };
 }
 
 /**
