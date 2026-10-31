@@ -38,7 +38,7 @@ Every non-2xx response has `Content-Type: application/problem+json`:
 4. **Validation happens before side effects.** All Zod validation runs before any DB write. Multi-step writes use a transaction.
 5. **5xx responses are generic.** `title: "Something went wrong"`, plus `requestId`. Full details go only to logs and Sentry, with PII scrubbed.
 6. **Retries.** Clients may retry only on `408`, `425`, `429`, `502`, `503`, and `504`, and on network errors, using exponential backoff with jitter. Retries are safe because of natural keys, the same `opId` (sync), or the same `Idempotency-Key` ([API_CONVENTIONS.md §9](API_CONVENTIONS.md)).
-7. **Localization fallback.** If a BN message is missing, the EN message is used, and `missing_translation` is logged (F-I18N-009).
+7. **Localization fallback.** If a BN message is missing, the EN message is used, and `missing_translation` is logged and reported to Sentry once per process at startup (F-I18N-009; `@dgd/i18n` `MISSING_KEYS`). In development the web app fails the page instead.
 
 ## 3. Error code catalog
 

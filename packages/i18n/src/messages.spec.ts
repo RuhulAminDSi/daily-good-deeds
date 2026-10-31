@@ -1,30 +1,59 @@
-import { isLocale, LOCALES } from './index.js';
-import { MESSAGES, translator } from './messages.js';
-
-/** Every message as [dotted key, value]: [["nav.today", "Today"], …]. */
-const leaves = (tree: object, prefix = ''): [string, unknown][] =>
-  Object.entries(tree).flatMap(([key, value]) =>
-    typeof value === 'object' && value !== null
-      ? leaves(value, `${prefix}${key}.`)
-      : [[`${prefix}${key}`, value] as [string, unknown]],
-  );
+import { createTranslator } from 'use-intl/core';
+import { isLocale } from './index.js';
+import {
+  assertComplete,
+  MISSING_KEYS,
+  MissingTranslationsError,
+  reportMissingTranslations,
+  translator,
+  withFallback,
+} from './messages.js';
+import bn from './messages/bn.json' with { type: 'json' };
+import en from './messages/en.json' with { type: 'json' };
 
 describe('catalogs', () => {
-  it('have the same keys in every locale', () => {
-    const keysOf = (locale: (typeof LOCALES)[number]) =>
-      leaves(MESSAGES[locale])
-        .map(([k]) => k)
-        .sort();
-    for (const locale of LOCALES) expect(keysOf(locale)).toEqual(keysOf('en'));
+  it('are complete: no locale falls back to English', () => {
+    expect(MISSING_KEYS).toEqual({ en: [], bn: [] });
   });
 
-  it('have no empty messages', () => {
-    for (const locale of LOCALES) {
-      const empty = leaves(MESSAGES[locale])
-        .filter(([, value]) => typeof value !== 'string' || value.trim() === '')
-        .map(([key]) => key);
-      expect(empty, locale).toEqual([]);
-    }
+  it('have no keys English lacks', () => {
+    expect(withFallback(en, bn).missing).toEqual([]);
+  });
+
+  it('have no empty English messages', () => {
+    expect(withFallback(en, en).missing).toEqual([]);
+  });
+});
+
+// T-P2-I18N-007 (F-I18N-009): a missing BN message renders in English and is reported once.
+describe('fallback', () => {
+  const reference = {
+    nav: { today: 'Today', more: 'More' },
+    extra: { n: '{count, number} items' },
+  };
+  const partial = { nav: { today: 'আজ', more: ' ' } };
+  const { messages, missing } = withFallback(partial, reference);
+  const missingBn = { en: [], bn: missing };
+
+  it('fills missing and blank messages from English and lists them', () => {
+    expect(missing).toEqual(['nav.more', 'extra.n']);
+    const t = createTranslator({ locale: 'bn', messages: messages as typeof reference });
+    expect(t('nav.today')).toBe('আজ');
+    expect(t('nav.more')).toBe('More');
+    expect(t('extra.n', { count: 3 })).toBe('৩ items');
+  });
+
+  it('throws in dev mode', () => {
+    expect(() => assertComplete('bn', missingBn)).toThrow(MissingTranslationsError);
+    expect(() => assertComplete('en', missingBn)).not.toThrow();
+  });
+
+  it('reports each incomplete locale once per process', () => {
+    const report = vi.fn();
+    reportMissingTranslations(report, missingBn);
+    reportMissingTranslations(report, missingBn);
+    expect(report).toHaveBeenCalledOnce();
+    expect(report.mock.calls[0]![0]).toMatchObject({ locale: 'bn', keys: ['nav.more', 'extra.n'] });
   });
 });
 

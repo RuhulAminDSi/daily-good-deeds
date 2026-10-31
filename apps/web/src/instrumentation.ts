@@ -6,16 +6,22 @@ let reporter: Reporter | undefined;
 /** Runs once when the Next server starts: fail fast on misconfiguration instead of per request. */
 export async function register() {
   if (process.env.NEXT_RUNTIME === 'nodejs') {
-    const [{ serverEnv }, { createNodeReporter }] = await Promise.all([
-      import('./env'),
-      import('@dgd/observability/node'),
-    ]);
+    const [{ serverEnv }, { createNodeReporter }, { reportMissingTranslations }] =
+      await Promise.all([
+        import('./env'),
+        import('@dgd/observability/node'),
+        import('@dgd/i18n/messages'),
+      ]);
     const env = serverEnv();
     reporter = await createNodeReporter({
       dsn: env.NEXT_PUBLIC_SENTRY_DSN,
       release: env.NEXT_PUBLIC_APP_RELEASE,
       environment: env.NODE_ENV,
     });
+    // Missing BN messages render in English (F-I18N-009); the catalogs are static, so one report.
+    reportMissingTranslations((error) =>
+      reporter?.report(error, { tags: { locale: error.locale } }),
+    );
   }
 }
 

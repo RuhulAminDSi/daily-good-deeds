@@ -602,3 +602,12 @@ All notable changes to this project are recorded here. Format: [Keep a Changelog
 - **API**: problem `title` follows `Accept-Language` (en/bn, `bn-BD` matches, default en), with `Content-Language` and `Vary: Accept-Language`; `code` and `i18nKey` stay stable across locales.
 - **Web**: `useProblemMessages()` renders a problem's title and per-field messages in the page language from their keys; `errors` and `validation` are now client namespaces. Unknown keys fall back to the server title and the generic field message.
 - **Tests**: contracts (issue mapping; every `ErrorCode` and validation key has EN and BN text and renders with its params), API (`Accept-Language` en / bn-BD / fr → localized title, stable keys), Playwright (`/en|bn/e2e/field-errors`: localized messages wired to `aria-describedby`, `aria-invalid`, unknown-code fallback).
+
+### Added (2026-10-31), Phase 2: T-P2-I18N-007 fallback and missing-key reporting
+- **Fallback BN → EN** in `@dgd/i18n`: `MESSAGES.bn` is the Bengali catalog with every missing or blank message filled from English (`withFallback`), so web, API and worker never show a raw key for a message English has. `MISSING_KEYS` lists what was filled in.
+- **Dev mode throws:** the web request config calls `assertComplete(locale)` in development, so an incomplete catalog fails the page with `missing_translation: … nav.more` instead of quietly rendering English.
+- **Reported once:** catalogs are static, so the missing set is fixed at startup. `reportMissingTranslations` sends one Sentry event per incomplete locale per process (tag `locale`), from the web server's `register()` and from the API/worker `ObservabilityModule` bootstrap (which also logs a `missing_translation` warning).
+- **Tests:** fallback rendering (incl. ICU args), blank-as-missing, dev throw, report-once; catalog completeness now asserts `MISSING_KEYS` is empty and that BN has no keys English lacks.
+- **Verified by hand** with `nav.more` removed from `bn.json`: `next dev` → `/bn/today` 500 with the `missing_translation` error, `/en/today` 200; production build → `/bn/today` 200 with "More" in English next to Bengali text. Catalog restored afterwards.
+- **Not covered:** a key missing from English as well is a type error (typed keys), so the "key name in dev only" step of the chain has no runtime handling.
+

@@ -1,4 +1,12 @@
-import { type DynamicModule, Global, Module, type OnApplicationShutdown } from '@nestjs/common';
+import {
+  type DynamicModule,
+  Global,
+  Logger,
+  Module,
+  type OnApplicationBootstrap,
+  type OnApplicationShutdown,
+} from '@nestjs/common';
+import { reportMissingTranslations } from '@dgd/i18n/messages';
 import { createNodeReporter, type ReportContext, type Reporter } from '@dgd/observability/node';
 import type { NodeOptions } from '@sentry/node';
 import type { BaseConfig } from '../../config/env.js';
@@ -25,7 +33,7 @@ export const createErrorReporter = (
 
 @Global()
 @Module({})
-export class ObservabilityModule implements OnApplicationShutdown {
+export class ObservabilityModule implements OnApplicationBootstrap, OnApplicationShutdown {
   constructor(private readonly reporter: ErrorReporter) {}
 
   static forRoot(config: BaseConfig): DynamicModule {
@@ -34,6 +42,14 @@ export class ObservabilityModule implements OnApplicationShutdown {
       providers: [{ provide: ErrorReporter, useFactory: () => createErrorReporter(config) }],
       exports: [ErrorReporter],
     };
+  }
+
+  /** Missing BN messages render in English (F-I18N-009, ERROR_HANDLING §2.7): logged and reported. */
+  onApplicationBootstrap(): void {
+    reportMissingTranslations((error) => {
+      new Logger('i18n').warn(error.message);
+      this.reporter.report(error, { tags: { locale: error.locale } });
+    });
   }
 
   async onApplicationShutdown(): Promise<void> {
