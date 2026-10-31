@@ -591,3 +591,8 @@ All notable changes to this project are recorded here. Format: [Keep a Changelog
   - **No guessed waits:** the CLS read uses a buffered `PerformanceObserver` and two animation frames after `fonts.ready`. A planned switch to `getEntriesByType` was dropped: layout-shift entries never appear there, so the test would always have read 0. An injected shift registered (CLS 0.022), so the measurement sees shifts.
 - **Pending (task stays in progress):** the visual conjunct check on Android Chrome and iOS Safari, which needs a real device. It can be done on staging.
 
+### Fixed (2026-10-31): the keyboard theme test's real cause
+- **The cause:** the CI failures of "the theme switch is keyboard operable" had a cause the hydration helpers didn't address. Radix moves roving focus inside a `setTimeout` (`@radix-ui/react-roving-focus`, `focusFirst` on arrow keys). The test pressed Space right after ArrowLeft, so on CI's slower runners Space could land on "System", which was already selected.
+- **The fix:** the test now waits until the target option has focus before pressing Space, as the Storybook story for SegmentedControl already did. The per-element hydration wait stays, since it is still needed before the first interaction.
+- **Correction:** the earlier follow-up described per-element hydration as the fix for this test. It was necessary, but not sufficient.
+

@@ -62,6 +62,8 @@ test('the theme switch is keyboard operable', async ({ page }) => {
   await hydrated(theme.getByRole('radio', { name: 'সিস্টেম' }));
   await theme.getByRole('radio', { name: 'সিস্টেম' }).focus();
   await page.keyboard.press('ArrowLeft');
+  // Radix moves roving focus in a setTimeout: wait for it, or Space can still hit "System".
+  await expect(theme.getByRole('radio', { name: 'ডার্ক' })).toBeFocused();
   await page.keyboard.press('Space');
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
 });
