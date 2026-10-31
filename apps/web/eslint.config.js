@@ -20,7 +20,7 @@ export default defineConfig(
   },
   {
     // Client translations go through useClientTranslations (src/i18n/client.ts), which only accepts
-    // the namespaces sent to the browser.
+    // the namespaces sent to the browser; numbers and dates through @dgd/i18n's formatters.
     ignores: ['src/i18n/client.ts'],
     rules: {
       'no-restricted-imports': [
@@ -31,6 +31,18 @@ export default defineConfig(
               name: 'next-intl',
               importNames: ['useTranslations'],
               message: 'Use useClientTranslations from @/i18n/client.',
+            },
+            {
+              name: 'next-intl',
+              importNames: ['useFormatter'],
+              message:
+                'Format with @dgd/i18n (formatNumber, formatDate…): it honours the digit preference.',
+            },
+            {
+              name: 'next-intl/server',
+              importNames: ['getFormatter'],
+              message:
+                'Format with @dgd/i18n (formatNumber, formatDate…): it honours the digit preference.',
             },
           ],
         },

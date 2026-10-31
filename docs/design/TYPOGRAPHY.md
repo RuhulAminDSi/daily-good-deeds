@@ -53,7 +53,7 @@ On mobile (< 640px), `h1` steps down to 1.5rem and `display` to 1.875rem.
 
 ## 4. Numerals
 - User preference `user_preferences.numeral_system`: `latn` (0-9) or `beng` (০-৯). The default is `beng` when the locale is BN and `latn` when it is EN.
-- All numbers are formatted through `Intl.NumberFormat(locale, { numberingSystem })` in `packages/i18n`. Never call `.toString()` on a user-visible number.
+- All numbers, dates and times are formatted with the helpers in `@dgd/i18n` (`formatNumber`, `formatDate`, `formatTime`, `formatRelative`, `formatHijri`, `formatCode`). They take `{ locale, numerals, timeZone }` and set the digit system as a locale extension (`bn-BD-u-nu-beng`). Never call `.toString()` on a user-visible number.
 - Bengali grouping uses the Indian system (১২,৩৪,৫৬৭) via `bn-BD`.
 - **Exceptions that always use Latin digits:** OTP/TOTP codes, IDs, and timestamps in admin audit logs. This avoids ambiguity when the value is copied.
 - Arabic āyah numbers inside Quran text use the Arabic-Indic glyphs supplied by the Quran source (e.g. ﴿١٢﴾).

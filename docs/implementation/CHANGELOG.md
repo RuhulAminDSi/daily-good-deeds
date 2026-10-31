@@ -560,3 +560,18 @@ All notable changes to this project are recorded here. Format: [Keep a Changelog
 - **The fix waits per element.** `hydrated(locator)` (`e2e/helpers.ts`) waits until React has attached its props (`__reactProps…`) to the exact control a test is about to use. `gotoHydrated(page, url, ready)` takes that control. All theme, language and More-sheet interactions use it.
 - **Stress results:** theme, language and app-shell specs, 30 repeats each with 16 parallel workers, in three runs of 300. The keyboard test never failed. Two runs were fully clean; one had 2 `toHaveURL` timeouts (navigation slower than 5 s at that load), which CI's single retry covers and which hasn't occurred at CI's parallelism.
 
+### Added (2026-10-31), Phase 2: T-P2-I18N-004 locale formatting helpers
+- **`@dgd/i18n` formatters**, browser-safe and shared by web, API and worker (TYPOGRAPHY §4–5). Each takes `{ locale, numerals, timeZone }`:
+  - `formatNumber`: Bangladeshi grouping in BN (১২,৩৪,৫৬৭), and passes Intl options through (percent, currency).
+  - `formatDate` and `formatTime`: in the user's IANA zone, with times on the 12-hour clock.
+  - `formatRelative`: "yesterday", "গতকাল", "৩ ঘণ্টায়".
+  - `formatCode`: always Latin digits, for OTPs and IDs.
+  - `formatHijri`: Umm al-Qura with the user's day offset. It is a P5 stub; its era reads "হিজরি", where CLDR gives the generic "যুগ".
+- **Digits:** Bengali digits by default in BN and Latin in EN; the user's `numerals` preference overrides either way. The digit system goes in the locale tag (`bn-BD-u-nu-beng`), so every formatter honours it, including calendars.
+- **16 unit tests** cover numbers, grouping, digit preference in both languages, currency and percent, codes, dates and times including the time-zone day boundary, relative times, Hijri dates with offsets, and formatter reuse.
+- **Pre-push review:**
+  - **Cached formatters:** Intl formatters are built once per locale tag and options, so long lists don't rebuild them.
+  - **Strings-only codes:** `formatCode` takes strings only, so `004217` can't lose its zeros.
+  - **One formatting path:** the web app's lint bans next-intl's `useFormatter` and `getFormatter`, which would ignore the digit preference and use a different locale tag.
+  - **Accepted:** the Hijri offset adds whole 24-hour days. That is exact in Bangladesh, which has no DST, and P5 revisits it.
+
