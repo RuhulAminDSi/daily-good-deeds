@@ -1,6 +1,7 @@
 // Install prompt state (F-PWA-001, FR-PWA-001-02), browser only. The browser's own
 // `beforeinstallprompt` fires once, possibly before React hydrates, so it is captured from
 // src/instrumentation-client.ts and kept here for the InstallPrompt banner.
+import { inAppBrowser } from './in-app-browser';
 
 /** Chromium's install event (not in TypeScript's DOM types). */
 interface BeforeInstallPromptEvent extends Event {
@@ -72,13 +73,18 @@ export function countVisit(): number {
 export const snoozeInstallPrompt = () =>
   safely(() => localStorage.setItem(DISMISSED_KEY, String(Date.now())), undefined);
 
-/** Engaged enough (second visit), not snoozed, and not already running installed. */
+/**
+ * Engaged enough (second visit), not snoozed, not already running installed, and not inside a
+ * social app's webview, which cannot install (F-PWA-007).
+ */
 export function shouldOfferInstall(visits: number): boolean {
   const dismissedAt = Number(safely(() => localStorage.getItem(DISMISSED_KEY), null) ?? 0);
   const installed =
     matchMedia('(display-mode: standalone)').matches ||
     (navigator as { standalone?: boolean }).standalone === true;
-  return visits >= MIN_VISITS && Date.now() - dismissedAt >= SNOOZE_MS && !installed;
+  return (
+    visits >= MIN_VISITS && Date.now() - dismissedAt >= SNOOZE_MS && !installed && !inAppBrowser()
+  );
 }
 
 /** iOS has no install event; its users get Add to Home Screen steps instead. */

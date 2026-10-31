@@ -628,3 +628,11 @@ All notable changes to this project are recorded here. Format: [Keep a Changelog
 - **Known cost:** the precache is 1.2 MB uncompressed. The largest entry is the lazily loaded Sentry chunk (414 KB, 138 KB gzipped), precached even when no DSN is set; its file name is hashed, so it can't be excluded by pattern.
 - **Test note:** Playwright cannot intercept the browser's own service-worker update check, so the update test installs the same worker under a new script URL, which the browser treats as an update.
 
+### Added (2026-10-31), Phase 2: T-P2-PWA-003 in-app browser detection and fallback
+- **Detection** (`apps/web/src/lib/in-app-browser.ts`, pure): Facebook, Messenger, Instagram, Telegram, LINE, TikTok, WeChat and LinkedIn by user agent; Telegram's iOS browser by its injected `TelegramWebviewProxy`; any other Android System WebView (`; wv)`) or iOS WKWebView (no `Safari/`, unless running as an installed web app). `useInAppBrowser()` exposes it to components (null on the server and during hydration).
+- **Banner** "For the best experience, open this in your browser" in the app shell and on the landing page, EN/BN (`inApp` namespace), naming the app. Android: an "Open in browser" button with an `intent://` link to the default browser (falling back to the same page). iOS: the app's menu steps plus a copy-link button. Dismissible for the session; everything keeps working inside the webview.
+- **Install prompt** is never offered inside an in-app browser (it cannot install).
+- **Unit tests in the web app** (Vitest, new `test` script): 18 fixture tests with real user agents for all of the above, plus Chrome, Samsung Internet, Safari, Chrome iOS and Firefox as negatives.
+- **E2E** (`e2e/in-app-browser.spec.ts`, user-agent overrides): no banner in a real browser; Facebook Android gets the intent link and the dismissal sticks; the landing page shows it in Bengali; Instagram iOS gets steps, copies the URL, and sees no install prompt. Full web E2E suite: 57 passed.
+- **Moved:** hiding the Google button in webviews needs the button, so its E2E check joins T-P2-AUTH-005 (Google OAuth), which uses `useInAppBrowser()`.
+

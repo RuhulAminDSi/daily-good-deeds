@@ -4,7 +4,7 @@
 >
 > Test case IDs here are **placeholders**, allocated in sequence per feature. [qa/TEST_PLAN.md](../qa/TEST_PLAN.md) defines their steps. Update **Status** as work moves (Not started → In progress → In review → Done → Verified). A task is marked Done only when its Definition of Done in the master plan is met, including tests. A UI that exists without its backend and tests does **not** count as Done.
 
-**Totals:** 200 tasks · 541 subtasks · 196 in-scope features (P2–P10) covered · 2 Won't-Have features deliberately unmapped (F-INTG-004, F-ADMIN-017).
+**Totals:** 200 tasks · 542 subtasks · 196 in-scope features (P2–P10) covered · 2 Won't-Have features deliberately unmapped (F-INTG-004, F-ADMIN-017).
 
 ## Phase 0
 
@@ -50,13 +50,13 @@
 | EP-I18N | F-I18N-009 | T-P2-I18N-007 | Fallback & missing-key reporting | T-P2-I18N-007.1, T-P2-I18N-007.2 | TC-I18N-009-02 | Done | P2 |
 | EP-PWA | F-PWA-001 | T-P2-PWA-001 | Web manifest & installability | T-P2-PWA-001.1, T-P2-PWA-001.2, T-P2-PWA-001.3 | TC-PWA-001-01 | In progress | P2 |
 | EP-PWA | F-PWA-003 | T-P2-PWA-002 | Service worker app shell (Serwist) | T-P2-PWA-002.1, T-P2-PWA-002.2, T-P2-PWA-002.3, T-P2-PWA-002.4 | TC-PWA-003-01 | Done | P2 |
-| EP-PWA | F-PWA-007 | T-P2-PWA-003 | In-app browser detection & fallback | T-P2-PWA-003.1, T-P2-PWA-003.2, T-P2-PWA-003.3 | TC-PWA-007-01 | Not started | P2 |
+| EP-PWA | F-PWA-007 | T-P2-PWA-003 | In-app browser detection & fallback | T-P2-PWA-003.1, T-P2-PWA-003.2, T-P2-PWA-003.3 | TC-PWA-007-01 | Done | P2 |
 | EP-PWA | F-PWA-008 | T-P2-PWA-004 | Capability detection & graceful degradation | T-P2-PWA-004.1, T-P2-PWA-004.2 | TC-PWA-008-01 | Not started | P2 |
 | EP-AUTH | F-AUTH-001 | T-P2-AUTH-001 | Identity schema | T-P2-AUTH-001.1, T-P2-AUTH-001.2, T-P2-AUTH-001.3, T-P2-AUTH-001.4 | TC-AUTH-001-01 | Not started | P2 |
 | EP-AUTH | F-AUTH-001 | T-P2-AUTH-002 | Registration | T-P2-AUTH-002.1, T-P2-AUTH-002.2, T-P2-AUTH-002.3, T-P2-AUTH-002.4, T-P2-AUTH-002.5, T-P2-AUTH-002.6 | TC-AUTH-001-02 | Not started | P2 |
 | EP-AUTH | F-AUTH-004 | T-P2-AUTH-003 | Email verification | T-P2-AUTH-003.1, T-P2-AUTH-003.2, T-P2-AUTH-003.3 | TC-AUTH-004-01 | Not started | P2 |
 | EP-AUTH | F-AUTH-002 | T-P2-AUTH-004 | Login, tokens & sessions | T-P2-AUTH-004.1, T-P2-AUTH-004.2, T-P2-AUTH-004.3, T-P2-AUTH-004.4, T-P2-AUTH-004.5 | TC-AUTH-002-01 | Not started | P2 |
-| EP-AUTH | F-AUTH-003 | T-P2-AUTH-005 | Google OAuth (PKCE redirect) | T-P2-AUTH-005.1, T-P2-AUTH-005.2, T-P2-AUTH-005.3, T-P2-AUTH-005.4 | TC-AUTH-003-01 | Not started | P2 |
+| EP-AUTH | F-AUTH-003 | T-P2-AUTH-005 | Google OAuth (PKCE redirect) | T-P2-AUTH-005.1, T-P2-AUTH-005.2, T-P2-AUTH-005.3, T-P2-AUTH-005.4, T-P2-AUTH-005.5 | TC-AUTH-003-01 | Not started | P2 |
 | EP-AUTH | F-AUTH-005 | T-P2-AUTH-006 | Forgot & reset password | T-P2-AUTH-006.1, T-P2-AUTH-006.2, T-P2-AUTH-006.3 | TC-AUTH-005-01 | Not started | P2 |
 | EP-AUTH | F-AUTH-006, F-AUTH-007 | T-P2-AUTH-007 | Logout & session management | T-P2-AUTH-007.1, T-P2-AUTH-007.2, T-P2-AUTH-007.3 | TC-AUTH-006-01, TC-AUTH-007-01 | Not started | P2 |
 | EP-AUTH | F-AUTH-008 | T-P2-AUTH-008 | Profile management | T-P2-AUTH-008.1, T-P2-AUTH-008.2 | TC-AUTH-008-01 | Not started | P2 |

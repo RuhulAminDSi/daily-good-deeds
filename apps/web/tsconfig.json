@@ -2,6 +2,7 @@
   "extends": "@dgd/config/tsconfig/react.json",
   "compilerOptions": {
     "plugins": [{ "name": "next" }],
+    "types": ["node", "vitest/globals"],
     "paths": { "@/*": ["./src/*"] }
   },
   "include": ["next-env.d.ts", "src", "e2e", "*.ts", ".next/types/**/*.ts"],

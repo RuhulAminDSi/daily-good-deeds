@@ -1,4 +1,5 @@
 import { getTranslations } from 'next-intl/server';
+import { InAppBrowserBanner } from '@/components/in-app-browser-banner';
 import { api, unwrap } from '@/lib/api';
 
 /**
@@ -25,6 +26,7 @@ export default async function Landing() {
   const [t, up] = await Promise.all([getTranslations(), apiIsUp()]);
   return (
     <main className="mx-auto flex max-w-xl flex-col gap-6 px-4 py-16">
+      <InAppBrowserBanner />
       <h1 className="text-display text-primary">{t('app.name')}</h1>
       <p className="text-h3 font-normal text-text-muted">{t('app.tagline')}</p>
       <p className="text-body-sm">

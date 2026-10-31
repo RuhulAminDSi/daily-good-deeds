@@ -185,7 +185,7 @@ importers:
         version: 0.0.1
       serwist:
         specifier: 9.5.13
-        version: 9.5.13(browserslist@4.29.3)(typescript@6.0.3)
+        version: 9.5.13(browserslist@4.29.5)(typescript@6.0.3)
       zod:
         specifier: 4.6.7
         version: 4.6.7
@@ -226,6 +226,9 @@ importers:
       typescript:
         specifier: 6.0.3
         version: 6.0.3
+      vitest:
+        specifier: 5.0.5
+        version: 5.0.5(@opentelemetry/api@1.10.0)(@types/node@24.19.2)(@vitest/browser-playwright@5.0.5)(@vitest/ui@5.0.5)(vite@8.3.5(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))
 
   packages/api-client:
     dependencies:
@@ -9496,6 +9499,10 @@ snapshots:
     optionalDependencies:
       browserslist: 4.29.3
 
+  '@serwist/utils@9.5.13(browserslist@4.29.5)':
+    optionalDependencies:
+      browserslist: 4.29.5
+
   '@serwist/window@9.5.13(browserslist@4.29.3)(typescript@6.0.3)':
     dependencies:
       '@types/trusted-types': 2.0.7
@@ -13174,6 +13181,15 @@ snapshots:
   serwist@9.5.13(browserslist@4.29.3)(typescript@6.0.3):
     dependencies:
       '@serwist/utils': 9.5.13(browserslist@4.29.3)
+      idb: 8.0.3
+    optionalDependencies:
+      typescript: 6.0.3
+    transitivePeerDependencies:
+      - browserslist
+
+  serwist@9.5.13(browserslist@4.29.5)(typescript@6.0.3):
+    dependencies:
+      '@serwist/utils': 9.5.13(browserslist@4.29.5)
       idb: 8.0.3
     optionalDependencies:
       typescript: 6.0.3

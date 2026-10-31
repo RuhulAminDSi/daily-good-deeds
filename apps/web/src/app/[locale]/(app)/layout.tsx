@@ -1,4 +1,5 @@
 import { AppShell } from '@/components/app-shell/app-shell';
+import { InAppBrowserBanner } from '@/components/in-app-browser-banner';
 import { InstallPrompt } from '@/components/install-prompt';
 import { OfflineBanner } from '@/components/offline-banner';
 
@@ -9,6 +10,7 @@ export default function AppLayout({ children }: LayoutProps<'/[locale]'>) {
       banners={
         <>
           <OfflineBanner />
+          <InAppBrowserBanner />
           <InstallPrompt />
         </>
       }

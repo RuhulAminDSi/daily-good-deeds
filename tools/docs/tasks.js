@@ -416,6 +416,7 @@ t(
     'Authorization code + PKCE',
     'auth_identities linking rules',
     'Error states',
+    'Hidden in in-app browsers via useInAppBrowser() (E2E with UA override; moved from T-P2-PWA-003)',
   ],
 );
 t(

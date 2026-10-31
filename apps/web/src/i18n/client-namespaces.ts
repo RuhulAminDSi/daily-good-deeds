@@ -8,6 +8,7 @@ import type { Messages } from '@dgd/i18n/messages';
 export const CLIENT_NAMESPACES = [
   'common',
   'errors',
+  'inApp',
   'install',
   'language',
   'nav',

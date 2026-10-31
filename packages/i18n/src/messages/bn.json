@@ -104,5 +104,14 @@
     "updateTitle": "নতুন সংস্করণ এসেছে",
     "updateAction": "রিফ্রেশ করুন",
     "updateAltText": "অ্যাপ হালনাগাদ করতে পৃষ্ঠাটি আবার লোড করুন"
+  },
+  "inApp": {
+    "title": "সবচেয়ে ভালো অভিজ্ঞতার জন্য এটি আপনার ব্রাউজারে খুলুন",
+    "body": "{app, select, facebook {Facebook} messenger {Messenger} instagram {Instagram} telegram {Telegram} line {LINE} tiktok {TikTok} wechat {WeChat} linkedin {LinkedIn} other {এই অ্যাপ}}-এর ভেতরে অ্যাপ ইনস্টল করা এবং Google দিয়ে সাইন ইন কাজ করে না।",
+    "steps": "{app, select, facebook {ওপরে ডান দিকে ⋯ চাপুন, তারপর “Open in external browser” বেছে নিন।} messenger {ওপরে ডান দিকে ⋯ চাপুন, তারপর “Open in external browser” বেছে নিন।} instagram {ওপরে ডান দিকে ⋯ চাপুন, তারপর “Open in external browser” বেছে নিন।} telegram {ওপরে ডান দিকে ⋯ চাপুন, তারপর “Open in Safari” বেছে নিন।} other {লিংকটি কপি করে Safari বা Chrome-এ পেস্ট করুন।}}",
+    "open": "ব্রাউজারে খুলুন",
+    "copy": "লিংক কপি করুন",
+    "copied": "লিংক কপি হয়েছে",
+    "dismiss": "এখন নয়"
   }
 }
