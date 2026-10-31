@@ -19,9 +19,7 @@ export async function register() {
       environment: env.NODE_ENV,
     });
     // Missing BN messages render in English (F-I18N-009); the catalogs are static, so one report.
-    reportMissingTranslations((error) =>
-      reporter?.report(error, { tags: { locale: error.locale } }),
-    );
+    reportMissingTranslations(reporter);
   }
 }
 

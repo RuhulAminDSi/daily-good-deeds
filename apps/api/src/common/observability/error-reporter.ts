@@ -46,9 +46,11 @@ export class ObservabilityModule implements OnApplicationBootstrap, OnApplicatio
 
   /** Missing BN messages render in English (F-I18N-009, ERROR_HANDLING §2.7): logged and reported. */
   onApplicationBootstrap(): void {
-    reportMissingTranslations((error) => {
-      new Logger('i18n').warn(error.message);
-      this.reporter.report(error, { tags: { locale: error.locale } });
+    reportMissingTranslations({
+      report: (error, context) => {
+        new Logger('i18n').warn(String(error));
+        this.reporter.report(error, context);
+      },
     });
   }
 

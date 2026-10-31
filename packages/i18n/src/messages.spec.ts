@@ -48,11 +48,11 @@ describe('fallback', () => {
     expect(() => assertComplete('en', missingBn)).not.toThrow();
   });
 
-  it('reports each incomplete locale once per process', () => {
+  it('reports one event per incomplete locale, tagged with it', () => {
     const report = vi.fn();
-    reportMissingTranslations(report, missingBn);
-    reportMissingTranslations(report, missingBn);
+    reportMissingTranslations({ report }, missingBn);
     expect(report).toHaveBeenCalledOnce();
+    expect(report.mock.calls[0]![1]).toEqual({ tags: { locale: 'bn' } });
     expect(report.mock.calls[0]![0]).toMatchObject({ locale: 'bn', keys: ['nav.more', 'extra.n'] });
   });
 });

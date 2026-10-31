@@ -15,8 +15,8 @@ type Tree = { [key: string]: string | Tree };
  * the dotted keys that were filled in.
  */
 export function withFallback(
-  catalog: object,
-  reference: object,
+  catalog: Tree,
+  reference: Tree,
 ): { messages: Tree; missing: string[] } {
   const missing: string[] = [];
   const merge = (own: Tree | undefined, ref: Tree, prefix: string): Tree =>
@@ -34,18 +34,18 @@ export function withFallback(
         return [key, value];
       }),
     );
-  return { messages: merge(catalog as Tree, reference as Tree, ''), missing };
+  return { messages: merge(catalog, reference, ''), missing };
 }
 
-const bnWithFallback = withFallback(bn, en);
+const CATALOGS: Record<Locale, Tree> = { en, bn };
+const byLocale = <T>(fn: (locale: Locale) => T) =>
+  Object.fromEntries(LOCALES.map((locale) => [locale, fn(locale)])) as Record<Locale, T>;
+const loaded = byLocale((locale) => withFallback(CATALOGS[locale], en));
 
-export const MESSAGES: Record<Locale, Messages> = { en, bn: bnWithFallback.messages as Messages };
+export const MESSAGES = byLocale((locale) => loaded[locale].messages as Messages);
 
 /** Keys each locale renders in English. Empty in CI (catalog tests), so normally only in dev. */
-export const MISSING_KEYS: Record<Locale, readonly string[]> = {
-  en: [],
-  bn: bnWithFallback.missing,
-};
+export const MISSING_KEYS = byLocale((locale): readonly string[] => loaded[locale].missing);
 
 export class MissingTranslationsError extends Error {
   override name = 'MissingTranslationsError';
@@ -64,20 +64,17 @@ export function assertComplete(locale: Locale, missing = MISSING_KEYS): void {
   if (missing[locale].length) throw new MissingTranslationsError(locale, missing[locale]);
 }
 
-const reported = new Set<Locale>();
-
 /**
- * Production: reports each incomplete locale once per process. Catalogs are static, so the
- * missing set never changes after startup and one event per locale is the whole story.
+ * Production: one report per incomplete locale, called once at process startup. Catalogs are
+ * static, so the missing set never changes afterwards and that single report is the whole story.
  */
 export function reportMissingTranslations(
-  report: (error: MissingTranslationsError) => void,
+  reporter: { report(error: unknown, context?: { tags?: Record<string, string> }): void },
   missing = MISSING_KEYS,
 ): void {
   for (const locale of LOCALES) {
-    if (!missing[locale].length || reported.has(locale)) continue;
-    reported.add(locale);
-    report(new MissingTranslationsError(locale, missing[locale]));
+    if (!missing[locale].length) continue;
+    reporter.report(new MissingTranslationsError(locale, missing[locale]), { tags: { locale } });
   }
 }
 
