@@ -636,3 +636,9 @@ All notable changes to this project are recorded here. Format: [Keep a Changelog
 - **E2E** (`e2e/in-app-browser.spec.ts`, user-agent overrides): no banner in a real browser; Facebook Android gets the intent link and the dismissal sticks; the landing page shows it in Bengali; Instagram iOS gets steps, copies the URL, and sees no install prompt. Full web E2E suite: 57 passed.
 - **Moved:** hiding the Google button in webviews needs the button, so its E2E check joins T-P2-AUTH-005 (Google OAuth), which uses `useInAppBrowser()`.
 
+### Added (2026-10-31), Phase 2: T-P2-PWA-004 capability detection and graceful degradation
+- **Capabilities module** (`apps/web/src/lib/capabilities.ts`): `supports(capability)` and `useCapability()` for service worker, push, notifications, background sync, share, clipboard, persistent storage, install prompt, vibration, geolocation, badging, wake lock, MediaRecorder, IndexedDB and Cache Storage. Never throws (a throwing getter counts as unsupported); false on the server and during hydration.
+- **Wired in:** the in-app browser banner shows the link as selectable text when there is no clipboard API (insecure context, old webview); the offline page checks Cache Storage through it; installed apps call `navigator.storage.persist()` (silently granted there; never in a browser tab, where Firefox would prompt).
+- **Fallbacks documented** per capability in PWA_ARCHITECTURE §6.1, including the planned ones for push, background sync, share, IndexedDB, vibration, geolocation, badging and voice input.
+- **Tests:** unit (full and bare environments, a throwing getter, push needing a service worker; web unit tests now 22); E2E `degraded.spec.ts` with the service worker blocked and the optional APIs deleted: landing, Today, Calendar and admin render, client navigation and the language switch work, no page errors; the iOS webview banner falls back to the plain link.
+

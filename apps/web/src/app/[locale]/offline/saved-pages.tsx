@@ -4,6 +4,7 @@ import { useLocale } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { NAV_GROUPS } from '@/components/app-shell/nav-config';
 import { useClientTranslations } from '@/i18n/client';
+import { supports } from '@/lib/capabilities';
 
 const ITEMS = NAV_GROUPS.flatMap((group) => group.items);
 
@@ -19,7 +20,7 @@ export function SavedPages() {
 
   useEffect(() => {
     const isSaved = async (item: (typeof ITEMS)[number]) =>
-      'caches' in window && (await caches.match(`/${locale}${item.href}`)) !== undefined;
+      supports('cacheStorage') && (await caches.match(`/${locale}${item.href}`)) !== undefined;
     void Promise.all(ITEMS.map(isSaved)).then((found) =>
       setSaved(ITEMS.filter((_, i) => found[i])),
     );

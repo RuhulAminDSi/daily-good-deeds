@@ -71,11 +71,17 @@ export const snoozeInstallPrompt = () =>
  */
 export function shouldOfferInstall(visits: number): boolean {
   const dismissedAt = Number(safely(() => localStorage.getItem(DISMISSED_KEY), null) ?? 0);
-  const installed = matchMedia('(display-mode: standalone)').matches || isIosStandalone();
   return (
-    visits >= MIN_VISITS && Date.now() - dismissedAt >= SNOOZE_MS && !installed && !inAppBrowser()
+    visits >= MIN_VISITS &&
+    Date.now() - dismissedAt >= SNOOZE_MS &&
+    !isInstalled() &&
+    !inAppBrowser()
   );
 }
+
+/** Running as an installed app (home screen, dock), not in a browser tab. */
+export const isInstalled = () =>
+  matchMedia('(display-mode: standalone)').matches || isIosStandalone();
 
 /** iOS has no install event; its users get Add to Home Screen steps instead. */
 export const isIos = () =>

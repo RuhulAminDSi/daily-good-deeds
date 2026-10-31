@@ -4,6 +4,7 @@ import { Button } from '@dgd/ui';
 import { ExternalLink } from 'lucide-react';
 import { useState } from 'react';
 import { useClientTranslations } from '@/i18n/client';
+import { useCapability } from '@/lib/capabilities';
 import { androidIntentUrl, useInAppBrowser } from '@/lib/in-app-browser';
 import { safely } from '@/lib/storage';
 import { BannerCard } from './banner-card';
@@ -25,6 +26,7 @@ export function InAppBrowserBanner() {
     safely(() => sessionStorage.getItem(DISMISSED_KEY) !== null, false),
   );
   const [copied, setCopied] = useState(false);
+  const canCopy = useCapability('clipboard');
 
   if (!inApp || dismissed) return null;
 
@@ -48,9 +50,11 @@ export function InAppBrowserBanner() {
               <a href={androidIntentUrl(location.href)}>{t('open')}</a>
             </Button>
           ) : (
-            <Button size="sm" onClick={copy} aria-live="polite">
-              {copied ? t('copied') : t('copy')}
-            </Button>
+            canCopy && (
+              <Button size="sm" onClick={copy} aria-live="polite">
+                {copied ? t('copied') : t('copy')}
+              </Button>
+            )
           )}
           <Button size="sm" variant="ghost" onClick={dismiss}>
             {t('dismiss')}
@@ -63,6 +67,10 @@ export function InAppBrowserBanner() {
         <p className="text-body-sm">
           {t('steps', { app: META.has(inApp.app) ? 'meta' : inApp.app })}
         </p>
+      )}
+      {/* No clipboard API (insecure context, old webview): the link to copy by hand. */}
+      {inApp.os !== 'android' && !canCopy && (
+        <p className="text-body-sm break-all select-all">{location.href}</p>
       )}
     </BannerCard>
   );

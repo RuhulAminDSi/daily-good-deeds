@@ -51,7 +51,7 @@
 | EP-PWA | F-PWA-001 | T-P2-PWA-001 | Web manifest & installability | T-P2-PWA-001.1, T-P2-PWA-001.2, T-P2-PWA-001.3 | TC-PWA-001-01 | In progress | P2 |
 | EP-PWA | F-PWA-003 | T-P2-PWA-002 | Service worker app shell (Serwist) | T-P2-PWA-002.1, T-P2-PWA-002.2, T-P2-PWA-002.3, T-P2-PWA-002.4 | TC-PWA-003-01 | Done | P2 |
 | EP-PWA | F-PWA-007 | T-P2-PWA-003 | In-app browser detection & fallback | T-P2-PWA-003.1, T-P2-PWA-003.2, T-P2-PWA-003.3 | TC-PWA-007-01 | Done | P2 |
-| EP-PWA | F-PWA-008 | T-P2-PWA-004 | Capability detection & graceful degradation | T-P2-PWA-004.1, T-P2-PWA-004.2 | TC-PWA-008-01 | Not started | P2 |
+| EP-PWA | F-PWA-008 | T-P2-PWA-004 | Capability detection & graceful degradation | T-P2-PWA-004.1, T-P2-PWA-004.2 | TC-PWA-008-01 | Done | P2 |
 | EP-AUTH | F-AUTH-001 | T-P2-AUTH-001 | Identity schema | T-P2-AUTH-001.1, T-P2-AUTH-001.2, T-P2-AUTH-001.3, T-P2-AUTH-001.4 | TC-AUTH-001-01 | Not started | P2 |
 | EP-AUTH | F-AUTH-001 | T-P2-AUTH-002 | Registration | T-P2-AUTH-002.1, T-P2-AUTH-002.2, T-P2-AUTH-002.3, T-P2-AUTH-002.4, T-P2-AUTH-002.5, T-P2-AUTH-002.6 | TC-AUTH-001-02 | Not started | P2 |
 | EP-AUTH | F-AUTH-004 | T-P2-AUTH-003 | Email verification | T-P2-AUTH-003.1, T-P2-AUTH-003.2, T-P2-AUTH-003.3 | TC-AUTH-004-01 | Not started | P2 |

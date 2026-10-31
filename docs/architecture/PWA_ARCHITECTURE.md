@@ -117,6 +117,26 @@ Detection uses UA heuristics (`FBAN|FBAV|FB_IAB` Facebook, `Messenger`, `Instagr
 
 **Graceful degradation:** feature-detect `serviceWorker`, `PushManager`, `Notification`, `SyncManager`, `BeforeInstallPromptEvent`, `navigator.storage.persist`, `indexedDB` (open test), `Intl` islamic calendar support, and `SpeechRecognition`. The UI hides or explains anything unsupported. It never throws.
 
+### 6.1 Capability fallbacks (F-PWA-008)
+
+Every check goes through `apps/web/src/lib/capabilities.ts` (`supports()`, `useCapability()`; false on the server and during hydration, and a throwing getter counts as unsupported). Code never touches an optional API without it. Rows marked *(planned)* describe the fallback the feature must implement when it lands.
+
+| Capability | Used for | When missing |
+|---|---|---|
+| `serviceWorker` | Offline shell, update prompt (F-PWA-003/009) | Online-only: pages load from the network; no offline notice or update toast. Covered by `e2e/degraded.spec.ts` |
+| `cacheStorage` | Offline page's saved-section list | The list reads as "no pages saved yet" |
+| `installPrompt` | Install button (F-PWA-001) | No install banner, except iOS Add to Home Screen steps |
+| `clipboard` | "Copy link" in the in-app browser banner (F-PWA-007) | The link is shown as selectable text instead of the button |
+| `persist` | Keeping offline data for installed apps | Nothing requested; the server stays the source of truth |
+| `push`, `notifications` | Web Push (F-NOTIF-006) *(planned)* | Push settings hidden with an explanation; in-app and email notifications still work |
+| `backgroundSync` | Outbox flush (P9) *(planned)* | Flush on foreground and on `online` (already the iOS path) |
+| `share` | Sharing (P7) *(planned)* | Copy-link fallback (`clipboard`, else selectable text) |
+| `indexedDb` | Offline data, outbox (P9) *(planned)* | Online-only mode with the offline notice |
+| `vibration`, `wakeLock` | Tasbih haptics, screen-on (P5) *(planned)* | Silent counting; screen may sleep |
+| `geolocation` | Prayer times (P5) *(planned)* | Manual city search |
+| `badging` | Unread count on the app icon (P6) *(planned)* | No badge; in-app count only |
+| `mediaRecorder` | Voice notes *(planned)* | Voice input hidden |
+
 ## 7. iOS limitations (documented, not hidden)
 - No `beforeinstallprompt`; we show a manual guide.
 - Push only for home-screen installs; requests must come from a user gesture.
