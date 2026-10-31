@@ -30,10 +30,15 @@
 | Density | Comfortable by default. Admin tables offer a "compact" density toggle. |
 
 ## 3. Implementation architecture
-- `packages/tokens`: tokens as TypeScript → CSS variables (`:root`, `[data-theme=dark]`), Tailwind preset (`colors.primary = 'rgb(var(--color-primary) / <alpha-value>)'`), and an Android `colors.xml` export.
+- `packages/tokens` (built in T-P2-UI-001): tokens in TypeScript, emitted as `tokens.css` and an Android `colors.xml` export.
+  - `tokens.css` is a Tailwind 4 `@theme` that replaces Tailwind's default palette, shadows and text sizes, so only tokens exist (`bg-primary`, `text-h1`, `shadow-md`, `rounded-lg`).
+  - Dark values apply under `prefers-color-scheme: dark` unless `<html data-theme>` overrides them.
+  - Bengali line heights and the 13px minimum apply under `:lang(bn)`.
 - `packages/ui`: React components built on Radix primitives. Styled only with Tailwind classes that reference tokens. Every component has a Storybook story (EN + BN, light + dark) and an axe check.
 - **No hardcoded strings in `packages/ui`.** Components receive labels as props. Default labels such as "Close" come from `packages/i18n`.
-- Lint rules: ban raw hex in `apps/web` (`no-restricted-syntax` + Tailwind `arbitrary value` lint), and ban string literals in JSX text (`i18next/no-literal-string`-style rule adapted for next-intl).
+- Lint rules:
+  - **Implemented:** `apps/web` bans Tailwind palette classes and arbitrary hex values (`no-restricted-syntax`). Removed palette classes would otherwise render unstyled without any error.
+  - **Planned:** ban string literals in JSX text (an `i18next/no-literal-string`-style rule adapted for next-intl), with I18N-001.
 
 ## 4. Key patterns
 

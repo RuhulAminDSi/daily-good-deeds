@@ -26,9 +26,9 @@ export default async function Landing({ params }: PageProps<'/[locale]'>) {
   const up = await apiIsUp();
   return (
     <main className="mx-auto flex max-w-xl flex-col gap-6 px-4 py-16">
-      <h1 className="text-3xl font-bold text-emerald-800">{m.app.name}</h1>
-      <p className="text-lg text-stone-700">{m.app.tagline}</p>
-      <p className="text-sm">
+      <h1 className="text-display text-primary">{m.app.name}</h1>
+      <p className="text-h3 font-normal text-text-muted">{m.app.tagline}</p>
+      <p className="text-body-sm">
         <span className="font-medium">{m.status.label}: </span>
         {up ? m.status.ok : m.status.unavailable}
       </p>

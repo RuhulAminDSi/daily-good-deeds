@@ -1,0 +1,23 @@
+{
+  "name": "@dgd/tokens",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Design tokens (docs/design/COLOR_TOKENS.md, TYPOGRAPHY.md): CSS variables + Tailwind theme for web, colors.xml for the Android widget",
+  "type": "module",
+  "exports": {
+    "./tokens.css": "./dist/tokens.css"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json && node dist/emit.js",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@dgd/config": "workspace:*",
+    "@types/node": "24.19.2",
+    "eslint": "10.14.0",
+    "typescript": "6.0.3",
+    "vitest": "5.0.5"
+  }
+}

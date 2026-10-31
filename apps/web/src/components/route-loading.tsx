@@ -7,7 +7,7 @@
 export default function RouteLoading() {
   return (
     <div role="status" aria-live="polite" className="p-6">
-      <span className="inline-block h-4 w-32 animate-pulse rounded bg-stone-200" />
+      <span className="inline-block h-4 w-32 animate-pulse rounded-sm bg-surface-sunken" />
     </div>
   );
 }

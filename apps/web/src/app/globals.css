@@ -1,3 +1,2 @@
 @import 'tailwindcss';
-
-/* Design tokens (colors, type scale) arrive with packages/tokens in T-P2-UI-001. */
+@import '@dgd/tokens/tokens.css';

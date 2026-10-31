@@ -9,7 +9,7 @@ export default async function AppLayout({ children, params }: LayoutProps<'/[loc
   const { locale, m } = await routeMessages(params);
   return (
     <div className="min-h-dvh">
-      <nav aria-label={m.nav.main} className="flex gap-4 border-b border-stone-200 px-4 py-3">
+      <nav aria-label={m.nav.main} className="flex gap-4 border-b border-border px-4 py-3">
         <Link href={`/${locale}/today`}>{m.nav.today}</Link>
       </nav>
       <main className="p-4">{children}</main>

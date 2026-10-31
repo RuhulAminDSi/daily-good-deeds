@@ -22,7 +22,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps<'/[
   const { locale, m } = await routeMessages(params);
   return (
     <html lang={locale}>
-      <body className="min-h-dvh bg-stone-50 text-stone-900 antialiased">
+      <body className="min-h-dvh bg-bg text-body text-text antialiased">
         <BoundaryMessagesProvider value={{ locale, common: m.common }}>
           {children}
         </BoundaryMessagesProvider>

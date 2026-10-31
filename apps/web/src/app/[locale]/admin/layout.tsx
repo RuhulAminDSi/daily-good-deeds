@@ -5,8 +5,11 @@ import { routeMessages } from '@/i18n/route-locale';
 export default async function AdminLayout({ children, params }: LayoutProps<'/[locale]/admin'>) {
   const { locale, m } = await routeMessages(params);
   return (
-    <div className="min-h-dvh bg-white">
-      <nav aria-label={m.nav.admin} className="flex gap-4 bg-stone-900 px-4 py-3 text-white">
+    <div className="min-h-dvh bg-surface">
+      <nav
+        aria-label={m.nav.admin}
+        className="flex gap-4 border-b border-border bg-surface-sunken px-4 py-3"
+      >
         <span className="font-semibold">{m.nav.admin}</span>
         <Link href={`/${locale}`}>{m.nav.home}</Link>
       </nav>

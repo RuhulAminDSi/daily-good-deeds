@@ -16,11 +16,11 @@ export default function ErrorBoundary({
   useEffect(() => reportError(error, error.digest), [error]);
   return (
     <div role="alert" className="mx-auto max-w-md p-6 text-center">
-      <h1 className="text-lg font-semibold">{common.errorTitle}</h1>
+      <h1 className="text-h3">{common.errorTitle}</h1>
       <button
         type="button"
         onClick={reset}
-        className="mt-4 rounded-lg bg-emerald-700 px-4 py-2 text-white"
+        className="mt-4 rounded-md bg-primary px-4 py-2 text-label text-primary-contrast hover:bg-primary-hover"
       >
         {common.retry}
       </button>

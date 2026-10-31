@@ -386,3 +386,36 @@ All notable changes to this project are recorded here. Format: [Keep a Changelog
 - **CI flake fixed:** the worker integration test's setup timed out once on CI. Startup installs pg-boss on a fresh, possibly cold, Neon branch, which can exceed the default 10 s hook timeout. That hook now allows 60 s.
 - **Deferred (DL-040):** ADR-017 cloud hosting, merge-triggered deploys, production, Sentry source-map upload and uptime checks.
 
+### Added (2026-10-31), Phase 2: T-P2-UI-001 design tokens (`packages/tokens`)
+- **`@dgd/tokens`** holds the tokens in one TypeScript source (`src/tokens.ts`):
+  - Semantic colours for light and dark (COLOR_TOKENS §2).
+  - The heatmap and life-balance palettes (§3).
+  - Shadows, radii, the type scale with Bengali line heights and size minimums (TYPOGRAPHY §2–3), and motion.
+- **The build emits:**
+  - `tokens.css`, a Tailwind 4 `@theme`. It **replaces** Tailwind's default palette, shadows and text sizes, so only tokens exist (`bg-primary`, `text-text-muted`, `text-h1`, `shadow-md`). Dark values follow `prefers-color-scheme` unless `<html data-theme>` overrides them. Bengali gets taller line heights and a 13px caption minimum under `:lang(bn)`, and `h1`/`display` step down below 640px.
+  - Android `values/colors.xml` and `values-night/colors.xml` (`dgd_*`, `#AARRGGBB`) for the P9 widget.
+- **The spec is the test.** `tokens.spec.ts` reads `docs/design/COLOR_TOKENS.md`. It fails when any hex value differs, when a documented contrast ratio (§4.1–4.2) differs from what the tokens produce, or when a pair drops below WCAG 2.2 thresholds (4.5:1 text, 3:1 UI): 38 tests. A deliberate one-token change failed 5 of them.
+- **Web:**
+  - Every page now uses tokens; no palette classes remain.
+  - A global `:focus-visible` ring uses `focus-ring` with a 2px offset.
+  - A new lint rule rejects Tailwind palette classes and arbitrary hex values. Without it, a removed palette class would silently render unstyled.
+- **Verified in a browser:**
+  - Light body is `#FAF7F2` on `#1F2A24`; dark is `#121613` on `#ECE8E1`.
+  - Bengali body line height is 1.7 (27.2px) against English 1.5.
+  - Web E2E: 15 passing.
+- **Pre-push review of T-P2-UI-001:**
+  - **Turbo cache:** the tokens test now hashes `COLOR_TOKENS.md`. Before, a doc-only edit got a cache hit and skipped the drift guard.
+  - **Focus ring:** moved into `tokens.css`, so `packages/ui` (UI-002) gets it too.
+  - **Bengali rule:** the overrides match only `:root:lang(bn)` and elements carrying `lang="bn"`, not every element.
+  - **Contrast tables:** the §4 tables in `COLOR_TOKENS.md` now name tokens in backticks, so the test reads them directly instead of interpreting prose labels.
+  - **Cleanups:**
+    - The unused JS barrel export and the stale `dev` script are removed.
+    - The no-op Bengali line height on `counter` is removed.
+    - One hex parser serves both contrast and Android output.
+    - The palette tests are merged.
+  - **Accepted, not changed:**
+    - `light-dark()` would remove the duplicated dark block (about 300 B gzipped), but Chrome 111–122, which Tailwind 4 supports, can't parse it, so older Android webviews would lose every colour.
+    - A theme-aware Tailwind class linter (it catches typos like `bg-primry`, `[oklch()]` and inline styles) is a new dependency, left to UI-002 when `packages/ui` needs a shared lint config.
+    - Bengali user content on an English page still gets English line heights until content is tagged with `lang` (I18N).
+- **Not yet:** fonts (Inter and Hind Siliguri via `next/font`) and the theme switcher with no-flash persistence (T-P2-UI-004).
+

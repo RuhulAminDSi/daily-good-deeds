@@ -1,6 +1,6 @@
 # Color Tokens
 
-> Source of truth for colour. Tokens will live in `packages/tokens` and be emitted as CSS custom properties (web), a Tailwind preset, and Android `colors.xml` / Glance `ColorProviders` for the widget. Components **never** use raw hex values; they reference semantic tokens.
+> Source of truth for colour. The code lives in `packages/tokens` (`src/tokens.ts`) and is emitted as a Tailwind 4 theme with CSS custom properties (`tokens.css`, so `bg-primary`, `text-text-muted` and so on) and as Android `colors.xml` / `values-night/colors.xml` for the widget's Glance `ColorProviders`. Components **never** use raw colours; they reference semantic tokens. The web lint rule rejects Tailwind palette classes and arbitrary hex values.
 
 ## 1. Palette philosophy
 
@@ -121,42 +121,42 @@ Ratios were **computed** with the WCAG relative-luminance formula (Node script r
 
 | Foreground / background | Light | Dark | Result |
 |---|---|---|---|
-| text / bg | 13.89 | 14.95 | PASS |
-| text / surface | 14.84 | 13.57 | PASS |
-| text / surface-raised | 14.84 | 12.19 | PASS |
-| text-muted / bg | 6.04 | 8.05 | PASS |
-| text-muted / surface | 6.46 | 7.30 | PASS |
-| text-muted / surface-raised | 6.46 | 6.56 | PASS |
-| text-placeholder / surface | 4.63 | 5.18 | PASS |
-| primary-contrast / primary | 6.33 | 8.08 | PASS |
-| primary-contrast / primary-hover | 8.05 | 9.48 | PASS |
-| primary / surface (links, text buttons) | 6.33 | 7.49 | PASS |
-| primary / bg | 5.93 | 8.26 | PASS |
-| primary-subtle-text / primary-subtle | 7.49 | 8.52 | PASS |
-| success / surface | 5.95 | 7.49 | PASS |
-| warning / surface | 5.93 | 8.48 | PASS |
-| warning / warning-bg | 5.29 | 6.80 | PASS |
-| accent-text / surface | 5.93 | 8.48 | PASS |
-| danger / surface | 6.27 | 6.92 | PASS |
-| danger / danger-bg | 5.34 | 6.17 | PASS |
-| danger-contrast / danger | 6.27 | 7.89 | PASS |
-| info / surface | 6.64 | 8.18 | PASS |
-| info / info-bg | 5.73 | 6.54 | PASS |
+| `text` / `bg` | 13.89 | 14.95 | PASS |
+| `text` / `surface` | 14.84 | 13.57 | PASS |
+| `text` / `surface-raised` | 14.84 | 12.19 | PASS |
+| `text-muted` / `bg` | 6.04 | 8.05 | PASS |
+| `text-muted` / `surface` | 6.46 | 7.30 | PASS |
+| `text-muted` / `surface-raised` | 6.46 | 6.56 | PASS |
+| `text-placeholder` / `surface` | 4.63 | 5.18 | PASS |
+| `primary-contrast` / `primary` | 6.33 | 8.08 | PASS |
+| `primary-contrast` / `primary-hover` | 8.05 | 9.48 | PASS |
+| `primary` / `surface` (links, text buttons) | 6.33 | 7.49 | PASS |
+| `primary` / `bg` | 5.93 | 8.26 | PASS |
+| `primary-subtle-text` / `primary-subtle` | 7.49 | 8.52 | PASS |
+| `success` / `surface` | 5.95 | 7.49 | PASS |
+| `warning` / `surface` | 5.93 | 8.48 | PASS |
+| `warning` / `warning-bg` | 5.29 | 6.80 | PASS |
+| `accent-text` / `surface` | 5.93 | 8.48 | PASS |
+| `danger` / `surface` | 6.27 | 6.92 | PASS |
+| `danger` / `danger-bg` | 5.34 | 6.17 | PASS |
+| `danger-contrast` / `danger` | 6.27 | 7.89 | PASS |
+| `info` / `surface` | 6.64 | 8.18 | PASS |
+| `info` / `info-bg` | 5.73 | 6.54 | PASS |
 
 ### 4.2 Non-text UI pairs
 
 | Element / background | Light | Dark | Result |
 |---|---|---|---|
-| border-strong / surface (inputs, checkboxes) | 3.78 | 3.61 | PASS |
-| border-strong / bg | 3.54 | 3.98 | PASS |
-| focus-ring / surface | 6.64 | 9.76 | PASS |
-| focus-ring / bg | 6.22 | 10.75 | PASS |
-| primary / bg (active nav indicator) | 5.93 | 8.26 | PASS |
-| accent / surface | 3.44 | 8.48 | PASS |
-| chart c1–c8 / surface | 4.71 – 7.49 | 7.22 – 9.29 | PASS (all) |
-| heatmap level 4 / surface | 6.33 | 10.03 | PASS |
-| heatmap level 3 / surface | 3.66 | 5.24 | PASS |
-| heatmap level 4 / level 0 | 5.10 | 9.01 | PASS |
+| `border-strong` / `surface` (inputs, checkboxes) | 3.78 | 3.61 | PASS |
+| `border-strong` / `bg` | 3.54 | 3.98 | PASS |
+| `focus-ring` / `surface` | 6.64 | 9.76 | PASS |
+| `focus-ring` / `bg` | 6.22 | 10.75 | PASS |
+| `primary` / `bg` (active nav indicator) | 5.93 | 8.26 | PASS |
+| `accent` / `surface` | 3.44 | 8.48 | PASS |
+| `chart-1`–`chart-8` / `surface` | 4.71 – 7.49 | 7.22 – 9.29 | PASS (all) |
+| `heat-4` (heatmap level 4) / `surface` | 6.33 | 10.03 | PASS |
+| `heat-3` (heatmap level 3) / `surface` | 3.66 | 5.24 | PASS |
+| `heat-4` / `heat-0` (heatmap levels 4 and 0) | 5.10 | 9.01 | PASS |
 
 ### 4.3 Adjustments made and known exceptions
 
@@ -167,7 +167,7 @@ Ratios were **computed** with the WCAG relative-luminance formula (Node script r
 | Heatmap levels 1–2 vs surface (1.42 / 2.03 light; 1.66 / 2.79 dark), adjacent level steps 1.14–1.91 | Below 3:1 | Accepted: colour is supplementary. The required information is given by text (aria-label, tooltip, table view, legend with numeric ranges). Tracked in the a11y test plan. |
 | `text-disabled` (2.69 light) | Below 4.5 | Exempt (inactive components, SC 1.4.3). Disabled controls also show a `not-allowed` cursor and `aria-disabled`. |
 
-The contrast script must move to `packages/tokens/scripts/contrast.test.ts` in Phase 2 so that CI fails if a token change breaks any pair above.
+`packages/tokens/src/tokens.spec.ts` reads this document. CI fails if the code and the hex values in §2–§3 disagree, if a ratio in §4.1–§4.2 differs from what the tokens produce (to two decimals), or if any pair drops below its threshold. Change the tokens and this document together.
 
 ## 5. Elevation & shadow tokens
 
