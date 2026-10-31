@@ -9,7 +9,7 @@ Make these required when `main` gets branch protection.
 | Check | Why it gates a merge |
 |---|---|
 | `verify` | The code builds, lints and type-checks. It runs unit and API tests, plus integration tests against a real Postgres. It also checks the OpenAPI contract snapshot (CI never rewrites it), the plan/spec integrity and the OpenAPI draft-vs-implemented overlap. |
-| `e2e` | The app renders and degrades correctly in a real browser (desktop, plus mobile for `@responsive` tests). |
+| `e2e` | The app renders and degrades correctly in a real browser (desktop, plus mobile for `@responsive` tests). Every `packages/ui` story also runs in Chromium: it renders, its keyboard and interaction checks pass, and axe finds no violations, in EN/BN × light/dark. |
 | `security` | No secrets are in the pushed or PR commits. On `dev`/`main` pushes, no high or critical advisories are in the dependencies. On PRs the audit only warns, because new advisories appear independently of the change. |
 
 The daily `security` run also scans the **full** git history.

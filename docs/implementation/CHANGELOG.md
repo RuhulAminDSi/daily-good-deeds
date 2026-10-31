@@ -419,3 +419,38 @@ All notable changes to this project are recorded here. Format: [Keep a Changelog
     - Bengali user content on an English page still gets English line heights until content is tagged with `lang` (I18N).
 - **Not yet:** fonts (Inter and Hind Siliguri via `next/font`) and the theme switcher with no-flash persistence (T-P2-UI-004).
 
+### Added (2026-10-31), Phase 2: T-P2-UI-002 core components (`packages/ui`)
+- **`@dgd/ui`:** Button (5 variants, 3 sizes, loading, focusable-disabled), IconButton with tooltip, Spinner, Field (label, hint, error, required) with Input and Textarea, Select, Checkbox, Switch, Dialog, Sheet, Toast, Tooltip, Card (default, highlight, interactive), Tabs, Badge, Avatar, Skeleton and EmptyState.
+  - Built on Radix primitives and Lucide icons, and styled only with `@dgd/tokens` classes.
+  - **No hard-coded text.** Every label, including "Close" and the toast region names, is a prop.
+  - The package is consumed as TypeScript source.
+- **Storybook 10:** a toolbar switches EN/BN and light/dark on `<html>`, as the app does. `pnpm --filter @dgd/ui storybook`.
+- **Every story is a test** (`@storybook/addon-vitest`, real Chromium; 37 tests in CI's `e2e` job). Each story:
+  - Renders.
+  - Runs its `play` checks: keyboard behaviour (Enter/Space, arrow keys, Tab trap and Esc in dialogs with focus returned, Esc on tooltips), label/hint/error wiring, and that toasts never steal focus.
+  - **Passes axe with zero violations.** An injected contrast bug failed with `color-contrast`.
+
+  The main story of each component also runs in Bengali, dark, and Bengali-dark.
+- **Bugs the tests caught before release:**
+  - A loading button hid its label with `visibility: hidden`, which also removed the accessible name. It now uses transparency, and the "Saving…" status moved outside the button.
+  - Radix's toast region and per-toast labels defaulted to English. They are now required, localized props.
+- **Shared lint rule:** the raw-colour rule moved to `@dgd/config/eslint/tokens`, so `apps/web` and `packages/ui` both use it.
+- **Bengali initials** use grapheme clusters, so conjuncts stay whole ("জ্ঞান" → "জ্ঞা").
+- **Pre-push review of T-P2-UI-002:**
+  - **`@dgd/ui/styles.css`** brings in the tokens and tells Tailwind to generate the component classes. Without it, an app importing the package would render the components unstyled, because Tailwind doesn't scan `node_modules`.
+  - **`UiProvider`** (locale plus the shared strings close, notifications, notification and required) wraps the tooltip and toast machinery. Call sites no longer pass the same labels to every Dialog, Toast and Field, and I18N-001 feeds it from the catalogs. Badge digits follow its locale.
+  - **Button:**
+    - `asChild` (Radix Slot) lets a link look like a button while staying a link.
+    - It renders a single element unless it is announcing a loading state, so wrappers like Tooltip and DialogClose can merge into it.
+  - **Toast:** the close control is the shared IconButton, with a tooltip and a 44px target. Toasts with an action are held for at least 5 s in code, not just in a comment.
+  - **Smaller cleanups:**
+    - Select reuses the Field wiring.
+    - The package exports an explicit list, so internals stay private.
+    - `Intl.Segmenter` and number formatters are created once.
+    - The Field context is memoised.
+    - Story copy is hoisted, and the Bengali IconButton story runs the full checks.
+  - **Accepted, not changed:**
+    - Checkbox and Switch stay native inputs, as COMPONENT_LIBRARY §1 specifies: they post without JS. They carry their own label instead of using Field.
+    - The `radix-ui` meta package installs every primitive, but bundles tree-shake.
+    - Stories keep their own EN/BN copy until I18N-001 provides catalogs.
+

@@ -1,0 +1,5 @@
+{
+  "extends": "@dgd/config/tsconfig/react.json",
+  "compilerOptions": { "types": ["vite/client"] },
+  "include": ["src", ".storybook", "*.ts"]
+}
