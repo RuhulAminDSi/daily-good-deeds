@@ -353,3 +353,35 @@ All notable changes to this project are recorded here. Format: [Keep a Changelog
     - The CSP endpoint has no rate limit beyond its 16 KB cap; edge limits come with T-P2-PLAT-010.
     - Web route handlers under `/api/*` get no request id, because the proxy skips them.
 - **Not yet:** private source-map upload and setting the release to the git SHA belong to the deploy pipeline (T-P2-PLAT-010). The `userId` pseudonym in logs arrives with auth.
+
+### Added (2026-10-31), Phase 2: T-P2-PLAT-010 staging (local + Tailscale, DL-040)
+- **No cloud hosting for now.** `pnpm staging` does the following:
+  - Builds the API and web for production.
+  - Applies migrations to Neon's `staging` branch, as the release step.
+  - Runs the API, worker and web on this machine.
+  - Publishes the web app on the internet with Tailscale Funnel as **https://daily-deeds.ilish-denebola.ts.net/**. It is public, so phones on mobile data can open it without Tailscale.
+  - Gates on a smoke test.
+
+  Ctrl+C stops everything and unpublishes. If any process exits, the whole stack stops.
+- **The `daily-deeds` hostname** belongs to a second, userspace Tailscale node with its own state and socket. The machine's own node, and the Funnel it already serves on 443, are untouched. It runs unattended, because on Windows a node otherwise stops when its CLI exits. The first run needs one browser login.
+- **Smoke test** (`tools/staging/smoke.js`), run through the public URL. It checks API readiness including the DB, both locales rendering with the API reported as working, the CSP nonce, `X-Request-Id`, security headers, locale redirects, and the CSP report endpoint. Publishing first waits for Tailscale to fetch the TLS certificate.
+- **Config:** secrets live in the git-ignored `apps/api/.env.staging`, and staging refuses to start if `WEB_ORIGINS` doesn't match the node's name. The procedure is documented in `docs/qa/STAGING.md`.
+- **Fix:** the API registered its JSON body middleware with the legacy `'*'` route syntax. That logged an "Unsupported route path" warning at every production start. It now uses `'{*path}'`.
+- **Verified:** staging came up from a clean build. Migrations applied to the staging branch, and all 5 smoke checks passed through the Tailscale URL. A browser saw "All systems working", and the URL answered 200 over the public Funnel route (public DNS).
+- **Pre-push review of T-P2-PLAT-010:**
+  - **`WEB_ORIGINS` is now injected** from the node's public URL instead of being kept by hand in `.env.staging`, so one setting can no longer drift.
+  - **Smoke test:**
+    - Fetches `/en` once for both its render and header checks.
+    - Runs its checks in parallel.
+    - Reads the expected texts from `en.json` instead of copying them.
+  - **Supervisor:**
+    - Windows-only, with the untested Linux paths removed.
+    - One polling helper.
+    - readline for log prefixes.
+    - The unused standalone smoke CLI is removed.
+  - **Port-in-use guard (new).** On Windows, a staging run killed without Ctrl+C leaves its processes running. A restart then smoke-tested the *old* server and wrongly passed. Staging now refuses to start while its ports are in use, and `docs/qa/STAGING.md` shows how to stop leftovers.
+  - **Accepted, not changed:**
+    - The smoke test overlaps a little with the web E2E suite. It checks the deployment (real API and DB, public URL); E2E checks rendering.
+    - Migrations still run after the build rather than alongside it.
+- **Deferred (DL-040):** ADR-017 cloud hosting, merge-triggered deploys, production, Sentry source-map upload and uptime checks.
+

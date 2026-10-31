@@ -40,6 +40,6 @@ export class AppModule implements NestModule {
   // Nest registers global modules' middleware (LoggerModule's pino-http) before non-global ones, so
   // parse errors carry a request id. Keep AppModule non-global; test/app.spec.ts guards this order.
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(jsonBody()).forRoutes('*');
+    consumer.apply(jsonBody()).forRoutes('{*path}');
   }
 }

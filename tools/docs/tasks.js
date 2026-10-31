@@ -178,16 +178,16 @@ t(
 );
 t(
   'T-P2-PLAT-010',
-  'Staging deployment',
+  'Staging deployment (local + Tailscale, DL-040)',
   [],
   'M',
-  'Merge to main deploys web + api + worker to staging; post-deploy smoke passes; migrations run as release step.',
+  '`pnpm staging` runs a production build of web + api + worker against the Neon staging branch, published with Tailscale Funnel; post-deploy smoke passes; migrations run as release step.',
   [
-    'Vercel (web) project',
-    'Render/Fly (api, worker)',
-    'Secrets management per env',
+    'Tailnet node `daily-deeds` (userspace tailscaled) + tailscale funnel (public)',
+    'Production build of api, worker, web on this machine',
+    'Secrets in git-ignored apps/api/.env.staging (staging branch)',
     'API env per host: WEB_ORIGINS and TRUST_PROXY (proxy hop count; wrong value = one shared rate-limit bucket)',
-    'Post-deploy smoke job',
+    'Post-deploy smoke script',
     'Probes: liveness → /health/live (frequent); /health/ready only for deploy gating, so Neon compute can autosuspend',
   ],
 );

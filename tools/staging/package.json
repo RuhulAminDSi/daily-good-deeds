@@ -1,0 +1,15 @@
+{
+  "name": "@dgd/staging-tools",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Local staging: production build of web + api + worker on this machine, published to the tailnet (DL-040)",
+  "type": "module",
+  "scripts": {
+    "start": "node staging.js",
+    "lint": "eslint ."
+  },
+  "devDependencies": {
+    "@dgd/config": "workspace:*",
+    "eslint": "10.14.0"
+  }
+}

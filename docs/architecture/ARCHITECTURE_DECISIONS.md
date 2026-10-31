@@ -20,7 +20,7 @@ Format: Context / Decision / Consequences / Alternatives. Status values: **Accep
 | ADR-014 | Application-level encryption for journals (single versioned key) | Proposed |
 | ADR-015 | UI i18n catalogs in git, not the database | Proposed |
 | ADR-016 | Content translations in `*_translations` tables | Proposed |
-| ADR-017 | Hosting: Vercel + Render/Fly.io + Neon | Proposed (open) |
+| ADR-017 | Hosting: Vercel + Render/Fly.io + Neon | Proposed (open); deferred by DL-040, which runs staging locally on the tailnet |
 | ADR-018 | Islamic content: cached external APIs + curated seed | Accepted (D-7) |
 | ADR-019 | Shared pure-TS domain package | Proposed |
 | ADR-020 | REST + OpenAPI 3.1, contract-first via Zod | Proposed |
