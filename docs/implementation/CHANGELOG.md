@@ -383,5 +383,6 @@ All notable changes to this project are recorded here. Format: [Keep a Changelog
   - **Accepted, not changed:**
     - The smoke test overlaps a little with the web E2E suite. It checks the deployment (real API and DB, public URL); E2E checks rendering.
     - Migrations still run after the build rather than alongside it.
+- **CI flake fixed:** the worker integration test's setup timed out once on CI. Startup installs pg-boss on a fresh, possibly cold, Neon branch, which can exceed the default 10 s hook timeout. That hook now allows 60 s.
 - **Deferred (DL-040):** ADR-017 cloud hosting, merge-triggered deploys, production, Sentry source-map upload and uptime checks.
 

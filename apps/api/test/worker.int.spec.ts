@@ -48,11 +48,13 @@ describe.skipIf(!TEST_DIRECT_URL)('worker (integration)', { timeout: 60_000 }, (
   const runId = randomUUID();
   const state = (queue: string, id: string) => boss.getJobById(queue, id).then((j) => j?.state);
 
+  // On a fresh CI branch, startup installs the pg-boss schema on a possibly cold Neon compute,
+  // which can exceed the default 10 s hook timeout.
   beforeAll(async () => {
     worker = await createTestWorker(TEST_DIRECT_URL!, [EchoJob, SlowJob]);
     boss = worker.get(PG_BOSS);
     jobs = worker.get(JobsClient);
-  });
+  }, 60_000);
 
   afterAll(async () => {
     if (!closed) await worker?.close();
