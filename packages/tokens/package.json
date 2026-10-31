@@ -5,6 +5,10 @@
   "description": "Design tokens (docs/design/COLOR_TOKENS.md, TYPOGRAPHY.md): CSS variables + Tailwind theme for web, colors.xml for the Android widget",
   "type": "module",
   "exports": {
+    ".": {
+      "types": "./dist/tokens.d.ts",
+      "default": "./dist/tokens.js"
+    },
     "./tokens.css": "./dist/tokens.css"
   },
   "scripts": {

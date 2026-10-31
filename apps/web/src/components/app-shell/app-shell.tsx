@@ -39,7 +39,10 @@ export async function AppShell({ banners, children }: AppShellProps) {
             <ThemeSwitcher initial={theme} />
           </div>
         </header>
-        {banners && <div className="flex flex-col gap-2 px-4 pt-4 md:px-6">{banners}</div>}
+        {/* `empty:hidden`: banners that render nothing (most of the time) take no space. */}
+        {banners && (
+          <div className="flex flex-col gap-2 px-4 pt-4 empty:hidden md:px-6">{banners}</div>
+        )}
         <main id="main" tabIndex={-1} className="flex-1 px-4 py-6 outline-none md:px-6 lg:px-8">
           <div className="mx-auto max-w-300">{children}</div>
         </main>

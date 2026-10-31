@@ -1,17 +1,6 @@
-import { match } from '@formatjs/intl-localematcher';
-import Negotiator from 'negotiator';
 import { type NextRequest, NextResponse } from 'next/server';
-import { DEFAULT_LOCALE, isLocale, LOCALE_COOKIE, LOCALES, type Locale } from './i18n/locales';
-
-/** Locale for a request without one in the path: cookie → Accept-Language (q-weighted) → English. */
-function preferredLocale(req: NextRequest): Locale {
-  const cookie = req.cookies.get(LOCALE_COOKIE)?.value;
-  if (isLocale(cookie)) return cookie;
-  const accepted = new Negotiator({
-    headers: { 'accept-language': req.headers.get('accept-language') ?? '' },
-  }).languages();
-  return match(accepted, LOCALES, DEFAULT_LOCALE) as Locale;
-}
+import { isLocale, LOCALE_COOKIE } from './i18n/locales';
+import { preferredLocale } from './i18n/preferred-locale';
 
 const SENTRY_DSN = process.env.NEXT_PUBLIC_SENTRY_DSN;
 /** The browser sends error reports straight to Sentry's ingest host. */
@@ -55,7 +44,11 @@ export function proxy(req: NextRequest) {
   if (!isLocale(first)) {
     // Every page lives under /{locale}.
     const url = req.nextUrl.clone();
-    url.pathname = `/${preferredLocale(req)}${req.nextUrl.pathname === '/' ? '' : req.nextUrl.pathname}`;
+    const locale = preferredLocale(
+      req.cookies.get(LOCALE_COOKIE)?.value,
+      req.headers.get('accept-language'),
+    );
+    url.pathname = `/${locale}${req.nextUrl.pathname === '/' ? '' : req.nextUrl.pathname}`;
     return NextResponse.redirect(url);
   }
 
@@ -84,7 +77,7 @@ export function proxy(req: NextRequest) {
 }
 
 export const config = {
-  // Pages only (prefetches included: they need the locale): skip Next internals, API routes and
-  // files with an extension (icons, manifest…).
-  matcher: ['/((?!_next|api|.*\\..*).*)'],
+  // Pages only (prefetches included: they need the locale): skip Next internals, API routes,
+  // files with an extension (manifest, /icons/*.png) and the extension-less tab and Apple icons.
+  matcher: ['/((?!_next|api|(?:apple-)?icon$|.*\\..*).*)'],
 };

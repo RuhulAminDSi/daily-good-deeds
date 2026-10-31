@@ -1,5 +1,6 @@
 import { UiProvider } from '@dgd/ui';
-import type { Metadata } from 'next';
+import { COLORS } from '@dgd/tokens';
+import type { Metadata, Viewport } from 'next';
 import { Hind_Siliguri, Inter } from 'next/font/google';
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, getTranslations } from 'next-intl/server';
@@ -40,6 +41,14 @@ export async function generateMetadata(): Promise<Metadata> {
     description: t('tagline'),
   };
 }
+
+/** Browser and status-bar colour: the top bar's surface, per colour scheme. */
+export const viewport: Viewport = {
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: COLORS.surface.light },
+    { media: '(prefers-color-scheme: dark)', color: COLORS.surface.dark },
+  ],
+};
 
 /** Root layout: one per locale, so `<html lang>` is always correct (screen readers, fonts). */
 export default async function LocaleLayout({ children, params }: LayoutProps<'/[locale]'>) {

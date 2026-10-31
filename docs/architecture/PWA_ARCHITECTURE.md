@@ -12,7 +12,9 @@ There is **one** manifest, `app/manifest.ts` served as `/manifest.webmanifest` (
 - `scope: /` and `start_url: /today?source=pwa`. Middleware redirects to `/{locale}/today` using the locale cookie, so switching language never leaves the installed app's scope.
 - `display: standalone`, with theme and background colours taken from the design tokens
 - icons at 192 and 512, plus maskable variants
-- two `shortcuts`: Today and Tasbih
+- two `shortcuts`: Today and Tasbih (Tasbih is added with its page in P5; until then only Today)
+
+`name`, `short_name`, `description` and shortcut names are in the visitor's language (locale cookie, then `Accept-Language`), since the manifest is fetched once at install time. Icons are rendered from one SVG mark by `next/og` at build time (`src/lib/brand-icon.tsx`), with no binary assets in the repo.
 
 A single scope is used because per-locale scopes would drop out of standalone mode when the user switches language. An installed app's name is fixed at install time anyway.
 

@@ -1,6 +1,7 @@
 {
   "app": {
     "name": "Daily Good Deeds",
+    "shortName": "Good Deeds",
     "tagline": "Small Good Deeds, Every Day. A Better You, Every Day."
   },
   "status": {
@@ -87,5 +88,12 @@
     "invalid_element": "Contains an invalid item.",
     "invalid_value": "Choose one of the allowed options.",
     "custom": "This value is not valid."
+  },
+  "install": {
+    "title": "Install Daily Good Deeds",
+    "body": "Open it from your home screen, like any other app.",
+    "iosSteps": "On iPhone or iPad: tap Share, then “Add to Home Screen”.",
+    "install": "Install",
+    "dismiss": "Not now"
   }
 }
