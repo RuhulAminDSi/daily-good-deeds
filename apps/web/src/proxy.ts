@@ -77,7 +77,7 @@ export function proxy(req: NextRequest) {
 }
 
 export const config = {
-  // Pages only (prefetches included: they need the locale): skip Next internals, API routes,
-  // files with an extension (manifest, /icons/*.png) and the extension-less tab and Apple icons.
-  matcher: ['/((?!_next|api|(?:apple-)?icon$|.*\\..*).*)'],
+  // Pages only (prefetches included: they need the locale): skip Next internals, API routes and
+  // files with an extension (icons, manifest…).
+  matcher: ['/((?!_next|api|.*\\..*).*)'],
 };

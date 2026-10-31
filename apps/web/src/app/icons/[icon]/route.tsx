@@ -1,17 +1,12 @@
+import { APP_ICONS, type AppIcon } from '@/lib/app-icons';
 import { brandIcon } from '@/lib/brand-icon';
 
-/** Manifest icons (src/app/manifest.ts): rendered once at build time. */
-const ICONS = {
-  'icon-192.png': () => brandIcon(192),
-  'icon-512.png': () => brandIcon(512),
-  'maskable-512.png': () => brandIcon(512, { fullBleed: true }),
-} as const;
-
+/** Every app icon (src/lib/app-icons.ts), rendered once at build time. */
 export const dynamic = 'force-static';
 export const dynamicParams = false;
-export const generateStaticParams = () => Object.keys(ICONS).map((icon) => ({ icon }));
+export const generateStaticParams = () => Object.keys(APP_ICONS).map((icon) => ({ icon }));
 
 export async function GET(_req: Request, { params }: RouteContext<'/icons/[icon]'>) {
-  const { icon } = await params;
-  return ICONS[icon as keyof typeof ICONS]();
+  const icon: { size: number; fullBleed?: boolean } = APP_ICONS[(await params).icon as AppIcon];
+  return brandIcon(icon.size, { fullBleed: icon.fullBleed });
 }

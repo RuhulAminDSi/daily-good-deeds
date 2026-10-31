@@ -49,38 +49,32 @@ export async function promptInstall(): Promise<'accepted' | 'dismissed'> {
   return (await event.userChoice).outcome;
 }
 
-// Storage can be unavailable (private mode, blocked): then the prompt simply never shows.
-function read(storage: () => Storage, key: string): string | null {
+/** Storage can be unavailable (private mode, blocked): then the prompt simply never shows. */
+function safely<T>(fn: () => T, fallback: T): T {
   try {
-    return storage().getItem(key);
+    return fn();
   } catch {
-    return null;
+    return fallback;
   }
 }
-function write(storage: () => Storage, key: string, value: string): void {
-  try {
-    storage().setItem(key, value);
-  } catch {
-    // nothing to remember
-  }
-}
-const local = () => localStorage;
-const session = () => sessionStorage;
 
 /** Counts this visit (once per browser session) and returns the total. */
 export function countVisit(): number {
-  const visits = Number(read(local, VISITS_KEY) ?? 0);
-  if (read(session, VISIT_COUNTED_KEY)) return visits;
-  write(session, VISIT_COUNTED_KEY, '1');
-  write(local, VISITS_KEY, String(visits + 1));
-  return visits + 1;
+  return safely(() => {
+    const visits = Number(localStorage.getItem(VISITS_KEY) ?? 0);
+    if (sessionStorage.getItem(VISIT_COUNTED_KEY)) return visits;
+    sessionStorage.setItem(VISIT_COUNTED_KEY, '1');
+    localStorage.setItem(VISITS_KEY, String(visits + 1));
+    return visits + 1;
+  }, 0);
 }
 
-export const snoozeInstallPrompt = () => write(local, DISMISSED_KEY, String(Date.now()));
+export const snoozeInstallPrompt = () =>
+  safely(() => localStorage.setItem(DISMISSED_KEY, String(Date.now())), undefined);
 
 /** Engaged enough (second visit), not snoozed, and not already running installed. */
 export function shouldOfferInstall(visits: number): boolean {
-  const dismissedAt = Number(read(local, DISMISSED_KEY) ?? 0);
+  const dismissedAt = Number(safely(() => localStorage.getItem(DISMISSED_KEY), null) ?? 0);
   const installed =
     matchMedia('(display-mode: standalone)').matches ||
     (navigator as { standalone?: boolean }).standalone === true;

@@ -23,23 +23,25 @@ export function InstallPrompt() {
   const t = useClientTranslations('install');
   const titleId = useId();
   const native = useSyncExternalStore(subscribe, canPromptNatively, () => false);
-  const [offer, setOffer] = useState<'native' | 'ios' | null>(null);
+  const [eligible, setEligible] = useState(false);
 
   // After hydration: storage and the display mode exist only in the browser.
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time read of browser state
-    if (shouldOfferInstall(countVisit())) setOffer(isIos() ? 'ios' : 'native');
+    setEligible(shouldOfferInstall(countVisit()));
   }, []);
 
-  if (offer === null || (offer === 'native' && !native)) return null;
+  // `eligible` is only true after mount, so isIos() never runs on the server.
+  const ios = eligible && isIos();
+  if (!eligible || (!ios && !native)) return null;
 
   const dismiss = () => {
     snoozeInstallPrompt();
-    setOffer(null);
+    setEligible(false);
   };
+  // promptInstall() consumes the event, which hides the banner.
   const install = async () => {
     if ((await promptInstall()) === 'dismissed') snoozeInstallPrompt();
-    setOffer(null);
   };
 
   return (
@@ -49,9 +51,9 @@ export function InstallPrompt() {
         <p id={titleId} className="text-label">
           {t('title')}
         </p>
-        <p className="text-body-sm">{offer === 'ios' ? t('iosSteps') : t('body')}</p>
+        <p className="text-body-sm">{ios ? t('iosSteps') : t('body')}</p>
         <div className="mt-2 flex flex-wrap gap-2">
-          {offer === 'native' && (
+          {!ios && (
             <Button size="sm" onClick={install}>
               {t('install')}
             </Button>

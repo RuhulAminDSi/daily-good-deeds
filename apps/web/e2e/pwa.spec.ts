@@ -35,9 +35,8 @@ test('manifest: single scope, locale-less start URL, named in the visitor langua
     expect(icon.headers()['content-type']).toBe('image/png');
     expect(pngSize(await icon.body()).join('x')).toBe(sizes);
   }
-  for (const path of ['/icon', '/apple-icon']) {
-    const icon = await request.get(path, { maxRedirects: 0 });
-    expect(icon.status(), path).toBe(200);
+  for (const path of ['/icons/tab-32.png', '/icons/apple-180.png']) {
+    expect((await request.get(path)).status(), path).toBe(200);
   }
 });
 

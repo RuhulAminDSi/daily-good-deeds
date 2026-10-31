@@ -5,6 +5,7 @@ import { Hind_Siliguri, Inter } from 'next/font/google';
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, getTranslations } from 'next-intl/server';
 import { CLIENT_NAMESPACES } from '@/i18n/client-namespaces';
+import { iconRef } from '@/lib/app-icons';
 import { routeLocale } from '@/i18n/route-locale';
 import { themeAttribute } from '@/theme';
 import { readTheme } from '@/theme.server';
@@ -39,6 +40,10 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: { default: t('name'), template: `%s · ${t('name')}` },
     description: t('tagline'),
+    icons: {
+      icon: { ...iconRef('tab-32.png'), url: iconRef('tab-32.png').src },
+      apple: { ...iconRef('apple-180.png'), url: iconRef('apple-180.png').src },
+    },
   };
 }
 
