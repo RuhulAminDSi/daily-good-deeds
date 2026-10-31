@@ -1,3 +1,4 @@
+import { withSerwist } from '@serwist/turbopack';
 import type { NextConfig } from 'next';
 import createNextIntlPlugin from 'next-intl/plugin';
 
@@ -29,4 +30,5 @@ const config: NextConfig = {
 };
 
 // Points next-intl at the per-request catalog loader.
-export default createNextIntlPlugin('./src/i18n/request.ts')(config);
+// withSerwist keeps esbuild (which bundles the service worker) out of the server bundle.
+export default createNextIntlPlugin('./src/i18n/request.ts')(withSerwist(config));

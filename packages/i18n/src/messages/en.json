@@ -95,5 +95,14 @@
     "iosSteps": "On iPhone or iPad: tap Share, then “Add to Home Screen”.",
     "install": "Install",
     "dismiss": "Not now"
+  },
+  "pwa": {
+    "offlineBanner": "You're offline. This is a saved copy of the page.",
+    "offlineTitle": "You're offline",
+    "offlineBody": "This page isn't saved for offline use yet. These pages are:",
+    "offlineNone": "No pages are saved yet. Try again when you're back online.",
+    "updateTitle": "A new version is available",
+    "updateAction": "Refresh",
+    "updateAltText": "Reload the page to update the app"
   }
 }

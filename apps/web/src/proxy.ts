@@ -26,6 +26,8 @@ function contentSecurityPolicy(nonce: string): string {
     'img-src': ["'self'", 'data:', 'blob:'],
     'font-src': ["'self'"],
     'connect-src': ["'self'", dev && 'ws:', SENTRY_ORIGIN],
+    // The service worker: with 'strict-dynamic', script-src would ignore 'self' for it.
+    'worker-src': ["'self'"],
     'object-src': ["'none'"],
     'base-uri': ["'self'"],
     'form-action': ["'self'"],

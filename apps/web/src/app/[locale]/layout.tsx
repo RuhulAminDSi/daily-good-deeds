@@ -1,9 +1,11 @@
 import { UiProvider } from '@dgd/ui';
+import { SerwistProvider } from '@serwist/turbopack/react';
 import { COLORS } from '@dgd/tokens';
 import type { Metadata, Viewport } from 'next';
 import { Hind_Siliguri, Inter } from 'next/font/google';
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, getTranslations } from 'next-intl/server';
+import { ServiceWorker } from '@/components/service-worker';
 import { CLIENT_NAMESPACES } from '@/i18n/client-namespaces';
 import { iconRef } from '@/lib/app-icons';
 import { routeLocale } from '@/i18n/route-locale';
@@ -74,7 +76,16 @@ export default async function LocaleLayout({ children, params }: LayoutProps<'/[
       <body className="min-h-dvh bg-bg text-body text-text antialiased">
         <NextIntlClientProvider messages={clientMessages}>
           <UiProvider locale={locale} strings={messages.ui}>
-            {children}
+            {/* The service worker (src/sw.ts) in production builds only: in development it
+                would serve stale code. Back online, the page is not reloaded (no lost input). */}
+            <SerwistProvider
+              swUrl="/serwist/sw.js"
+              disable={process.env.NODE_ENV !== 'production'}
+              reloadOnOnline={false}
+            >
+              <ServiceWorker />
+              {children}
+            </SerwistProvider>
           </UiProvider>
         </NextIntlClientProvider>
       </body>

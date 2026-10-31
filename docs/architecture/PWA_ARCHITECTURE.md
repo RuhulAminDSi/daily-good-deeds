@@ -21,6 +21,8 @@ A single scope is used because per-locale scopes would drop out of standalone mo
 ## 3. Service worker (Serwist, ADR-011)
 
 ### 3.1 Caching strategy per route/request type
+Implemented in `apps/web/src/sw.ts`, bundled by `@serwist/turbopack` (Turbopack has no plugin hook, so a static route, `src/app/serwist/[path]/route.ts`, builds it) and served as `/serwist/sw.js` with `Service-Worker-Allowed: /`. The CSP adds `worker-src 'self'`, because `'strict-dynamic'` makes `script-src` ignore `'self'`. Production builds only. The offline pages `/en/offline` and `/bn/offline` are precached, versioned by the commit. When the first install takes control of an already-loaded page, the page asks the worker to save it, so "visited once" holds from the first visit. Page matching covers navigations and the provider's `CACHE_URLS` fetches after client-side navigation, never RSC payloads.
+
 
 | Request | Strategy | Cache name | Expiry | Notes |
 |---|---|---|---|---|
