@@ -2,6 +2,7 @@ import type { INestApplication, INestApplicationContext, Type } from '@nestjs/co
 import { Test } from '@nestjs/testing';
 import { AppModule } from '../src/app.module.js';
 import { APP_OPTIONS, configureApp } from '../src/app.setup.js';
+import { ErrorReporter } from '../src/common/observability/error-reporter.js';
 import { loadConfig, loadWorkerConfig } from '../src/config/env.js';
 import { WorkerModule } from '../src/jobs/worker.module.js';
 
@@ -9,11 +10,14 @@ import { WorkerModule } from '../src/jobs/worker.module.js';
 export async function createTestApp(
   databaseUrl: string,
   extraImports: Type[] = [],
+  { errorReporter }: { errorReporter?: ErrorReporter } = {},
 ): Promise<INestApplication> {
   const config = loadConfig({ NODE_ENV: 'test', LOG_LEVEL: 'silent', DATABASE_URL: databaseUrl });
-  const moduleRef = await Test.createTestingModule({
+  let builder = Test.createTestingModule({
     imports: [AppModule.forRoot(config), ...extraImports],
-  }).compile();
+  });
+  if (errorReporter) builder = builder.overrideProvider(ErrorReporter).useValue(errorReporter);
+  const moduleRef = await builder.compile();
   const app = configureApp(moduleRef.createNestApplication(APP_OPTIONS), config);
   await app.init();
   return app;

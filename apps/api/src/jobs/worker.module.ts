@@ -3,6 +3,7 @@ import { DiscoveryModule } from '@nestjs/core';
 import { LoggerModule } from 'nestjs-pino';
 import { PgBoss } from 'pg-boss';
 import { loggerOptions } from '../common/logging/logger.options.js';
+import { ObservabilityModule } from '../common/observability/error-reporter.js';
 import { ConfigModule } from '../config/config.module.js';
 import type { WorkerConfig } from '../config/env.js';
 import { HeartbeatJob } from './heartbeat.job.js';
@@ -35,6 +36,7 @@ export class WorkerModule {
       imports: [
         LoggerModule.forRoot(loggerOptions(config)),
         ConfigModule.forRoot(config),
+        ObservabilityModule.forRoot(config),
         DiscoveryModule,
       ],
       providers: [

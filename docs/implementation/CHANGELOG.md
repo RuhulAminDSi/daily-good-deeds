@@ -307,3 +307,49 @@ All notable changes to this project are recorded here. Format: [Keep a Changelog
   - **Accepted, not changed:**
     - The throttle guard runs after body parsing, which costs at most a bounded 256 KB read and scan per throttled request.
     - Unknown routes aren't throttled; edge/WAF limits come with the deployment.
+
+### Added (2026-10-31), Phase 2: T-P2-PLAT-009 observability
+- **`@dgd/observability` (new package):**
+  - `scrubEvent` and `scrubString`, the NFR-PRIVACY-010 safety net for every error report:
+    - Values under sensitive keys are redacted at any depth.
+    - Request bodies and cookies are dropped.
+    - Emails keep only their domain.
+    - URL credentials and secret query parameters (`token`, `code`, `*key*`…) are removed.
+  - `@dgd/observability/node` exports `createNodeReporter`, shared by the API, the worker and the web server:
+    - Sentry errors only, with no tracing and no integrations.
+    - A scope per report.
+    - A no-op when no DSN is set.
+- **API and worker:**
+  - The `ErrorReporter` provider reports 5xx responses (tagged with `requestId`), a job's final failed attempt once retries are exhausted (tagged with `queue`, `jobId`, `retryCount`), and pg-boss errors.
+  - New config: `SENTRY_DSN` and `APP_RELEASE`.
+- **Web:**
+  - `onRequestError` reports server errors tagged with `requestId`, route and digest.
+  - The browser loads `@sentry/browser` lazily, and only when `NEXT_PUBLIC_SENTRY_DSN` is set. `error.tsx` reports errors caught by the boundary.
+  - `proxy.ts` gives every page an `X-Request-Id` (a well-formed upstream UUID is kept) and forwards it to the API through the API client, so one id spans web and API logs and reports.
+  - The CSP allows the Sentry ingest origin only when a DSN is set.
+- **CSP violation reports:**
+  - `report-to csp`, `Reporting-Endpoints` and a `report-uri` fallback point browsers to `/api/csp-report`.
+  - That endpoint accepts both report formats, caps bodies at 16 KB, and logs one `warn` line per violation with URLs reduced to origin and path.
+- **Docs:**
+  - `docs/architecture/OBSERVABILITY.md` covers reporting, correlation, privacy rules and structured log field conventions.
+  - The decision is recorded as DL-039.
+  - `.env.example` files were added for the API and the web app.
+- **Tests:**
+  - Observability: 7 unit tests.
+  - API: 43 passing, including a Sentry wire-envelope test that uses the real reporter with a capturing transport. It checks release, environment and the `requestId` tag matching `X-Request-Id`, and that no DB password or email is sent.
+  - Web E2E: 15 passing, covering the request id, CSP reporting headers, both report formats, and 400/413 handling.
+- **Verified manually against a fake Sentry ingest** (production build with a DSN):
+  - The server event arrived with the release, a `requestId` equal to the page's `X-Request-Id`, the route and the digest.
+  - The browser event arrived with the same release and digest, and its `?token=` was redacted.
+  - The CSP allowed the request.
+- **Pre-push review of T-P2-PLAT-009:**
+  - **One privacy list:** `SENSITIVE_FIELDS` in `@dgd/observability` now drives both Sentry scrubbing and the pino `redact` paths. Before, the two lists had already drifted apart: logs did not redact `apiKey`, `journal` or `session`.
+  - **Logged errors are scrubbed too:** an error message containing a DB connection string was safe in Sentry but was written to the logs verbatim.
+  - **Final attempts only:** the worker reports a job only after its last attempt, so a failure fixed by a retry is no longer a Sentry incident.
+  - `@sentry/node` loads only when a DSN is set, so dev, test and CI processes don't pay its startup cost. The browser scrubber is lazy-loaded with the SDK.
+  - **Smaller cleanups:** the scrubber no longer tracks paths per node, one `[REDACTED]` marker is used everywhere, and there is one field map for both CSP report formats.
+  - **Accepted, not changed:**
+    - Process-level `uncaughtException`/`unhandledRejection` reporting is not added: the process exits before an async report is sent, and host logs record crashes.
+    - The CSP endpoint has no rate limit beyond its 16 KB cap; edge limits come with T-P2-PLAT-010.
+    - Web route handlers under `/api/*` get no request id, because the proxy skips them.
+- **Not yet:** private source-map upload and setting the release to the git SHA belong to the deploy pipeline (T-P2-PLAT-010). The `userId` pseudonym in logs arrives with auth.

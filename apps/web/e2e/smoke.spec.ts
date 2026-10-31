@@ -98,3 +98,41 @@ test('sends the static security headers', async ({ page }) => {
   expect(headers['x-frame-options']).toBe('DENY');
   expect(headers['permissions-policy']).toContain('camera=()');
 });
+
+test('gives every page a request id and a CSP reporting endpoint', async ({ page }) => {
+  const res = await page.goto('/en');
+  const headers = res?.headers() ?? {};
+  expect(headers['x-request-id']).toMatch(/^[0-9a-f-]{36}$/);
+  expect(headers['content-security-policy']).toContain('report-to csp');
+  expect(headers['content-security-policy']).toContain('report-uri /api/csp-report');
+  expect(headers['reporting-endpoints']).toBe('csp="/api/csp-report"');
+});
+
+test.describe('the CSP report endpoint', () => {
+  const violation = {
+    documentURL: 'http://localhost/en/reset?token=secret',
+    blockedURL: 'https://evil.example/x.js?k=1',
+    effectiveDirective: 'script-src-elem',
+    disposition: 'enforce',
+  };
+
+  test('accepts Reporting API and legacy report-uri payloads', async ({ request }) => {
+    const reportTo = await request.post('/api/csp-report', {
+      headers: { 'content-type': 'application/reports+json' },
+      data: JSON.stringify([{ type: 'csp-violation', body: violation }]),
+    });
+    expect(reportTo.status()).toBe(204);
+    const reportUri = await request.post('/api/csp-report', {
+      headers: { 'content-type': 'application/csp-report' },
+      data: JSON.stringify({ 'csp-report': { 'document-uri': violation.documentURL } }),
+    });
+    expect(reportUri.status()).toBe(204);
+  });
+
+  test('rejects malformed and oversized bodies', async ({ request }) => {
+    const malformed = await request.post('/api/csp-report', { data: '{' });
+    expect(malformed.status()).toBe(400);
+    const oversized = await request.post('/api/csp-report', { data: 'x'.repeat(20_000) });
+    expect(oversized.status()).toBe(413);
+  });
+});

@@ -5,6 +5,10 @@ const ServerEnvSchema = z
     NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
     /** Server-side base URL of the API; never exposed to the browser. */
     API_URL: z.url().optional(),
+    /** Sentry project of the web app (server and browser); unset → errors are not reported. */
+    NEXT_PUBLIC_SENTRY_DSN: z.url().optional(),
+    /** Build identifier (git SHA) attached to error reports. */
+    NEXT_PUBLIC_APP_RELEASE: z.string().min(1).default('dev'),
   })
   .transform((env, ctx) => {
     if (!env.API_URL && env.NODE_ENV === 'production') {

@@ -1,0 +1,33 @@
+{
+  "name": "@dgd/observability",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Error reporting and privacy scrubbing (NFR-PRIVACY-010), shared by API, worker and web",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./node": {
+      "types": "./dist/node.d.ts",
+      "default": "./dist/node.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "dev": "tsc -p tsconfig.build.json --watch --preserveWatchOutput"
+  },
+  "dependencies": {
+    "@sentry/node": "11.10.0"
+  },
+  "devDependencies": {
+    "@dgd/config": "workspace:*",
+    "eslint": "10.14.0",
+    "typescript": "6.0.3",
+    "vitest": "5.0.5"
+  }
+}

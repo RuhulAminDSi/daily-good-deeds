@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { DiscoveryService } from '@nestjs/core';
 import type { PgBoss } from 'pg-boss';
+import { ErrorReporter } from '../common/observability/error-reporter.js';
 import { APP_CONFIG, type WorkerConfig } from '../config/env.js';
 import { Job, type JobDefinition, type JobHandler, QUEUE_DEFAULTS, dlqName } from './job.js';
 import { PG_BOSS } from './jobs.client.js';
@@ -23,10 +24,14 @@ export class JobRunner implements OnApplicationBootstrap, OnApplicationShutdown 
     @Inject(PG_BOSS) private readonly boss: PgBoss,
     @Inject(APP_CONFIG) private readonly config: WorkerConfig,
     private readonly discovery: DiscoveryService,
+    private readonly reporter: ErrorReporter,
   ) {}
 
   async onApplicationBootstrap(): Promise<void> {
-    this.boss.on('error', (err) => this.logger.error({ err }, 'pg-boss error'));
+    this.boss.on('error', (err) => {
+      this.logger.error({ err }, 'pg-boss error');
+      this.reporter.report(err, { tags: { source: 'pg-boss' } });
+    });
     // Includes `queue_backlog` for any non-empty dead-letter queue (warningQueueSize 1 below).
     this.boss.on('warning', (warning) => this.logger.warn({ warning }, 'pg-boss warning'));
     await this.boss.start();
@@ -61,13 +66,24 @@ export class JobRunner implements OnApplicationBootstrap, OnApplicationShutdown 
 
     await this.boss.work(
       name,
-      { pollingIntervalSeconds: this.config.JOB_POLL_SECONDS },
+      { pollingIntervalSeconds: this.config.JOB_POLL_SECONDS, includeMetadata: true },
       async ([job]) => {
-        await handler.handle(schema.parse(job!.data), {
-          jobId: job!.id,
-          retryCount: job!.retryCount,
-          signal: job!.signal,
-        });
+        try {
+          await handler.handle(schema.parse(job!.data), {
+            jobId: job!.id,
+            retryCount: job!.retryCount,
+            signal: job!.signal,
+          });
+        } catch (err) {
+          // Rethrown so pg-boss retries / dead-letters the job. Only the final attempt is reported:
+          // a failure that a retry fixes is logged by pg-boss, not an incident.
+          if (job!.retryCount >= job!.retryLimit) {
+            this.reporter.report(err, {
+              tags: { queue: name, jobId: job!.id, retryCount: String(job!.retryCount) },
+            });
+          }
+          throw err;
+        }
       },
     );
     if (schedule) await this.boss.schedule(name, schedule.cron, {}, { tz: schedule.tz ?? 'UTC' });

@@ -8,6 +8,7 @@ describe('loadConfig', () => {
       NODE_ENV: 'development',
       PORT: 4000,
       LOG_LEVEL: 'info',
+      APP_RELEASE: 'dev',
       DATABASE_URL,
       DB_POOL_MAX: 5,
       TRUST_PROXY: 0,

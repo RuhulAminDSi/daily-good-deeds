@@ -5,7 +5,7 @@ import { loggerOptions } from './logger.options.js';
 
 describe('log redaction', () => {
   it('removes credentials and personal data using the production redact config', () => {
-    const { redact } = loggerOptions(
+    const { redact, serializers } = loggerOptions(
       loadConfig({ NODE_ENV: 'test', DATABASE_URL: 'postgresql://u:p@localhost/x' }),
     ).pinoHttp as LoggerOptions;
     const lines: string[] = [];
@@ -15,10 +15,15 @@ describe('log redaction', () => {
         done();
       },
     });
-    pino({ redact }, stream).info({
-      req: { headers: { authorization: 'Bearer secret', cookie: '__Host-dgd_session=abc' } },
-      body: { email: 'user@example.com', password: 'hunter2', token: 't0k' },
-    });
+    pino({ redact, serializers }, stream).info(
+      {
+        req: { headers: { authorization: 'Bearer secret', cookie: '__Host-dgd_session=abc' } },
+        body: { email: 'user@example.com', password: 'hunter2', token: 't0k' },
+        user: { apiKey: 'k3y' },
+        err: { message: 'connect postgresql://owner:s3cret@db/dgd failed for asha@example.com' },
+      },
+      'db error',
+    ); // a constant msg (OBSERVABILITY.md §3): without one pino copies err.message
 
     const out = lines.join('');
     for (const secret of [
@@ -27,6 +32,9 @@ describe('log redaction', () => {
       'user@example.com',
       'hunter2',
       't0k',
+      'k3y',
+      's3cret',
+      'asha@',
     ]) {
       expect(out).not.toContain(secret);
     }

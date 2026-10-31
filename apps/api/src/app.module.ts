@@ -10,6 +10,7 @@ import { LoggerModule } from 'nestjs-pino';
 import { ProblemDetailsFilter } from './common/errors/problem-details.filter.js';
 import { jsonBody } from './common/http/json-body.middleware.js';
 import { RateLimitGuard, THROTTLE_OPTIONS } from './common/http/rate-limit.js';
+import { ObservabilityModule } from './common/observability/error-reporter.js';
 import { loggerOptions } from './common/logging/logger.options.js';
 import { ConfigModule } from './config/config.module.js';
 import type { AppConfig } from './config/env.js';
@@ -24,6 +25,7 @@ export class AppModule implements NestModule {
       imports: [
         LoggerModule.forRoot(loggerOptions(config)),
         ConfigModule.forRoot(config),
+        ObservabilityModule.forRoot(config),
         ThrottlerModule.forRoot(THROTTLE_OPTIONS),
         HealthModule,
         DatabaseModule,

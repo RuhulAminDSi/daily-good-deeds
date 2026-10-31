@@ -15,6 +15,10 @@ const postgresUrl = z.url({ protocol: /^postgres(ql)?$/ }).refine(
 const BaseSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent']).default('info'),
+  /** Error reporting (NFR-OBSERVABILITY-005); unset = errors are only logged. */
+  SENTRY_DSN: z.url().optional(),
+  /** Deployed version (git SHA) for error reports; set by the deploy. */
+  APP_RELEASE: z.string().min(1).default('dev'),
 });
 
 /** Comma-separated web origins allowed by CORS (NFR-SECURITY-027), e.g. `https://app.example.com`. */

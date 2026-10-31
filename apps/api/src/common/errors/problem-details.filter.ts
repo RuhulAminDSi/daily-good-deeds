@@ -10,6 +10,7 @@ import {
   type Problem,
   typeUriOf,
 } from '@dgd/contracts';
+import { ErrorReporter } from '../observability/error-reporter.js';
 import { DomainError, type DomainErrorOptions } from './domain-error.js';
 
 type Normalized = { code: ErrorCode } & DomainErrorOptions;
@@ -40,6 +41,8 @@ function normalize(exception: unknown): Normalized {
 /** Renders every error as RFC 9457 problem+json (docs/api/ERROR_HANDLING.md). Never leaks internals. */
 @Catch()
 export class ProblemDetailsFilter implements ExceptionFilter {
+  constructor(private readonly reporter: ErrorReporter) {}
+
   catch(exception: unknown, host: ArgumentsHost): void {
     const http = host.switchToHttp();
     const req = http.getRequest<Request>();
@@ -48,8 +51,10 @@ export class ProblemDetailsFilter implements ExceptionFilter {
     const { status, title } = ERROR_CODES[code];
 
     // pino-http's request-completion log picks this up, so failures are logged once, with the cause.
-    if (status >= 500)
+    if (status >= 500) {
       res.err = exception instanceof Error ? exception : new Error(String(exception));
+      this.reporter.report(exception, { requestId: String(req.id) });
+    }
 
     res
       .status(status)
