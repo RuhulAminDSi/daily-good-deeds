@@ -1,6 +1,7 @@
 // Serves the service worker (src/sw.ts) as /serwist/sw.js, bundled at build time with the precache
 // manifest injected (@serwist/turbopack: Turbopack has no plugin hook, so a static route builds it).
 import { spawnSync } from 'node:child_process';
+import { LOCALES } from '@dgd/i18n';
 import { createSerwistRoute } from '@serwist/turbopack';
 
 /** Offline pages change with the code: the commit versions them (a new commit re-precaches). */
@@ -11,7 +12,7 @@ const revision =
 export const { dynamic, dynamicParams, revalidate, generateStaticParams, GET } = createSerwistRoute(
   {
     swSrc: 'src/sw.ts',
-    additionalPrecacheEntries: ['/en/offline', '/bn/offline'].map((url) => ({ url, revision })),
+    additionalPrecacheEntries: LOCALES.map((locale) => ({ url: `/${locale}/offline`, revision })),
     useNativeEsbuild: true,
   },
 );

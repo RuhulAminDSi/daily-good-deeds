@@ -10,10 +10,13 @@ async function installed(page: Page, path: string) {
   await expect.poll(() => page.evaluate((url) => caches.match(url).then(Boolean), path)).toBe(true);
 }
 
-test('a page visited once reloads offline, with a notice', async ({ page, context }) => {
+// Every test starts from one visit to Today, saved by the freshly installed worker.
+test.beforeEach(async ({ page }) => {
   await gotoHydrated(page, '/en/today');
   await installed(page, '/en/today');
+});
 
+test('a page visited once reloads offline, with a notice', async ({ page, context }) => {
   await context.setOffline(true);
   await page.reload();
   await expect(page.getByRole('heading', { level: 1, name: 'Today' })).toBeVisible();
@@ -27,8 +30,6 @@ test('a never-visited page shows the offline page in its language, with saved pa
   page,
   context,
 }) => {
-  await gotoHydrated(page, '/en/today');
-  await installed(page, '/en/today');
   await context.setOffline(true);
 
   await page.goto('/en/calendar');
@@ -47,8 +48,6 @@ test('a never-visited page shows the offline page in its language, with saved pa
 });
 
 test('admin pages are never saved', async ({ page }) => {
-  await gotoHydrated(page, '/en/today');
-  await installed(page, '/en/today');
   await gotoHydrated(page, '/en/admin');
   // A page visited after admin is saved, so a cache write for admin would have landed by then.
   await gotoHydrated(page, '/en/calendar');
@@ -57,8 +56,6 @@ test('admin pages are never saved', async ({ page }) => {
 });
 
 test('a new version waits for "Refresh", then takes over', async ({ page }) => {
-  await gotoHydrated(page, '/en/today');
-  await installed(page, '/en/today');
   const first = await page.evaluate(() => navigator.serviceWorker.controller!.scriptURL);
 
   // The next deploy. Playwright cannot intercept the browser's own update check, so the new
