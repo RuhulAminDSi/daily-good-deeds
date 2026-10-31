@@ -525,3 +525,15 @@ All notable changes to this project are recorded here. Format: [Keep a Changelog
   - **Deferred to I18N-002:** a check that every client `useTranslations()` namespace is in `CLIENT_NAMESPACES`. Today a missing one only fails at runtime. Added to the task definition.
 - **Not reproduced:** one full E2E run had a single `toHaveAttribute` failure. It didn't recur in three more full runs or in 304 repeated runs (38 tests × 8, in parallel). If it shows up in CI, the trace will show which test.
 
+### Added (2026-10-31), Phase 2: T-P2-I18N-002 no hard-coded strings and complete catalogs
+- **One UI lint preset, `@dgd/config/eslint/ui`** (apps/web and packages/ui), replaces the separate colour and text presets.
+  - **Raw colours:** rejected everywhere, stories included.
+  - **Literal text:** rejects Latin or Bengali letters in JSX text, in `{'…'}` and template children, and in user-visible attributes (`aria-label`, `aria-description`, `title`, `placeholder`, `alt`, `label`), including conditional branches.
+  - **Exempt from the text rule:** stories and E2E-only routes.
+  - **No hidden ordering:** the two scopes never overlap. Separate presets would have depended on order, because flat config replaces a rule's options.
+  - **Probes:** literals are caught; punctuation, `t('nav.today')` keys and token classes pass; stories keep the colour rule.
+- **Client namespaces checked at compile time.** `useClientTranslations(namespace)` (`src/i18n/client.ts`) accepts only `CLIENT_NAMESPACES`, and lint bans importing next-intl's `useTranslations` elsewhere in the app. Probes: a server-only namespace fails `tsc`, and a direct import fails lint. This replaced a regex scan script during the pre-push review; the scan was weaker, with edge cases around comments, strings and aliases.
+- **Catalog completeness** stays in `@dgd/i18n`'s tests: identical keys in `en.json` and `bn.json`, and no empty messages.
+- **Policy and allowlist:** `docs/qa/I18N.md`.
+- **One reasoned exception:** the toast region label `({hotkey})` is Radix's F8 placeholder, not text, so it carries an inline disable with its reason.
+- **Fixed the flaky E2E test** that I18N-001 couldn't reproduce. The keyboard theme test sometimes pressed keys before React had hydrated, so the presses were lost. A stress run reproduced it (1 failure in 120). The new `gotoHydrated()` helper (`e2e/helpers.ts`) waits for React's root on the document; from then on React replays early events itself. The theme and More-sheet tests use it, and 200 of 200 stress runs passed.

@@ -10,7 +10,7 @@
     "./eslint/node": "./eslint/node.js",
     "./prettier": "./prettier.config.js",
     "./eslint/nest": "./eslint/nest.js",
-    "./eslint/tokens": "./eslint/tokens.js"
+    "./eslint/ui": "./eslint/ui.js"
   },
   "scripts": {
     "lint": "eslint ."

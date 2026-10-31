@@ -1,5 +1,5 @@
 import { defineConfig } from 'eslint/config';
 import base from '@dgd/config/eslint';
-import tokens from '@dgd/config/eslint/tokens';
+import ui from '@dgd/config/eslint/ui';
 
-export default defineConfig(base, tokens, { ignores: ['storybook-static/**'] });
+export default defineConfig(base, ui, { ignores: ['storybook-static/**'] });

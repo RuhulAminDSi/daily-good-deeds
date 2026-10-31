@@ -38,7 +38,7 @@
 - **No hardcoded strings in `packages/ui`.** Components receive labels as props. Default labels such as "Close" come from `packages/i18n`.
 - Lint rules:
   - **Implemented:** `apps/web` bans Tailwind palette classes and arbitrary hex values (`no-restricted-syntax`). Removed palette classes would otherwise render unstyled without any error.
-  - **Planned:** ban string literals in JSX text (an `i18next/no-literal-string`-style rule adapted for next-intl), with I18N-001.
+  - **Implemented (T-P2-I18N-002):** ban letters in JSX text and user-visible attributes (`@dgd/config/eslint/ui`, which also holds the raw-colour rule). The rules and allowlist are in [../qa/I18N.md](../qa/I18N.md).
 
 ## 4. Key patterns
 

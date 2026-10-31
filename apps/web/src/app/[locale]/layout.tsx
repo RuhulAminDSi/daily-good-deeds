@@ -1,8 +1,8 @@
-import type { Messages } from '@dgd/i18n/messages';
 import { UiProvider } from '@dgd/ui';
 import type { Metadata } from 'next';
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, getTranslations } from 'next-intl/server';
+import { CLIENT_NAMESPACES } from '@/i18n/client-namespaces';
 import { routeLocale } from '@/i18n/route-locale';
 import { themeAttribute } from '@/theme';
 import { readTheme } from '@/theme.server';
@@ -13,9 +13,6 @@ import '../globals.css';
  * cannot carry it. Expensive data is cached at the fetch level instead.
  */
 export const dynamic = 'force-dynamic';
-
-/** Namespaces client components use; only these are sent to the browser. */
-const CLIENT_NAMESPACES = ['common', 'nav', 'theme'] as const satisfies (keyof Messages)[];
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('app');
@@ -32,6 +29,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps<'/[
     readTheme(),
     getMessages(),
   ]);
+  // Only the namespaces client components use are sent to the browser.
   const clientMessages = Object.fromEntries(CLIENT_NAMESPACES.map((ns) => [ns, messages[ns]]));
   return (
     // The saved theme is in the server-rendered HTML, so the first paint is already right.

@@ -1,6 +1,7 @@
 // T-P2-UI-003: the app shell's navigation per breakpoint (RESPONSIVE_GUIDELINES §2), focus order
 // and the More sheet. Viewports are set per test, so these run once (desktop project).
 import { expect, type Page, test } from '@playwright/test';
+import { gotoHydrated } from './helpers';
 
 const nav = (page: Page) => page.getByRole('navigation', { name: 'Main navigation' });
 
@@ -14,7 +15,7 @@ test.describe('phone (360px): bottom bar', () => {
   test('shows 5 items with the current page marked, and More opens the grouped sheet', async ({
     page,
   }) => {
-    await page.goto('/en/today');
+    await gotoHydrated(page, '/en/today');
     const bar = nav(page);
     await expect(bar).toBeVisible();
     await expect(bar.getByRole('link')).toHaveText(['Today', 'Calendar', 'Islamic', 'Growth']);

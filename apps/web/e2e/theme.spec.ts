@@ -1,6 +1,7 @@
 // T-P2-UI-004: light / dark / system, applied at once, remembered, and correct on the very first
 // paint after a reload (the server renders `data-theme` from the cookie: no flash, no script).
 import { expect, type Page, test } from '@playwright/test';
+import { gotoHydrated } from './helpers';
 
 const LIGHT_BG = 'rgb(250, 247, 242)'; // --color-bg, light
 const DARK_BG = 'rgb(18, 22, 19)'; // --color-bg, dark
@@ -19,7 +20,7 @@ test('follows the system by default, and a choice applies at once and survives r
   page,
   context,
 }) => {
-  await page.goto('/en/today');
+  await gotoHydrated(page, '/en/today');
   const theme = page.getByRole('radiogroup', { name: 'Theme' });
   await expect(theme.getByRole('radio', { name: 'System' })).toBeChecked();
   await expect(page.locator('html')).not.toHaveAttribute('data-theme');
@@ -36,6 +37,9 @@ test('follows the system by default, and a choice applies at once and survives r
   // No flash: the server's HTML already carries the choice.
   expect(await serverTheme(page)).toBe('light');
   await page.reload();
+  await page.waitForFunction(() =>
+    Object.keys(document).some((k) => k.startsWith('__reactContainer')),
+  );
   await expect(theme.getByRole('radio', { name: 'Light' })).toBeChecked();
   expect(await background(page)).toBe(LIGHT_BG);
 
@@ -54,7 +58,7 @@ test('ignores an invalid theme cookie', async ({ page, context }) => {
 });
 
 test('the theme switch is keyboard operable', async ({ page }) => {
-  await page.goto('/bn/today');
+  await gotoHydrated(page, '/bn/today');
   const theme = page.getByRole('radiogroup', { name: 'থিম' });
   await theme.getByRole('radio', { name: 'সিস্টেম' }).focus();
   await page.keyboard.press('ArrowLeft');

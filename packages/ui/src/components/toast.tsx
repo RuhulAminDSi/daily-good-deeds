@@ -72,6 +72,8 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         </RadixToast.Root>
       ))}
       <RadixToast.Viewport
+        // `{hotkey}` is Radix's placeholder (F8), not user-facing text.
+        // eslint-disable-next-line no-restricted-syntax -- see above
         label={`${strings.notifications} ({hotkey})`}
         className="fixed inset-x-4 bottom-4 z-50 flex flex-col gap-2 outline-none md:start-auto md:w-96"
       />

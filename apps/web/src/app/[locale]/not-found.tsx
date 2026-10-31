@@ -1,10 +1,10 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
+import { useClientTranslations } from '@/i18n/client';
 
 export default function NotFound() {
-  const t = useTranslations('common');
+  const t = useClientTranslations('common');
   return (
     <main className="mx-auto max-w-md p-6 text-center">
       <h1 className="text-h3">{t('notFoundTitle')}</h1>

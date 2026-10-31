@@ -2,10 +2,10 @@
 
 import { Sheet } from '@dgd/ui';
 import { Menu } from 'lucide-react';
-import { useTranslations } from 'next-intl';
 import { type ReactNode, useId, useState } from 'react';
 import { Link, usePathname } from '@/i18n/navigation';
 import { NAV_GROUPS, type NavItem, PRIMARY_NAV } from './nav-config';
+import { useClientTranslations } from '@/i18n/client';
 
 /** Bottom bar and rail item: icon above a one-line label. */
 const TAB =
@@ -16,7 +16,7 @@ const TAB =
  * 768px, a 72px icon rail from 768px, a 260px grouped sidebar from 1024px.
  */
 export function Navigation() {
-  const t = useTranslations('nav');
+  const t = useClientTranslations('nav');
   return (
     <nav
       aria-label={t('main')}
@@ -68,7 +68,7 @@ function NavLink({
 
 /** "More" (bottom bar and rail): every group in a sheet; choosing a link closes it. */
 function MoreSheet() {
-  const t = useTranslations('nav');
+  const t = useClientTranslations('nav');
   const [open, setOpen] = useState(false);
   return (
     <Sheet
@@ -95,7 +95,7 @@ function Groups({
   className?: string;
   onNavigate?: () => void;
 }) {
-  const t = useTranslations('nav');
+  const t = useClientTranslations('nav');
   // The sidebar and an open More sheet can both be in the DOM: ids must not collide.
   const id = useId();
   return (

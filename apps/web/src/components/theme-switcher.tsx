@@ -2,13 +2,13 @@
 
 import { SegmentedControl } from '@dgd/ui';
 import { Monitor, Moon, Sun } from 'lucide-react';
-import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { applyTheme, type Theme } from '@/theme';
+import { useClientTranslations } from '@/i18n/client';
 
 /** Light / dark / system, for any shell's top bar. Applies at once, remembered for a year. */
 export function ThemeSwitcher({ initial }: { initial: Theme }) {
-  const t = useTranslations('theme');
+  const t = useClientTranslations('theme');
   const [theme, setTheme] = useState(initial);
 
   const choose = (next: Theme) => {
