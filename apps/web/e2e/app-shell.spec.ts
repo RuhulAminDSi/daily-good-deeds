@@ -15,7 +15,7 @@ test.describe('phone (360px): bottom bar', () => {
   test('shows 5 items with the current page marked, and More opens the grouped sheet', async ({
     page,
   }) => {
-    await gotoHydrated(page, '/en/today');
+    await gotoHydrated(page, '/en/today', page.getByRole('button', { name: 'More' }));
     const bar = nav(page);
     await expect(bar).toBeVisible();
     await expect(bar.getByRole('link')).toHaveText(['Today', 'Calendar', 'Islamic', 'Growth']);
@@ -70,7 +70,7 @@ test('Bengali bottom bar labels fit on one line at 320px', async ({ page }) => {
 
 test('tablet (768px): a 72px navigation rail with More', async ({ page }) => {
   await page.setViewportSize({ width: 768, height: 1024 });
-  await gotoHydrated(page, '/en/today');
+  await gotoHydrated(page, '/en/today', page.getByRole('button', { name: 'More' }));
   const rail = nav(page);
   const box = (await rail.boundingBox())!;
   expect([box.x, box.width]).toEqual([0, 72]);

@@ -555,3 +555,8 @@ All notable changes to this project are recorded here. Format: [Keep a Changelog
   - **Prettier had reformatted the snapshot files.** Lenient matching hid that too. `*.aria.yml` is now excluded from Prettier.
 - The tooltip-on-click-open check moved to the tablet test, where the sheet's ✕ is still its only non-link control. On phones the sheet now opens on the language switch.
 
+### Fixed (2026-10-31): flaky E2E interaction tests (follow-up to I18N-002/003)
+- **The keyboard theme test failed in CI** (both attempts) even after I18N-002's `gotoHydrated`. That helper waited only for React's root on the document, but hydration then proceeds part by part, so on a slower CI machine the theme radio still had no handlers when the keys were pressed.
+- **The fix waits per element.** `hydrated(locator)` (`e2e/helpers.ts`) waits until React has attached its props (`__reactProps…`) to the exact control a test is about to use. `gotoHydrated(page, url, ready)` takes that control. All theme, language and More-sheet interactions use it.
+- **Stress results:** theme, language and app-shell specs, 30 repeats each with 16 parallel workers, in three runs of 300. The keyboard test never failed. Two runs were fully clean; one had 2 `toHaveURL` timeouts (navigation slower than 5 s at that load), which CI's single retry covers and which hasn't occurred at CI's parallelism.
+

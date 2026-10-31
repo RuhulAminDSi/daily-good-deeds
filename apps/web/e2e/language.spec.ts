@@ -1,7 +1,7 @@
 // T-P2-I18N-003: the language switch keeps the page, and the guest's choice is remembered: a URL
 // without a locale opens in the chosen language even when the browser prefers another.
 import { expect, test } from '@playwright/test';
-import { gotoHydrated } from './helpers';
+import { gotoHydrated, hydrated } from './helpers';
 
 test.use({ extraHTTPHeaders: { 'Accept-Language': 'en-US,en;q=0.9' } });
 
@@ -11,6 +11,7 @@ test('desktop: switching keeps the page and is remembered for locale-less URLs',
 }) => {
   await gotoHydrated(page, '/en/calendar');
   const language = page.getByRole('banner').getByRole('radiogroup', { name: 'Language' });
+  await hydrated(language.getByRole('radio', { name: 'বাংলা' }));
   await expect(language.getByRole('radio', { name: 'English' })).toBeChecked();
   // Endonyms carry their own language for screen readers.
   await expect(language.getByRole('radio', { name: 'বাংলা' })).toHaveAttribute('lang', 'bn');
@@ -31,7 +32,11 @@ test('desktop: switching keeps the page and is remembered for locale-less URLs',
   await expect(page.locator('html')).toHaveAttribute('lang', 'bn');
 
   // And back.
-  await gotoHydrated(page, '/bn/today');
+  await gotoHydrated(
+    page,
+    '/bn/today',
+    page.getByRole('banner').getByRole('radio', { name: 'English' }),
+  );
   await page.getByRole('banner').getByRole('radio', { name: 'English' }).click();
   await expect(page).toHaveURL(/\/en\/today$/);
   await page.goto('/');
@@ -42,7 +47,7 @@ test.describe('phone (360px)', () => {
   test.use({ viewport: { width: 360, height: 740 } });
 
   test('the switch is in the More sheet, which closes after switching', async ({ page }) => {
-    await gotoHydrated(page, '/en/growth');
+    await gotoHydrated(page, '/en/growth', page.getByRole('button', { name: 'More' }));
     await expect(
       page.getByRole('banner').getByRole('radiogroup', { name: 'Language' }),
     ).toBeHidden();
