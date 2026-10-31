@@ -1,3 +1,5 @@
+'use client';
+
 import { Avatar as RadixAvatar } from 'radix-ui';
 import { cn } from '../lib/cn';
 

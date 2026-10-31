@@ -11,8 +11,27 @@
   "nav": {
     "main": "প্রধান নেভিগেশন",
     "today": "আজ",
+    "calendar": "ক্যালেন্ডার",
+    "islamic": "ইসলামিক",
+    "growth": "উন্নতি",
+    "more": "আরও",
     "admin": "অ্যাডমিন",
-    "home": "হোম"
+    "home": "হোম",
+    "skipToContent": "মূল বিষয়বস্তুতে যান",
+    "groups": {
+      "daily": "দৈনন্দিন",
+      "faith": "ঈমান",
+      "growth": "উন্নতি"
+    }
+  },
+  "ui": {
+    "close": "বন্ধ করুন",
+    "notifications": "বিজ্ঞপ্তিসমূহ",
+    "notification": "বিজ্ঞপ্তি",
+    "required": "আবশ্যক"
+  },
+  "section": {
+    "comingSoon": "এই অংশটি পরবর্তী হালনাগাদে আসছে।"
   },
   "today": {
     "title": "আজ",

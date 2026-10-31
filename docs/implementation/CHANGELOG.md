@@ -454,3 +454,34 @@ All notable changes to this project are recorded here. Format: [Keep a Changelog
     - The `radix-ui` meta package installs every primitive, but bundles tree-shake.
     - Stories keep their own EN/BN copy until I18N-001 provides catalogs.
 
+### Added (2026-10-31), Phase 2: T-P2-UI-003 app shell and responsive navigation
+- **`AppShell` for the signed-in app**, in this order: skip link, top bar, navigation, a system-banner slot, then `<main>`.
+  - The banner slot will hold the offline and in-app-browser banners; their content arrives with the PWA tasks.
+  - The shell fills the dynamic viewport (`dvh`), so in-app browser toolbars never cover the bottom bar, and the bar respects the safe-area inset.
+- **Navigation by breakpoint** (RESPONSIVE_GUIDELINES §2), driven by one config (`nav-config.ts`):
+  - Under 768px: a 5-item bottom bar (Today, Calendar, Islamic, Growth, More).
+  - 768–1023px: a 72px icon rail.
+  - 1024px and up: a 260px sidebar grouped Daily / Faith / Growth.
+  - "More" opens a sheet with the groups.
+  - The current page is marked with `aria-current="page"` and a primary bar.
+  - Only one navigation landmark is ever exposed.
+- **Navigation links only to real pages.** Calendar, Islamic and Growth have placeholder pages ("coming in a later update"); further items join the config as their pages ship.
+- **The web app now uses `@dgd/ui`:**
+  - `UiProvider` sits in the locale layout, with its strings from the message catalogs.
+  - `@dgd/ui/styles.css` is imported once.
+  - The component files are marked `'use client'` for Next.js server components.
+- **Tests** (Playwright):
+  - At 360, 768 and 1280px: the layout per breakpoint (bar position and widths), `aria-current`, and that the More sheet navigates and closes.
+  - Focus order: skip link → first navigation link, and the skip link moves focus to `<main>`.
+  - Bengali bottom-bar labels (including "ক্যালেন্ডার") fit on one line at 320px with no horizontal scroll.
+  - Web E2E: 20 passing.
+- **Fixed in `@dgd/ui`, found by screenshot review and fixed at the root after the pre-push review:**
+  - **Misplaced ✕:** a dialog's ✕ fell to the bottom of the sheet, because Button's own `relative` outranked the `absolute` class passed to it. Button is now `relative` only while loading, for its spinner, so callers can position it. A story test asserts the ✕ sits in its corner.
+  - **Unwanted tooltip:** opening a sheet by click focused the ✕ and popped its tooltip. Tooltips now open on focus only when the focus is keyboard-driven (`:focus-visible`); hover and Tab still show them. A Playwright test with a real click guards this, and it failed with the fix removed. (Storybook's synthetic clicks can't exercise focus-visible.) The first attempt, focusing the dialog itself, was dropped: it would have removed first-field autofocus from every form dialog.
+- **Pre-push review of T-P2-UI-003:**
+  - **One navigation list:** `NAV_GROUPS` marks the bar and rail items with `primary`, so feature flags and roles will filter one list.
+  - **One `<nav>`** with responsive classes replaces a separate bar and rail. A self-contained `NavLink` works out its own `aria-current`.
+  - **`PageHeader`** is shared by the five placeholder pages.
+  - **Bundles:** `@dgd/ui` is marked side-effect free except for its CSS and listed in `optimizePackageImports`, so a route ships only the components it uses.
+  - **Accepted, not changed:** feature-flag and role conditions on nav items wait for the flags (Phase 2 RBAC and admin) and the Islamic-module switch.
+

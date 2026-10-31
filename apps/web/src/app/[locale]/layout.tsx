@@ -1,3 +1,4 @@
+import { UiProvider } from '@dgd/ui';
 import type { Metadata } from 'next';
 import { BoundaryMessagesProvider } from '@/i18n/boundary-messages';
 import { routeMessages } from '@/i18n/route-locale';
@@ -23,9 +24,11 @@ export default async function LocaleLayout({ children, params }: LayoutProps<'/[
   return (
     <html lang={locale}>
       <body className="min-h-dvh bg-bg text-body text-text antialiased">
-        <BoundaryMessagesProvider value={{ locale, common: m.common }}>
-          {children}
-        </BoundaryMessagesProvider>
+        <UiProvider locale={locale} strings={m.ui}>
+          <BoundaryMessagesProvider value={{ locale, common: m.common }}>
+            {children}
+          </BoundaryMessagesProvider>
+        </UiProvider>
       </body>
     </html>
   );

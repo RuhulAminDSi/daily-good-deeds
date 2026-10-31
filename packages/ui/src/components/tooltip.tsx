@@ -1,3 +1,5 @@
+'use client';
+
 import { Tooltip as RadixTooltip } from 'radix-ui';
 import type { ReactNode } from 'react';
 
@@ -18,7 +20,16 @@ export interface TooltipProps {
 export function Tooltip({ content, children, side = 'top' }: TooltipProps) {
   return (
     <RadixTooltip.Root>
-      <RadixTooltip.Trigger asChild>{children}</RadixTooltip.Trigger>
+      <RadixTooltip.Trigger
+        asChild
+        // Keyboard focus only: a dialog focusing its ✕ after a click must not pop the tooltip.
+        // (Preventing default makes Radix skip its own open-on-focus handler.)
+        onFocus={(event) => {
+          if (!event.currentTarget.matches(':focus-visible')) event.preventDefault();
+        }}
+      >
+        {children}
+      </RadixTooltip.Trigger>
       <RadixTooltip.Portal>
         <RadixTooltip.Content
           side={side}

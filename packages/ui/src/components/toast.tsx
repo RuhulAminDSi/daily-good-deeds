@@ -1,3 +1,5 @@
+'use client';
+
 import { X } from 'lucide-react';
 import { Toast as RadixToast } from 'radix-ui';
 import { createContext, type ReactNode, useCallback, useContext, useState } from 'react';

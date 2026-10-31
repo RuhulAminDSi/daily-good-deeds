@@ -19,7 +19,9 @@ const SECURITY_HEADERS = [
 const config: NextConfig = {
   poweredByHeader: false,
   // Consumed as TypeScript source (no build step).
-  transpilePackages: ['@dgd/api-client'],
+  transpilePackages: ['@dgd/api-client', '@dgd/ui'],
+  // Import only the @dgd/ui components a route uses, not the whole barrel.
+  experimental: { optimizePackageImports: ['@dgd/ui'] },
   pageExtensions: e2e ? ['e2e.tsx', 'tsx', 'ts'] : ['tsx', 'ts'],
   distDir: e2e ? '.next-e2e' : '.next',
   headers: async () => [{ source: '/:path*', headers: SECURITY_HEADERS }],

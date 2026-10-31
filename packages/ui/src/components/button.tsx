@@ -1,3 +1,5 @@
+'use client';
+
 import { LoaderCircle } from 'lucide-react';
 import { Slot } from 'radix-ui';
 import type { ButtonHTMLAttributes, MouseEvent, ReactNode } from 'react';
@@ -58,12 +60,13 @@ export function Button({
   ...props
 }: ButtonProps) {
   const classes = cn(
-    'relative inline-flex items-center justify-center gap-2 rounded-md text-label',
+    'inline-flex items-center justify-center gap-2 rounded-md text-label',
     'transition-colors duration-(--duration-micro)',
     VARIANTS[variant],
     variant !== 'link' && SIZES[size],
     disabled && 'cursor-not-allowed opacity-50',
-    loading && 'cursor-progress',
+    // Only while loading (for the spinner overlay), so callers can still position the button.
+    loading && 'relative cursor-progress',
     className,
   );
   if (asChild)

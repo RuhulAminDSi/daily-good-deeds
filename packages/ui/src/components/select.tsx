@@ -1,3 +1,5 @@
+'use client';
+
 import { Check, ChevronDown } from 'lucide-react';
 import { Select as RadixSelect } from 'radix-ui';
 import { cn } from '../lib/cn';

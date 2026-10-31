@@ -42,6 +42,11 @@ export const ConfirmDialog: Story = {
     await userEvent.click(trigger);
     const dialog = await screen.findByRole('dialog', { name: t(globals, copy.title) });
     await expect(dialog).toHaveAccessibleDescription(t(globals, copy.description));
+    // The ✕ sits in the top-end corner (a regression once let it fall to the bottom).
+    const close = within(dialog).getByRole('button', { name: t(globals, copy.close) });
+    const [d, c] = [dialog.getBoundingClientRect(), close.getBoundingClientRect()];
+    await expect(c.top - d.top).toBeLessThan(24);
+    await expect(d.right - c.right).toBeLessThan(24);
     // Focus moves inside, Tab stays inside, Esc closes and focus returns to the trigger.
     await waitFor(() => expect(dialog).toContainElement(document.activeElement as HTMLElement));
     for (let i = 0; i < 4; i++) {
@@ -77,8 +82,11 @@ export const BottomSheet: Story = {
       within(canvasElement).getByRole('button', { name: t(globals, sheet.open) }),
     );
     const dialog = await screen.findByRole('dialog', { name: t(globals, sheet.title) });
+    // (No tooltip-on-open check here: user-event's synthetic clicks don't update the browser's
+    // focus-visible state. apps/web/e2e/app-shell.spec.ts checks it with a real click.)
+    const close = within(dialog).getByRole('button', { name: t(globals, copy.close) });
     // A sheet is still a dialog: the close button closes it.
-    await userEvent.click(within(dialog).getByRole('button', { name: t(globals, copy.close) }));
+    await userEvent.click(close);
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
   },
 };

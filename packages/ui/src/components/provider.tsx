@@ -1,3 +1,5 @@
+'use client';
+
 import { type ReactNode, useMemo } from 'react';
 import { type Ui, UiContext } from '../lib/ui';
 import { ToastProvider } from './toast';

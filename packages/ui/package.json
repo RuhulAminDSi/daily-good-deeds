@@ -4,6 +4,9 @@
   "private": true,
   "description": "Core UI components (docs/design/COMPONENT_LIBRARY.md): Radix primitives styled with @dgd/tokens; all text via props",
   "type": "module",
+  "sideEffects": [
+    "*.css"
+  ],
   "exports": {
     ".": "./src/index.ts",
     "./styles.css": "./src/styles.css"

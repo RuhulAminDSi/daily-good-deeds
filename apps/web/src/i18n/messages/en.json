@@ -11,8 +11,27 @@
   "nav": {
     "main": "Main navigation",
     "today": "Today",
+    "calendar": "Calendar",
+    "islamic": "Islamic",
+    "growth": "Growth",
+    "more": "More",
     "admin": "Admin",
-    "home": "Home"
+    "home": "Home",
+    "skipToContent": "Skip to main content",
+    "groups": {
+      "daily": "Daily",
+      "faith": "Faith",
+      "growth": "Growth"
+    }
+  },
+  "ui": {
+    "close": "Close",
+    "notifications": "Notifications",
+    "notification": "Notification",
+    "required": "required"
+  },
+  "section": {
+    "comingSoon": "This section is coming in a later update."
   },
   "today": {
     "title": "Today",

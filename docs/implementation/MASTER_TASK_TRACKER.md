@@ -39,7 +39,7 @@
 | EP-PLAT | — | T-P2-PLAT-010 | Staging deployment (local + Tailscale, DL-040) | T-P2-PLAT-010.1, T-P2-PLAT-010.2, T-P2-PLAT-010.3, T-P2-PLAT-010.4, T-P2-PLAT-010.5, T-P2-PLAT-010.6 | TC-PLAT-010-01 | Done | P2 |
 | EP-UI | — | T-P2-UI-001 | packages/tokens | T-P2-UI-001.1, T-P2-UI-001.2, T-P2-UI-001.3, T-P2-UI-001.4 | TC-UI-001-01 | Done | P2 |
 | EP-UI | — | T-P2-UI-002 | packages/ui core components | T-P2-UI-002.1, T-P2-UI-002.2, T-P2-UI-002.3, T-P2-UI-002.4 | TC-UI-002-01 | Done | P2 |
-| EP-UI | F-PWA-002 | T-P2-UI-003 | App shell & responsive navigation | T-P2-UI-003.1, T-P2-UI-003.2, T-P2-UI-003.3 | TC-PWA-002-01 | Not started | P2 |
+| EP-UI | F-PWA-002 | T-P2-UI-003 | App shell & responsive navigation | T-P2-UI-003.1, T-P2-UI-003.2, T-P2-UI-003.3 | TC-PWA-002-01 | Done | P2 |
 | EP-UI | F-AUTH-010 | T-P2-UI-004 | Theme switching (light/dark/system) | T-P2-UI-004.1, T-P2-UI-004.2 | TC-AUTH-010-01 | Not started | P2 |
 | EP-I18N | F-I18N-001 | T-P2-I18N-001 | EN/BN catalogs & next-intl setup | T-P2-I18N-001.1, T-P2-I18N-001.2, T-P2-I18N-001.3 | TC-I18N-001-01 | Not started | P2 |
 | EP-I18N | F-I18N-001, F-I18N-009 | T-P2-I18N-002 | No-hardcoded-strings lint & missing-key check | T-P2-I18N-002.1, T-P2-I18N-002.2 | TC-I18N-001-02, TC-I18N-009-01 | Not started | P2 |
