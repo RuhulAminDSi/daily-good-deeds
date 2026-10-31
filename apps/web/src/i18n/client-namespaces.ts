@@ -5,4 +5,9 @@ import type { Messages } from '@dgd/i18n/messages';
  * server. Client components translate with `useClientTranslations` (src/i18n/client.ts), which only
  * accepts these namespaces; server components use `getTranslations`.
  */
-export const CLIENT_NAMESPACES = ['common', 'nav', 'theme'] as const satisfies (keyof Messages)[];
+export const CLIENT_NAMESPACES = [
+  'common',
+  'language',
+  'nav',
+  'theme',
+] as const satisfies (keyof Messages)[];

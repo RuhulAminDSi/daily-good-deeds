@@ -24,6 +24,9 @@
                     - /url: /en/growth
 - banner:
     - text: Daily Good Deeds
+    - radiogroup "Language":
+        - radio "English" [checked]
+        - radio "বাংলা"
     - radiogroup "Theme":
         - radio "Light"
         - radio "Dark"

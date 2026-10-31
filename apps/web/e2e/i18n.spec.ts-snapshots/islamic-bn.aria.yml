@@ -24,6 +24,9 @@
                     - /url: /bn/growth
 - banner:
     - text: ডেইলি গুড ডিডস
+    - radiogroup "ভাষা":
+        - radio "English"
+        - radio "বাংলা" [checked]
     - radiogroup "থিম":
         - radio "লাইট"
         - radio "ডার্ক"

@@ -11,6 +11,8 @@ export default defineConfig({
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? 'github' : 'list',
   use: { baseURL: `http://localhost:${PORT}`, trace: 'retain-on-failure' },
+  // Aria snapshots match exactly: an extra (e.g. untranslated) element fails, not only a changed one.
+  expect: { toMatchAriaSnapshot: { children: 'deep-equal' } },
   projects: [
     { name: 'desktop', use: { ...devices['Desktop Chrome'] } },
     // Only layout-dependent tests need a phone viewport.

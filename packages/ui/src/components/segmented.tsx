@@ -9,6 +9,8 @@ export interface SegmentedOption<T extends string> {
   value: T;
   label: string;
   icon?: ReactNode;
+  /** Language of the label when it differs from the page (e.g. "বাংলা" on an English page). */
+  lang?: string;
 }
 
 export interface SegmentedControlProps<T extends string> {
@@ -51,6 +53,7 @@ export function SegmentedControl<T extends string>({
           <ToggleGroup.Item
             key={option.value}
             value={option.value}
+            lang={option.lang}
             aria-label={iconOnly ? option.label : undefined}
             className={cn(
               'inline-flex min-h-9 min-w-9 items-center justify-center gap-1.5 rounded-sm px-2 text-label text-text-muted hover:text-text',

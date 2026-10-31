@@ -28,10 +28,6 @@ test.describe('phone (360px): bottom bar', () => {
     await bar.getByRole('button', { name: 'More' }).click();
     const sheet = page.getByRole('dialog', { name: 'More' });
     await expect(sheet.getByRole('region', { name: 'Daily' })).toBeVisible();
-    // Opened with a real click: the ✕ gets focus but must not pop its tooltip.
-    await expect(sheet.getByRole('button', { name: 'Close' })).toBeFocused();
-    await page.waitForTimeout(500);
-    await expect(page.getByRole('tooltip')).toHaveCount(0);
     await sheet.getByRole('link', { name: 'Calendar' }).click();
     await expect(page).toHaveURL(/\/en\/calendar$/);
     await expect(sheet).toBeHidden();
@@ -74,13 +70,23 @@ test('Bengali bottom bar labels fit on one line at 320px', async ({ page }) => {
 
 test('tablet (768px): a 72px navigation rail with More', async ({ page }) => {
   await page.setViewportSize({ width: 768, height: 1024 });
-  await page.goto('/en/today');
+  await gotoHydrated(page, '/en/today');
   const rail = nav(page);
   const box = (await rail.boundingBox())!;
   expect([box.x, box.width]).toEqual([0, 72]);
   await expect(rail.getByRole('link', { name: 'Today' })).toHaveAttribute('aria-current', 'page');
   await expect(rail.getByRole('button', { name: 'More' })).toBeVisible();
+
   await expect(page.getByRole('navigation')).toHaveCount(1);
+
+  // Opened with a real click, the sheet focuses its ✕ (its only non-link control at this width),
+  // which must not pop the tooltip: tooltips open on keyboard focus only.
+  await rail.getByRole('button', { name: 'More' }).click();
+  await expect(
+    page.getByRole('dialog', { name: 'More' }).getByRole('button', { name: 'Close' }),
+  ).toBeFocused();
+  await page.waitForTimeout(500);
+  await expect(page.getByRole('tooltip')).toHaveCount(0);
 });
 
 test('desktop (1280px): a 260px sidebar with groups, no More', async ({ page }) => {

@@ -537,3 +537,21 @@ All notable changes to this project are recorded here. Format: [Keep a Changelog
 - **Policy and allowlist:** `docs/qa/I18N.md`.
 - **One reasoned exception:** the toast region label `({hotkey})` is Radix's F8 placeholder, not text, so it carries an inline disable with its reason.
 - **Fixed the flaky E2E test** that I18N-001 couldn't reproduce. The keyboard theme test sometimes pressed keys before React had hydrated, so the presses were lost. A stress run reproduced it (1 failure in 120). The new `gotoHydrated()` helper (`e2e/helpers.ts`) waits for React's root on the document; from then on React replays early events itself. The theme and More-sheet tests use it, and 200 of 200 stress runs passed.
+
+### Added (2026-10-31), Phase 2: T-P2-I18N-003 language switcher (guest part)
+- **EN / বাংলা switch** (`LanguageSwitcher`, a SegmentedControl) in the top bar from 768px. On phones it sits in the More sheet, which closes after switching, because the top bar has no room.
+  - It keeps the page: `/en/calendar` becomes `/bn/calendar` via next-intl's router.
+  - Language names are endonyms, each with its own `lang` (`SegmentedOption.lang` in `@dgd/ui`) so screen readers pronounce them correctly.
+- **Guest persistence:** next-intl's router writes the choice to `NEXT_LOCALE`, which the proxy uses for locale-less URLs. Its `routing.localeCookie` is configured for a one-year lifetime. The theme's cookie write moved to a shared `setCookie()` (`src/lib/cookie.ts`).
+- **Tests** (Playwright, 2 new; web E2E 40 passing):
+  - Desktop: switching keeps the page and sets the cookie for a year, not just the session. `/` then opens in the chosen language even when the browser prefers English, also after a reload. Switching back works.
+  - Phone: the switch is in the More sheet, and the sheet closes.
+- **Pre-push review:**
+  - **Bug fixed:** next-intl's router rewrites `NEXT_LOCALE` as a session-only cookie on every locale switch, which overwrote my one-year cookie. The language would have been forgotten when the browser closed. The duplicate write is gone, and next-intl's cookie is configured for a year. The test now asserts the expiry, and it failed with the old setup.
+  - **Dead code removed:** the `onChange` prop that closed the More sheet. A locale change remounts the layout, so the sheet closes anyway; the phone test passes 5 of 5 without it.
+- **Not done (task stays in progress):** syncing the choice to the account (`user_preferences.locale`) so it follows the user across devices. That half of the DoD needs auth.
+- **Correction to T-P2-I18N-001's snapshots:**
+  - **They were laxer than claimed.** Playwright matches aria snapshots partially by default, so an *extra* element (for example an untranslated one) would have passed. Matching is now strict (`children: 'deep-equal'`, `playwright.config.ts`). A stray element added to the Today page failed both of its snapshots, as it should.
+  - **Prettier had reformatted the snapshot files.** Lenient matching hid that too. `*.aria.yml` is now excluded from Prettier.
+- The tooltip-on-click-open check moved to the tablet test, where the sheet's ✕ is still its only non-link control. On phones the sheet now opens on the language switch.
+

@@ -36,6 +36,11 @@
     "dark": "ডার্ক",
     "system": "সিস্টেম"
   },
+  "language": {
+    "label": "ভাষা",
+    "en": "English",
+    "bn": "বাংলা"
+  },
   "section": {
     "comingSoon": "এই অংশটি পরবর্তী হালনাগাদে আসছে।"
   },

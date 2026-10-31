@@ -6,6 +6,7 @@ import { type ReactNode, useId, useState } from 'react';
 import { Link, usePathname } from '@/i18n/navigation';
 import { NAV_GROUPS, type NavItem, PRIMARY_NAV } from './nav-config';
 import { useClientTranslations } from '@/i18n/client';
+import { LanguageSwitcher } from '../language-switcher';
 
 /** Bottom bar and rail item: icon above a one-line label. */
 const TAB =
@@ -83,6 +84,9 @@ function MoreSheet() {
       }
     >
       <Groups onNavigate={() => setOpen(false)} />
+      <div className="mt-6 border-t border-border pt-4 md:hidden">
+        <LanguageSwitcher />
+      </div>
     </Sheet>
   );
 }

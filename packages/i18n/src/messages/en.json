@@ -36,6 +36,11 @@
     "dark": "Dark",
     "system": "System"
   },
+  "language": {
+    "label": "Language",
+    "en": "English",
+    "bn": "বাংলা"
+  },
   "section": {
     "comingSoon": "This section is coming in a later update."
   },

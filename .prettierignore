@@ -3,3 +3,6 @@ pnpm-lock.yaml
 tools/docs/*.tpl.md
 packages/api-client/openapi.json
 packages/api-client/src/schema.ts
+
+# Playwright aria snapshots: compared verbatim, regenerated with --update-snapshots
+**/*.aria.yml

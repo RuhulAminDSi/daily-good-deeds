@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { getTranslations } from 'next-intl/server';
 import { readTheme } from '@/theme.server';
 import { Navigation } from './navigation';
+import { LanguageSwitcher } from '../language-switcher';
 import { ThemeSwitcher } from '../theme-switcher';
 
 interface AppShellProps {
@@ -30,7 +31,11 @@ export async function AppShell({ banners, children }: AppShellProps) {
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="sticky top-0 z-20 flex min-h-14 items-center gap-3 border-b border-border bg-surface px-4 md:px-6">
           <span className="text-h3 text-primary">{t('app.name')}</span>
-          <div className="ms-auto">
+          <div className="ms-auto flex items-center gap-2">
+            {/* Phones: in the More sheet; the top bar has no room (RESPONSIVE_GUIDELINES §2). */}
+            <div className="hidden md:block">
+              <LanguageSwitcher />
+            </div>
             <ThemeSwitcher initial={theme} />
           </div>
         </header>
