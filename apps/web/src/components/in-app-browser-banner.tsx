@@ -64,13 +64,13 @@ export function InAppBrowserBanner() {
     >
       <p className="text-body-sm">{t('body', { app: inApp.app })}</p>
       {inApp.os !== 'android' && (
-        <p className="text-body-sm">
-          {t('steps', { app: META.has(inApp.app) ? 'meta' : inApp.app })}
-        </p>
-      )}
-      {/* No clipboard API (insecure context, old webview): the link to copy by hand. */}
-      {inApp.os !== 'android' && !canCopy && (
-        <p className="text-body-sm break-all select-all">{location.href}</p>
+        <>
+          <p className="text-body-sm">
+            {t('steps', { app: META.has(inApp.app) ? 'meta' : inApp.app })}
+          </p>
+          {/* No clipboard API (insecure context, old webview): the link to copy by hand. */}
+          {!canCopy && <p className="text-body-sm break-all select-all">{location.href}</p>}
+        </>
       )}
     </BannerCard>
   );

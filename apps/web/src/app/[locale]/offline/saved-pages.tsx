@@ -19,8 +19,9 @@ export function SavedPages() {
   const [saved, setSaved] = useState<typeof ITEMS | null>(null);
 
   useEffect(() => {
+    const canCheck = supports('cacheStorage');
     const isSaved = async (item: (typeof ITEMS)[number]) =>
-      supports('cacheStorage') && (await caches.match(`/${locale}${item.href}`)) !== undefined;
+      canCheck && (await caches.match(`/${locale}${item.href}`)) !== undefined;
     void Promise.all(ITEMS.map(isSaved)).then((found) =>
       setSaved(ITEMS.filter((_, i) => found[i])),
     );

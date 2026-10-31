@@ -2,7 +2,7 @@
 // sign-in is blocked, installing is impossible and storage may not survive. Detection uses the user
 // agent plus one feature check (Telegram injects a bridge object); it is pure, so it is tested
 // against real user-agent fixtures (in-app-browser.spec.ts).
-import { useSyncExternalStore } from 'react';
+import { useClientSnapshot } from './client-snapshot';
 
 export type InAppApp =
   | 'facebook'
@@ -92,9 +92,4 @@ export function inAppBrowser(): InAppBrowser | null {
  * The in-app browser this page runs in, or null (also on the server and during hydration). The
  * Google sign-in button (T-P2-AUTH-005) hides itself when this is set.
  */
-export const useInAppBrowser = () =>
-  useSyncExternalStore(
-    () => () => {},
-    inAppBrowser,
-    () => null,
-  );
+export const useInAppBrowser = () => useClientSnapshot(inAppBrowser, null);

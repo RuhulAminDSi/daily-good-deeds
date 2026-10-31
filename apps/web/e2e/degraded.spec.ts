@@ -33,16 +33,15 @@ test('every page works without the service worker and optional APIs', async ({ p
   await expect(page.getByRole('heading', { level: 1, name: 'Daily Good Deeds' })).toBeVisible();
 
   for (const [path, heading] of [
-    ['/en/today', 'Today'],
     ['/en/calendar', 'Calendar'],
     ['/en/admin', 'Admin dashboard'],
+    ['/en/today', 'Today'],
   ] as const) {
     await gotoHydrated(page, path);
     await expect(page.getByRole('heading', { level: 1, name: heading })).toBeVisible();
   }
 
-  // Client-side navigation and the language switch still work.
-  await gotoHydrated(page, '/en/today');
+  // From Today: client-side navigation and the language switch still work.
   const nav = page.getByRole('navigation', { name: 'Main navigation' });
   await hydrated(nav.getByRole('link', { name: 'Calendar' }));
   await nav.getByRole('link', { name: 'Calendar' }).click();

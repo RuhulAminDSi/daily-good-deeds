@@ -1,7 +1,8 @@
 // Install prompt state (F-PWA-001, FR-PWA-001-02), browser only. The browser's own
 // `beforeinstallprompt` fires once, possibly before React hydrates, so it is captured from
 // src/instrumentation-client.ts and kept here for the InstallPrompt banner.
-import { inAppBrowser, IOS_UA, isIosStandalone } from './in-app-browser';
+import { isInstalled } from './capabilities';
+import { inAppBrowser, IOS_UA } from './in-app-browser';
 import { safely } from './storage';
 
 /** Chromium's install event (not in TypeScript's DOM types). */
@@ -78,10 +79,6 @@ export function shouldOfferInstall(visits: number): boolean {
     !inAppBrowser()
   );
 }
-
-/** Running as an installed app (home screen, dock), not in a browser tab. */
-export const isInstalled = () =>
-  matchMedia('(display-mode: standalone)').matches || isIosStandalone();
 
 /** iOS has no install event; its users get Add to Home Screen steps instead. */
 export const isIos = () =>
