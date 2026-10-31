@@ -8,28 +8,26 @@ import type { FieldError } from './errors.js';
  */
 const PREFIX = 'validation.';
 
-/** Every Zod issue code; the type check fails when a Zod upgrade adds one without a message. */
-const ZOD_ISSUE_CODES = [
-  'invalid_type',
-  'too_big',
-  'too_small',
-  'invalid_format',
-  'not_multiple_of',
-  'unrecognized_keys',
-  'invalid_union',
-  'invalid_key',
-  'invalid_element',
-  'invalid_value',
-  'custom',
-] as const satisfies readonly z.core.$ZodIssue['code'][];
-type Missing = Exclude<z.core.$ZodIssue['code'], (typeof ZOD_ISSUE_CODES)[number]>;
-const exhaustive: [Missing] extends [never] ? true : Missing = true;
-void exhaustive;
+/** validation.too_big */
+export const validationKeyOf = (code: string) => `${PREFIX}${code}`;
 
-/** Every key the error map below can produce (asserted to exist in EN and BN). */
-export const VALIDATION_KEYS = ['required', 'max_depth', ...ZOD_ISSUE_CODES].map(
-  (code) => `${PREFIX}${code}`,
-);
+/** Every Zod issue code; the type check fails when a Zod upgrade adds or drops one. */
+const ZOD_ISSUE_CODES = Object.keys({
+  invalid_type: 1,
+  too_big: 1,
+  too_small: 1,
+  invalid_format: 1,
+  not_multiple_of: 1,
+  unrecognized_keys: 1,
+  invalid_union: 1,
+  invalid_key: 1,
+  invalid_element: 1,
+  invalid_value: 1,
+  custom: 1,
+} satisfies Record<z.core.$ZodIssue['code'], 1>);
+
+/** Every key this package produces (asserted to exist in EN and BN). */
+export const VALIDATION_KEYS = ['required', 'max_depth', ...ZOD_ISSUE_CODES].map(validationKeyOf);
 
 /**
  * Global Zod error map: the issue's message becomes its i18n key. Only here is the raw input
@@ -37,8 +35,8 @@ export const VALIDATION_KEYS = ['required', 'max_depth', ...ZOD_ISSUE_CODES].map
  */
 export const zodErrorMap: z.core.$ZodErrorMap = (issue) =>
   issue.code === 'invalid_type' && issue.input === undefined
-    ? `${PREFIX}required`
-    : `${PREFIX}${issue.code}`;
+    ? validationKeyOf('required')
+    : validationKeyOf(issue.code);
 
 // Applied on import: the API and the web app both import this package, so every schema parsed in
 // either one reports keys. Per-schema and per-parse messages still take precedence.
@@ -73,7 +71,7 @@ function paramsOf(issue: z.core.$ZodIssue): Record<string, unknown> | undefined 
  * stable as the key: `{ pointer: "/title", code: "too_big", i18nKey: "validation.too_big" }`.
  */
 export function fieldErrorFromIssue(issue: z.core.$ZodIssue): FieldError {
-  const i18nKey = issue.message.startsWith(PREFIX) ? issue.message : `${PREFIX}${issue.code}`;
+  const i18nKey = issue.message.startsWith(PREFIX) ? issue.message : validationKeyOf(issue.code);
   const params = paramsOf(issue);
   return {
     pointer: toPointer(issue.path),

@@ -1,5 +1,5 @@
 import express, { type RequestHandler } from 'express';
-import type { ErrorCode } from '@dgd/contracts';
+import { type ErrorCode, validationKeyOf } from '@dgd/contracts';
 import { DomainError } from '../errors/domain-error.js';
 
 /** SRS NFR-SECURITY-019. `/sync` gets its own larger limit when that module lands (P9). */
@@ -57,7 +57,7 @@ export function jsonBody(limit = JSON_BODY_LIMIT): RequestHandler {
               {
                 pointer: '',
                 code: 'max_depth',
-                i18nKey: 'validation.max_depth',
+                i18nKey: validationKeyOf('max_depth'),
                 params: { max: JSON_MAX_DEPTH },
               },
             ],

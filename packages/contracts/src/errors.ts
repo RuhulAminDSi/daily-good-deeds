@@ -32,7 +32,8 @@ export const CODE_BY_STATUS: ReadonlyMap<number, ErrorCode> = new Map(
 );
 
 /** errors.validation_failed */
-export const i18nKeyOf = (code: ErrorCode) => `errors.${code.toLowerCase()}` as const;
+export const i18nKeyOf = (code: ErrorCode) =>
+  `errors.${code.toLowerCase() as Lowercase<ErrorCode>}` as const;
 
 /** https://docs.dailygooddeeds.app/errors/validation-failed */
 export const typeUriOf = (code: ErrorCode) =>

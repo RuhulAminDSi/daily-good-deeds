@@ -17,10 +17,9 @@ import { DomainError, type DomainErrorOptions } from './domain-error.js';
 
 type Normalized = { code: ErrorCode } & DomainErrorOptions;
 
-type TitleKey = Parameters<ReturnType<typeof translator>>[0];
-const translators = new Map<Locale, ReturnType<typeof translator>>(
+const translators = Object.fromEntries(
   LOCALES.map((locale) => [locale, translator(locale)]),
-);
+) as Record<Locale, ReturnType<typeof translator>>;
 
 /** `title` in the request's `Accept-Language` (q-weighted; `bn-BD` matches `bn`), else English. */
 function localeOf(req: Request): Locale {
@@ -65,8 +64,7 @@ export class ProblemDetailsFilter implements ExceptionFilter {
       .set('Content-Language', locale)
       .json({
         type: typeUriOf(code),
-        // Every catalog code has a message in every locale (asserted in @dgd/contracts).
-        title: translators.get(locale)!(i18nKey as TitleKey),
+        title: translators[locale](i18nKey),
         status,
         // 5xx detail stays generic; the cause is only in logs.
         ...(detail && status < 500 ? { detail } : {}),

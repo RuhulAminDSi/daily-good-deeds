@@ -1,4 +1,4 @@
-import type { FieldError, Problem } from '@dgd/contracts';
+import { type FieldError, type Problem, validationKeyOf } from '@dgd/contracts';
 import { useClientTranslations } from './client';
 
 type Params = Record<string, string | number>;
@@ -11,9 +11,10 @@ type Translate = ((key: string, params?: Params) => string) & { has: (key: strin
  * Unknown keys (a newer API) fall back to the server's `title` and the generic field message.
  */
 export function useProblemMessages() {
-  const errors = useClientTranslations('errors') as unknown as Translate;
-  const validation = useClientTranslations('validation') as unknown as Translate;
-  const namespaces: Partial<Record<string, Translate>> = { errors, validation };
+  const namespaces = {
+    errors: useClientTranslations('errors'),
+    validation: useClientTranslations('validation'),
+  } as unknown as Partial<Record<string, Translate>> & { validation: Translate };
   const message = (i18nKey: string, params?: FieldError['params']) => {
     const dot = i18nKey.indexOf('.');
     const t = namespaces[i18nKey.slice(0, dot)];
@@ -30,8 +31,8 @@ export function useProblemMessages() {
       for (const error of problem.errors ?? []) {
         const field = error.pointer ?? error.parameter ?? '';
         byField[field] ??=
-          message(error.i18nKey ?? `validation.${error.code}`, error.params) ??
-          validation('custom');
+          message(error.i18nKey ?? validationKeyOf(error.code), error.params) ??
+          namespaces.validation('custom');
       }
       return byField;
     },
